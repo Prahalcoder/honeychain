@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs'
 import { REGIONS, regionalUsername, stateUsername } from '../config/regions.js'
 import { createHandle, driver } from './connection.js'
 import { FORBID_CHANGE, immutable, lockDown, pgDdl } from './ddl.js'
+import { ensureDirectorySchema } from './directorySchema.js'
 
 // Common secure database: identity, organisation registry, review queues, the audit trail and the
 // shared blockchain. Company production and finance records live in their own private schemas
@@ -162,6 +163,7 @@ await addColumn('users', 'active', 'INTEGER NOT NULL DEFAULT 1')
 await addColumn('users', 'state', 'TEXT')
 await addColumn('users', 'region', 'TEXT')
 await addColumn('users', 'last_login_at', 'TEXT')
+await addColumn('users', 'password_changed_at', 'TEXT')
 
 // madhukranti_id doubles as the registration number issued by KVIC or by the
 // beekeeper's own organisation; registration_body says who issued it.
@@ -492,6 +494,8 @@ for (let start = 0; start < missing.length; start += 50) {
 }
 
 // No demo beekeeper is seeded: every company registers through the keeper app.
+
+await ensureDirectorySchema(db, addColumn)
 
 await db.refresh()
 await lockDown('public')

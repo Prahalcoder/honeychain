@@ -373,4 +373,6 @@ if __name__ == "__main__":
     print(" OpenCV Python Camera Server Active              ")
     print(" Data Logs stored at: python_app/data_logs/      ")
     print("==================================================")
-    app.run(host="0.0.0.0", port=5001, debug=True)
+    # The ESP32 posts its readings over Wi-Fi, so the server listens on the network. The interactive debugger would let
+    # anyone on that network run code, so it stays off unless IOT_DEBUG=1 is set for development.
+    app.run(host=os.environ.get("IOT_HOST", "0.0.0.0"), port=5001, debug=os.environ.get("IOT_DEBUG") == "1")

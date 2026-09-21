@@ -10,8 +10,16 @@ import { onJarsCreated, proofFor } from '../services/chain.js'
 import { appendTraceabilityEvent } from '../services/traceabilityLog.js'
 
 import { lanAddress } from '../config/network.js'
+import { lockNamed } from '../services/ledgerLock.js'
 
 const router = express.Router()
+
+class CapacityLost extends Error {
+  constructor(maxBottles) {
+    super('capacity lost')
+    this.maxBottles = maxBottles
+  }
+}
 
 const MIN_JAR_GRAMS = 10
 const MAX_JAR_GRAMS = 25000
@@ -99,7 +107,14 @@ router.post('/pack-batches', ...keeperOnly, requireApprovedOrg, async (req, res)
 
   const packBatchCode = await nextCode('PB')
 
-  const result = await db.transaction(async () => {
+  let result
+  try {
+    result = await db.transaction(async () => {
+    // Two requests at the same moment must not both take the last of the honey: check again under a lock.
+    await lockNamed(`honey:${batch.id}`)
+    const fresh = await batchCapacity(batch)
+    if (quantity > maxBottlesFor(fresh, jarSize)) throw new CapacityLost(maxBottlesFor(fresh, jarSize))
+
     const inserted = await db.prepare(`
       INSERT INTO pack_batches
       (pack_batch_code, batch_id, product_name, jar_size_grams, quantity_to_pack)
@@ -122,7 +137,13 @@ router.post('/pack-batches', ...keeperOnly, requireApprovedOrg, async (req, res)
     await sealPendingBlock()
 
     return inserted
-  })()
+    })()
+  } catch (error) {
+    if (error instanceof CapacityLost) {
+      return res.status(409).json({ code: 'BOTTLE_LIMIT_EXCEEDED', message: `The honey of this batch was just used by another request. At most ${error.maxBottles} QR code(s) of ${jarSize} g are left.`, maxBottles: error.maxBottles })
+    }
+    throw error
+  }
 
   res.status(201).json({
     id: result.lastInsertRowid,

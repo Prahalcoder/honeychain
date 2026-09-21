@@ -21,13 +21,8 @@ const tabs = [
     icon: User,
   },
   {
-    id: 'farm',
-    name: 'Farm',
-    icon: Home,
-  },
-  {
-    id: 'business',
-    name: 'Business',
+    id: 'organisation',
+    name: 'Organisation & address',
     icon: Building2,
   },
   {
@@ -58,14 +53,26 @@ export default function Settings() {
     gstin: '',
     businessAddress: '',
     contactEmail: '',
+    addressLine: '',
+    locality: '',
+    district: '',
+    pincode: '',
+    upiId: '',
   })
+  const [organization, setOrganization] = useState(null)
+  const [offices, setOffices] = useState(null)
   const [profile, setProfile] = useState({ name: '', username: '' })
   const [status, setStatus] = useState('')
 
   useEffect(() => {
     Promise.all([apiRequest('/auth/settings'), apiRequest('/auth/me')])
-      .then(([{ settings: savedSettings }, { user }]) => {
+      .then(([{ settings: savedSettings, organization: org, offices: kvicOffices }, { user }]) => {
         if (savedSettings) setSettings((current) => ({ ...current, ...savedSettings }))
+        if (org) {
+          setOrganization(org)
+          setSettings((current) => ({ ...current, addressLine: org.addressLine, locality: org.locality, district: org.district, pincode: org.pincode, upiId: org.upiId }))
+        }
+        if (kvicOffices) setOffices(kvicOffices)
         if (user) setProfile({ name: user.name, username: user.username })
       })
       .catch(() => setStatus('Unable to load saved settings'))
@@ -88,6 +95,7 @@ export default function Settings() {
         body: JSON.stringify(settings),
       })
       setStatus('Saved just now')
+      setOrganization((current) => (current ? { ...current, addressSample: false, addressLine: settings.addressLine, locality: settings.locality, district: settings.district, pincode: settings.pincode, upiId: settings.upiId } : current))
     } catch (saveError) {
       setStatus(saveError.message)
     }
@@ -135,8 +143,7 @@ export default function Settings() {
         <div className="rounded-2xl border border-[#c0dfdd] bg-white p-6">
 
           {active === 'profile' && <Profile profile={profile} settings={settings} updateProfile={updateProfile} updateField={updateField} saveSettings={saveSettings} />}
-          {active === 'farm' && <Farm settings={settings} updateField={updateField} saveSettings={saveSettings} />}
-          {active === 'business' && <Business settings={settings} updateField={updateField} saveSettings={saveSettings} />}
+          {active === 'organisation' && <Organisation organization={organization} offices={offices} settings={settings} updateField={updateField} saveSettings={saveSettings} />}
           {active === 'iot' && <IoT />}
           {active === 'security' && <Security />}
           {active === 'closure' && <Closure />}
@@ -180,37 +187,83 @@ function Profile({ profile, settings, updateProfile, updateField, saveSettings }
   )
 }
 
-function Farm({ settings, updateField, saveSettings }) {
+function Organisation({ organization, offices, settings, updateField, saveSettings }) {
   const { summary } = useSummary()
   const hiveCount = summary?.hives.total ?? 0
-
-  return (
-    <Section
-      title="Farm Information"
-      description="Manage your apiary and farm details."
-    >
-      <Field label="Farm Name" value={settings.farmName} onChange={(value) => updateField('farmName', value)} />
-      <Field label="Location" value={settings.farmLocation} onChange={(value) => updateField('farmLocation', value)} />
-      <Field label="Number of Hives" value={String(hiveCount)} readOnly />
-
-      <SaveButton onClick={saveSettings} />
-    </Section>
+  const info = (label, value) => (
+    <div className="rounded-xl bg-[#f4fbfb] px-4 py-3">
+      <p className="text-xs font-semibold uppercase tracking-wide text-[#5d7f80]">{label}</p>
+      <p className="mt-1 text-sm font-bold">{value || '-'}</p>
+    </div>
   )
-}
 
-function Business({ settings, updateField, saveSettings }) {
   return (
-    <Section
-      title="Business Information"
-      description="Information used for invoices and future integrations."
-    >
-      <Field label="Business Name" value={settings.businessName} onChange={(value) => updateField('businessName', value)} />
-      <Field label="GSTIN" value={settings.gstin} onChange={(value) => updateField('gstin', value)} />
-      <Field label="Business Address" value={settings.businessAddress} onChange={(value) => updateField('businessAddress', value)} />
-      <Field label="Contact Email" value={settings.contactEmail} onChange={(value) => updateField('contactEmail', value)} />
+    <div>
+      <Section
+        title="Where your organisation is registered"
+        description="Fixed at registration. Your regional KVIC officer looks after this state and region."
+      >
+        {organization && (
+          <div className="grid gap-3 sm:grid-cols-2">
+            {info('Organisation', organization.name)}
+            {info('Organisation code', organization.code)}
+            {info('State', organization.state)}
+            {info('KVIC region', organization.region)}
+            {info('Registration number', organization.registrationId)}
+            {info('FSSAI licence', organization.fssai)}
+          </div>
+        )}
+      </Section>
 
-      <SaveButton onClick={saveSettings} />
-    </Section>
+      <div className="mt-8">
+        <Section
+          title="Address"
+          description="Buyers see this address on the Sellers nearby page, and officers use it for inspections."
+        >
+          {organization?.addressSample && (
+            <p className="rounded-xl border border-[#f2c9c0] bg-[#fff3f0] px-4 py-3 text-sm text-[#8a3d2e]">
+              This is a sample address that was filled in for now. Enter your real address and save.
+            </p>
+          )}
+          <Field label="Apiary / business address" value={settings.addressLine} onChange={(value) => updateField('addressLine', value)} />
+          <Field label="Village / town" value={settings.locality} onChange={(value) => updateField('locality', value)} />
+          <Field label="District" value={settings.district} onChange={(value) => updateField('district', value)} />
+          <Field label="PIN code" value={settings.pincode} onChange={(value) => updateField('pincode', value)} />
+          <Field label="Farm name" value={settings.farmName} onChange={(value) => updateField('farmName', value)} />
+          <Field label="Number of hives" value={String(hiveCount)} readOnly />
+        </Section>
+      </div>
+
+      <div className="mt-8">
+        <Section
+          title="Business and payment"
+          description="Used on invoices. The UPI ID is where buyers on the Sellers nearby page pay you (the QR code on their order page)."
+        >
+          <Field label="Business name" value={settings.businessName} onChange={(value) => updateField('businessName', value)} />
+          <Field label="GSTIN" value={settings.gstin} onChange={(value) => updateField('gstin', value)} />
+          <Field label="Contact email" value={settings.contactEmail} onChange={(value) => updateField('contactEmail', value)} />
+          <Field label="UPI ID (for example name@okhdfcbank)" value={settings.upiId} onChange={(value) => updateField('upiId', value)} />
+
+          <SaveButton onClick={saveSettings} />
+        </Section>
+      </div>
+
+      {offices && (
+        <div className="mt-8">
+          <Section title="Your KVIC offices" description="Where to send documents and who to visit.">
+            <div className="grid gap-3">
+              {[offices.regional, offices.state, offices.central].filter(Boolean).map((office) => (
+                <div key={office.level} className="rounded-xl bg-[#f4fbfb] px-4 py-3">
+                  <p className="text-sm font-bold">{office.name}</p>
+                  <p className="mt-1 text-sm text-gray-600">{office.address}</p>
+                  {office.email && <p className="mt-1 text-xs text-gray-500">{office.email}{office.sample ? ' (sample address)' : ''}</p>}
+                </div>
+              ))}
+            </div>
+          </Section>
+        </div>
+      )}
+    </div>
   )
 }
 
@@ -278,7 +331,8 @@ function Security() {
     setMessage({ text: '', ok: false })
 
     try {
-      await apiRequest('/auth/password', { method: 'PUT', body: JSON.stringify(form) })
+      const result = await apiRequest('/auth/password', { method: 'PUT', body: JSON.stringify(form) })
+      if (result.token) localStorage.setItem('apictech_token', result.token)
       setForm({ currentPassword: '', newPassword: '' })
       setMessage({ text: 'Password updated', ok: true })
     } catch (error) {

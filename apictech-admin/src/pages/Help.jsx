@@ -152,6 +152,18 @@ function Officer({ officer }) {
   )
 }
 
+// An office's address, with a note when it is a made-up sample.
+function OfficeAddress({ office }) {
+  if (!office) return null
+  return (
+    <div className="office-address">
+      <b>{office.name}</b>
+      <span>{office.address}</span>
+      {office.email && <small>{office.email}{office.sample ? ' · sample address' : ''}</small>}
+    </div>
+  )
+}
+
 function Directory({ data, user }) {
   if (!data) return <Empty>Loading the directory…</Empty>
 
@@ -159,6 +171,7 @@ function Directory({ data, user }) {
     <div className="directory">
       <section className="panel dir-national">
         <h2><Landmark size={18} /> National office</h2>
+        <OfficeAddress office={data.nationalOffice} />
         <div className="officer-list">{data.national.map((officer) => <Officer key={officer.id} officer={officer} />)}</div>
         <small>{ROLE_LABELS[user.role]} · you are signed in as <b>{user.name}</b></small>
       </section>
@@ -166,6 +179,7 @@ function Directory({ data, user }) {
       {data.states.map((state) => (
         <section className="panel dir-state" key={state.state}>
           <h2><MapPin size={18} /> {state.state}</h2>
+          <OfficeAddress office={state.office} />
           <div className="dir-label">State officer</div>
           <div className="officer-list">{state.officers.length ? state.officers.map((officer) => <Officer key={officer.id} officer={officer} />) : <small>No state officer assigned</small>}</div>
           <div className="dir-label">Regions</div>
@@ -173,6 +187,7 @@ function Directory({ data, user }) {
             {state.regions.map((region) => (
               <div className="region-card" key={region.region}>
                 <strong>{region.region}</strong>
+                <OfficeAddress office={region.office} />
                 <small>{region.organizations.approved || 0} approved · {region.organizations.pending || 0} pending</small>
                 {region.officers.length ? region.officers.map((officer) => <Officer key={officer.id} officer={officer} />) : <small>No officer assigned</small>}
               </div>

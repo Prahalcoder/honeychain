@@ -138,6 +138,12 @@ router.post('/', async (req, res) => {
   try {
     const created = await db2.transaction(async () => {
       await lockNamed(`sale:${req.org.id}`)
+
+      // The honey check above ran before the lock; run it again so two requests cannot both take the last honey.
+      await lockNamed(`honey:${batch.id}`)
+      const fresh = await batchCapacity(batch)
+      if (grams > fresh.remainingGrams) throw new TransferError(`Only ${round2(fresh.remainingGrams / 1000)} kg of ${batch.batch_code} is left to sell.`, 409)
+
       const code = await nextCode(db2, 'honey_sales', 'SAL', 'sale_code')
       const invoiceNumber = await nextCode(db2, 'invoices', 'INV', 'invoice_number')
       const description = `Loose honey ${batch.honey_type}, batch ${batch.batch_code} (${kg} kg at ₹${pricePerKg}/kg)`

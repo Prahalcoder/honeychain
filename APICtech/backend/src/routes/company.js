@@ -14,6 +14,8 @@ import { keeperInspections, upcomingFor } from '../services/inspections.js'
 import { visibleAnnouncements } from '../services/announcements.js'
 import { pdfBody, saveDocument, sendDocument } from '../services/labDocuments.js'
 import salesRoutes from './sales.js'
+import shopKeeperRoutes from './shopKeeper.js'
+import { openShopOrders } from '../services/shop.js'
 import { onHarvest } from '../services/chain.js'
 import { TicketError, keeperReply, keeperThread, keeperTicketNotices, keeperTickets, openTicket, getTicket } from '../services/tickets.js'
 import { analyzeLabResult } from '../services/labAnalysis.js'
@@ -124,6 +126,11 @@ router.post('/closure', async (req, res) => {
     return res.status(400).json({ message: 'Password confirmation failed' })
   }
 
+  const openOrders = await openShopOrders(req.org.organization_code)
+  if (openOrders > 0) {
+    return res.status(409).json({ message: `You still have ${openOrders} open order(s) on the Sellers nearby page. Ship or cancel them before closing.` })
+  }
+
   await db.transaction(async () => {
     await db.prepare(`
       INSERT INTO closure_requests (org_id, initiated_by, initiated_by_role, reason, declarations_json)
@@ -229,6 +236,7 @@ router.post('/inspections/:id/acknowledge', async (req, res) => {
 
 router.use(requireApprovedOrg)
 router.use('/sales', salesRoutes)
+router.use('/shop', shopKeeperRoutes)
 
 // ------------------------------------------------------------------- hives
 router.get('/hives', async (req, res) => {
@@ -270,6 +278,12 @@ router.post('/harvests', async (req, res) => {
 
   if (!isDate(harvestDate) || harvestDate > today()) {
     return res.status(400).json({ message: 'Harvest date must be a valid date that is not in the future' })
+  }
+
+  const oldest = new Date()
+  oldest.setFullYear(oldest.getFullYear() - 2)
+  if (harvestDate < oldest.toLocaleDateString('en-CA')) {
+    return res.status(400).json({ message: 'Harvest date is more than two years ago. Check the date.' })
   }
 
   const type = HONEY_TYPES.includes(honeyType) ? honeyType : 'Other'
@@ -842,6 +856,18 @@ async function listNotifications(req, res) {
         : `Lab result rejected for ${review.batch_code}`,
       message: review.review_note || `Report from ${review.lab_name} was reviewed by your regional officer.`,
       time: review.reviewed_at,
+    })
+  }
+
+  // Shop orders that wait for the keeper: new, payment sent by the buyer, or paid and ready to ship.
+  const waiting = await (await getCompanyDb(req.org.organization_code)).prepare("SELECT order_code, product_title, quantity, payment_status, created_at, updated_at FROM shop_orders WHERE order_status = 'PLACED' ORDER BY id DESC LIMIT 10").all()
+  for (const order of waiting) {
+    items.push({
+      id: `order-${order.order_code}-${order.payment_status}`,
+      type: 'order',
+      title: order.payment_status === 'CLAIMED' ? `Confirm the payment for order ${order.order_code}` : order.payment_status === 'PAID' ? `Order ${order.order_code} is paid: ship it` : `New order ${order.order_code}`,
+      message: `${order.quantity} x ${order.product_title}. Open Orders to act on it.`,
+      time: order.updated_at || order.created_at,
     })
   }
 

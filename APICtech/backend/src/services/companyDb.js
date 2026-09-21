@@ -6,7 +6,7 @@ import { lockDown, pgDdl } from '../database/ddl.js'
 // figures and blockchain events leave it. In the Supabase dashboard each company shows up as its own
 // schema, separate from the common tables.
 const connections = new Map()
-const TABLES = ['hives', 'harvests', 'finance_entries', 'buyers', 'honey_sales', 'invoices', 'meta']
+const TABLES = ['hives', 'harvests', 'finance_entries', 'buyers', 'honey_sales', 'invoices', 'shop_orders', 'meta']
 
 const SCHEMA = `
   CREATE TABLE IF NOT EXISTS hives (
@@ -89,6 +89,36 @@ const SCHEMA = `
     finance_entry_id INTEGER,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (buyer_id) REFERENCES buyers(id)
+  );
+
+  -- Orders placed on the public "Sellers nearby" page. Buyer name, phone and delivery address stay in this
+  -- private schema; the public tracking page finds an order through public.shop_order_index.
+  CREATE TABLE IF NOT EXISTS shop_orders (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    order_code TEXT UNIQUE NOT NULL,
+    listing_id INTEGER NOT NULL,
+    pack_batch_code TEXT,
+    product_title TEXT NOT NULL,
+    jar_size_grams INTEGER,
+    quantity INTEGER NOT NULL CHECK (quantity > 0),
+    unit_price_inr REAL NOT NULL,
+    total_inr REAL NOT NULL,
+    buyer_name TEXT NOT NULL,
+    buyer_phone TEXT NOT NULL,
+    buyer_email TEXT,
+    delivery_address TEXT NOT NULL,
+    delivery_pincode TEXT NOT NULL,
+    payment_status TEXT NOT NULL DEFAULT 'PENDING',
+    payment_ref TEXT,
+    paid_at TEXT,
+    order_status TEXT NOT NULL DEFAULT 'PLACED',
+    courier TEXT,
+    tracking_ref TEXT,
+    shipped_at TEXT,
+    delivered_at TEXT,
+    cancel_reason TEXT,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
   );
 
   CREATE TABLE IF NOT EXISTS meta (
