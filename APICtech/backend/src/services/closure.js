@@ -5,6 +5,7 @@ import { recordAudit } from './audit.js'
 import { sealPendingBlock } from './blockchain.js'
 import { archiveCompanyDb } from './companyDb.js'
 import { parseJson } from './batches.js'
+import { openShopOrders } from './shop.js'
 import { appendTraceabilityEvent } from './traceabilityLog.js'
 
 // Formal closure (deregistration) of an organisation. The checklist follows the
@@ -80,6 +81,11 @@ export async function completeClosure({ closure, organization, officer, items = 
 
   if (readyState.openLabWork > 0) {
     throw new ClosureError('Open laboratory requests or reviews must be finished first', 409)
+  }
+
+  const openOrders = await openShopOrders(organization.organization_code)
+  if (openOrders > 0) {
+    throw new ClosureError(`${openOrders} order(s) on the Sellers nearby page are still open. They must be shipped or cancelled first.`, 409)
   }
 
   const checklist = {}

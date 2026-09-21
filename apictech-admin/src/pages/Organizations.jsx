@@ -112,6 +112,7 @@ function OrganizationDetail({ id, user, onClose, onChanged, notify, onOpenChain,
         <div><span>Owner</span><strong>{org.ownerName}</strong></div>
         <div><span>Phone · email</span><strong>{[org.phone, org.email].filter(Boolean).join(' · ') || '—'}</strong></div>
         <div><span>Jurisdiction</span><strong>{org.region}, {org.state}</strong></div>
+        <div><span>Address{org.addressSample ? ' (sample)' : ''}</span><strong>{[org.addressLine, org.locality, org.district].filter(Boolean).join(', ') || '—'}{org.pincode ? ` – ${org.pincode}` : ''}</strong></div>
         <div><span>Honey recorded</span><strong>{kg(org.honeyKg)} in {org.batchCount} batches</strong></div>
         <div><span>Bottle QR codes</span><strong>{num(org.bottles)}</strong></div>
         {org.monthIncomeInr !== undefined && <div><span>Income this month</span><strong>{inr(org.monthIncomeInr)}</strong></div>}

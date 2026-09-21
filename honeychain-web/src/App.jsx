@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { ADMIN_URL, KEEPER_URL, LANGUAGES, useLang, withLang } from './i18n'
 import ScrollStory from './ScrollStory'
 import VerifyPanel from './Verify'
+import { OrderPage, SellersPage, sellersLabel } from './Shop'
 
 function Nav({ alwaysSolid }) {
   const { t, lang, setLang } = useLang()
@@ -23,6 +24,7 @@ function Nav({ alwaysSolid }) {
 
       <nav className="nav-links" aria-label="Sections">
         <a href="/#verify">{t.nav.verify}</a>
+        <a href="/sellers">{sellersLabel(lang)}</a>
         <a href="/#how">{t.nav.how}</a>
         <a href="/#schemes">{t.nav.schemes}</a>
         <a href="/#honey">{t.nav.honey}</a>
@@ -43,7 +45,7 @@ function Nav({ alwaysSolid }) {
 }
 
 function Home() {
-  const { t } = useLang()
+  const { t, lang } = useLang()
 
   return (
     <>
@@ -55,6 +57,15 @@ function Home() {
           <h2>{t.verify.title}</h2>
           <p className="lead">{t.verify.text}</p>
           <VerifyPanel />
+        </div>
+      </section>
+
+      <section className="section cream" id="sellers">
+        <div className="wrap narrow">
+          <p className="kicker">{sellersLabel(lang)}</p>
+          <h2>{lang === 'hi' ? 'पंजीकृत मधुमक्खी पालकों से सीधे शहद खरीदें' : 'Buy honey straight from registered beekeepers'}</h2>
+          <p className="lead">{lang === 'hi' ? 'अपना राज्य चुनें, विक्रेता का पता, फ़ोन और स्टॉक देखें, ऑर्डर करें और UPI से भुगतान करें।' : 'Choose your state, see the address, phone and stock of every seller, place an order and pay by UPI. Follow your parcel until it arrives.'}</p>
+          <a className="btn-gold" href="/sellers">{sellersLabel(lang)}</a>
         </div>
       </section>
 
@@ -133,12 +144,15 @@ function VerifyPage() {
 
 export default function App() {
   const { t } = useLang()
-  const onVerifyPage = window.location.pathname.startsWith('/verify')
+  const path = window.location.pathname
+  const onVerifyPage = path.startsWith('/verify')
+  const onSellers = path.startsWith('/sellers')
+  const onOrder = path.startsWith('/order/')
 
   return (
     <>
-      <Nav alwaysSolid={onVerifyPage} />
-      <main>{onVerifyPage ? <VerifyPage /> : <Home />}</main>
+      <Nav alwaysSolid={onVerifyPage || onSellers || onOrder} />
+      <main>{onVerifyPage ? <VerifyPage /> : onSellers ? <SellersPage /> : onOrder ? <OrderPage /> : <Home />}</main>
       <footer className="footer">
         <img src="/honeychain-logo.png" alt="" />
         <p>{t.footer.line}</p>

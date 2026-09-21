@@ -10,6 +10,7 @@ import companyRoutes from './routes/company.js'
 import adminRoutes from './routes/admin.js'
 import traceabilityRoutes, { qrRouter } from './routes/traceability.js'
 import platformRoutes, { verificationRouter } from './routes/platform.js'
+import shopRoutes from './routes/shop.js'
 import { REGIONS } from './config/regions.js'
 import { sealPendingBlock } from './services/blockchain.js'
 import { syncMonthlyReport } from './services/reports.js'
@@ -18,6 +19,7 @@ import { chainStatus, recentOutbox, startChain } from './services/chain.js'
 import { readPinned } from './services/ipfs.js'
 import { isAllowedOrigin } from './config/network.js'
 import { databaseKind, startBackups, verifyDatabases } from './services/backup.js'
+import { expireUnpaidOrders } from './services/shop.js'
 
 // In production the API refuses to start with a weak or default signing secret.
 if (process.env.NODE_ENV === 'production' && (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32 || /replace-with/.test(process.env.JWT_SECRET))) {
@@ -61,6 +63,7 @@ app.use('/api/traceability', traceabilityRoutes)
 app.use('/api/qr', qrRouter)
 app.use('/api/platform', platformRoutes)
 app.use('/api/verify', verificationRouter)
+app.use('/api/shop', shopRoutes)
 
 // Blockchain: public status of the smart-contract link, the outbox for the KVIC head, and the
 // content-addressed metadata (IPFS CIDs) that the contract points to.
@@ -108,6 +111,9 @@ startBackups(db)
 const PORT = process.env.PORT || 5000
 
 await startChain()
+
+// Every ten minutes: cancel orders that were never paid and put their jars back.
+setInterval(() => { expireUnpaidOrders().catch((error) => console.error('Order expiry failed:', error.message)) }, 10 * 60 * 1000).unref()
 
 app.listen(PORT, () => {
   console.log(`

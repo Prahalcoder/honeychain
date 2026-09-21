@@ -27,11 +27,16 @@ export async function authenticateToken(req, res, next) {
   }
 
   const user = await db
-    .prepare('SELECT id, username, name, role, state, region, active FROM users WHERE id = ?')
+    .prepare('SELECT id, username, name, role, state, region, active, password_changed_at FROM users WHERE id = ?')
     .get(decoded.id)
 
   if (!user || !user.active) {
     return res.status(403).json({ message: 'This account is no longer active' })
+  }
+
+  // A token issued before the last password change or reset no longer works.
+  if (user.password_changed_at && decoded.iat && decoded.iat < Math.floor(Date.parse(user.password_changed_at) / 1000)) {
+    return res.status(403).json({ message: 'Invalid or expired token: your password was changed, please sign in again' })
   }
 
   req.user = user

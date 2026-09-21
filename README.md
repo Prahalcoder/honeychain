@@ -90,6 +90,15 @@ Regional officers, state officers and the KVIC Head can schedule an inspection o
 - **Help & Support with tickets.** Keepers get a guide, FAQ, official contacts and tickets (the `?` in the top bar). Each question is a separate ticket, a private conversation held only with the keeper's regional officer, who alone can close it. The regional officer can hand a ticket to the state officer straight away, or ask to take an urgent one to the central office, which happens **only if the state officer approves**. State and central officers add internal notes that keepers never see. Officers get **Help & roles**: what each role can and cannot do, who covers every state and region, guides, and the Tickets tab.
 - **Government Schemes** in the keeper sidebar lists NBHM, Madhukranti, KVIC Honey Mission, PMEGP and FSSAI with links to the official portals, in English and Hindi.
 
+## Sellers nearby, orders and addresses
+
+- **Addresses.** A keeper enters an address (street, village or town, district, PIN code) when registering, and can change it in Keeper > Settings > **Organisation and address**, which also shows the state, region, registration number and the keeper's own KVIC offices. Keepers registered before addresses existed got a made-up sample address, marked "sample" until they save a real one. The central, state and regional offices are in the `offices` table and are shown in Admin > Help and roles > Who covers what. The KVIC head office address is the real one; the state and regional office streets are made up (marked sample), the town PIN codes are real.
+- **Selling.** Keeper > **Orders** > Products for sale: pick a packaging run of a lab-verified batch, set a price per jar and how many jars to sell. The jars appear on the website at **/sellers** (state, region, seller, address, phone, stock).
+- **Buying.** No account: the buyer chooses a product, enters name, mobile number and delivery address, and lands on an order page (`/order/ORD-...`) with the seller's **UPI QR code**, a box for the UPI reference number after paying, and the order steps. The buyer tracks the order with the order code and the mobile number. If the seller has not entered a UPI ID (Settings), the page shows a clearly marked demo QR.
+- **Fulfilment.** Keeper > Orders shows each order with the buyer's details, the payment status (not paid / buyer says paid / payment received) and the parcel status. The keeper confirms the payment, then marks it shipped (courier and tracking number), then delivered. Cancelling puts the jars back on sale.
+- **Privacy.** Products, prices and stock are public. Buyer names, phone numbers and delivery addresses stay in the seller's private schema (`shop_orders`); the common database only keeps the order code and the seller (`shop_order_index`).
+- The website text for this page is in English and Hindi; other languages fall back to English. Payment is not checked automatically: the seller confirms it after seeing the UPI reference.
+
 ## Database and blockchain: everything runs on this computer
 
 `npm start` starts, before anything else:
@@ -179,6 +188,15 @@ Keep `WALLET_MASTER_KEY` (in `.env`) with the data if you set it: it encrypts th
 
 Login / register / verify rate limits, security headers, a refusal to start in production with a weak `JWT_SECRET`, the ledger tables refuse update, delete and truncate (database triggers), the ledger and the batch / invoice numbers are written one at a time (advisory locks), and the API refuses to start if it cannot read every schema.
 
+Found in a review of the whole flow and fixed:
+
+- **Sessions.** Changing or resetting a password ends every older sign-in (the device that changed it gets a new one).
+- **Login.** An unknown user takes as long to reject as a wrong password, and ten wrong passwords for one account within 15 minutes make that account wait (`LOGIN_ATTEMPTS_PER_ACCOUNT`).
+- **Honey stock.** Packing jars and selling loose honey re-check the remaining honey under a lock, so two requests at the same instant cannot both take the last kilograms.
+- **Orders.** A buyer cannot cancel after sending the payment; an order nobody pays is cancelled after `SHOP_HOLD_HOURS` (24) and its jars go back on the shelf; a seller cannot set the stock higher than the jars packed minus the jars already ordered; a company with open orders cannot request closure, and an officer's closure cannot be completed until they are shipped or cancelled.
+- **Harvest dates** older than two years are refused.
+- **IoT server.** It listens on the network (the ESP32 needs that) but the Flask debugger is off unless `IOT_DEBUG=1`; set `IOT_HOST=127.0.0.1` when no hardware is used.
+
 ## Showing the databases and the chain to the jury (one page)
 
 Start everything with `npm start`, use the apps for a while (register a keeper, approve, harvest, verify the lab result, create jars, sell loose honey), then in a second terminal:
@@ -224,6 +242,7 @@ Details: `APICtech/backend/API.md`, `APICtech/backend/IMMUTABLE_LEDGER.md`, `API
 - The audit ledger has a **single validator** (proof of authority; its signing key is the file `APICtech/backend/data/validator-key.pem`): tamper-evident, not a decentralised network. The smart contract is on a public **test** network (Polygon Amoy), not the main network, once you set `CHAIN_RPC_URL`; without it a local development chain is used, which forgets everything when stopped (the API refills it from the database).
 - Keeper and officer signing accounts are **custodial**: the server holds them, encrypted with `WALLET_MASTER_KEY`, and signs when the user acts. The relayer pays the gas and cannot forge a signature. Losing `WALLET_MASTER_KEY` means losing those accounts.
 - The database is a single PostgreSQL server on this computer: no replica, no failover. Data from the earlier SQLite version is not migrated (`APICtech/backend/apictech.db` and `data/companies` are left untouched).
-- Honey stock checks (how much can still be sold or packed) read then write; two sales of the last kilogram at the same instant could both pass in the database. The smart contract enforces the same limit on chain.
+- Honey stock checks (how much can still be sold or packed) are re-run under a lock inside the transaction, and the smart contract enforces the same limit on chain.
+- Lab certificates need an uploaded document only when `REQUIRE_LAB_DOCUMENT=true`; turn it on for real use. The failed-login counter lives in memory and resets when the API restarts.
 - Hive weight needs an HX711 load cell on the ESP32 (the firmware does not read one yet); the UI and analysis use it when `weight_kg` is reported.
 - Internal identifiers (`APICTECH` party type, `apictech_*` storage keys) keep their old names on purpose; display text says Honey Chain.

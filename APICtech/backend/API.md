@@ -148,3 +148,19 @@ Any officer can inspect organisations in their jurisdiction (`APPROVED` or `SUSP
 | `GET /api/ipfs/:cid` | public | the public metadata JSON; the header `X-Content-Integrity: cid-verified` shows the content matches its CID |
 | `GET /api/admin/system/health` | KVIC head | every schema read and counted (common + one per company), latest exports, chain status, outbox |
 | `POST /api/admin/system/backup` | KVIC head | write a portable export now |
+
+## Public shop and keeper orders
+
+| Method and path | Who | Purpose |
+|---|---|---|
+| `GET /api/shop/states` | public | every state with the number of sellers per region |
+| `GET /api/shop/sellers?state=&region=` | public | sellers with stock |
+| `GET /api/shop/sellers/:code` | public | seller address, phone, FSSAI and products with stock and lab status |
+| `POST /api/shop/orders` | public | place an order (seller, product, quantity, buyer name, phone, address, PIN) |
+| `GET /api/shop/orders/:code?phone=` | buyer | order, payment QR data, timeline |
+| `POST /api/shop/orders/:code/paid` | buyer | send the UPI reference |
+| `POST /api/shop/orders/:code/cancel` | buyer | cancel an unpaid, unshipped order |
+| `GET/POST/PUT /api/company/shop/products` | keeper | products for sale |
+| `GET /api/company/shop/orders` | keeper | orders with buyer details |
+| `PATCH /api/company/shop/orders/:code/payment \| ship \| deliver \| cancel` | keeper | payment received, shipped (courier, tracking), delivered, cancel |
+| `GET/PUT /api/auth/settings` | keeper | profile, organisation, address, UPI ID, own offices |

@@ -2,7 +2,7 @@ export const API_URL =
   import.meta.env.VITE_API_URL || `${window.location.protocol}//${window.location.hostname}:5000/api`
 
 export const BEEHIVE_API_URL =
-  import.meta.env.VITE_BEEHIVE_API_URL || 'http://localhost:5001/api'
+  import.meta.env.VITE_BEEHIVE_API_URL || `${window.location.protocol}//${window.location.hostname}:5001/api`
 
 const PUBLIC_VERIFICATION_URL =
   import.meta.env.VITE_PUBLIC_VERIFICATION_URL || `${API_URL}/qr`

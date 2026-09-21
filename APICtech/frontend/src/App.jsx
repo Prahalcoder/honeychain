@@ -12,6 +12,7 @@ import Laboratory from './pages/Laboratory'
 import SupplyChain from './pages/SupplyChain'
 import Buyers from './pages/Buyers'
 import Billing from './pages/Billing'
+import Orders from './pages/Orders'
 import Finance from './pages/FinanceWorkspace'
 import Predictions from './pages/Predictions'
 import Traceability from './pages/Traceability'
@@ -46,6 +47,11 @@ export default function App() {
       <Route
         path="/dashboard"
         element={<Dashboard />}
+      />
+
+      <Route
+        path="/orders"
+        element={<Orders />}
       />
 
       <Route

@@ -1,4 +1,5 @@
 import {
+  ShoppingBag,
   LayoutDashboard,
   Boxes,
   Droplets,
@@ -97,6 +98,7 @@ const menuSections = [
       { name: 'Laboratory', path: '/laboratory', icon: FlaskConical },
       { name: 'Supply Chain', path: '/supply-chain', icon: Truck },
       { name: 'Buyers', path: '/buyers', icon: Users },
+      { name: 'Orders', path: '/orders', icon: ShoppingBag },
       { name: 'Billing', path: '/billing', icon: Receipt },
       { name: 'Finance', path: '/finance', icon: Wallet },
       { name: 'AI Insights', path: '/predictions', icon: TrendingUp },

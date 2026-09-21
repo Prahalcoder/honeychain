@@ -28,6 +28,10 @@ export default function Login() {
     gstin: '',
     state: '',
     region: '',
+    addressLine: '',
+    locality: '',
+    district: '',
+    pincode: '',
     phone: '',
     email: '',
   })
@@ -195,10 +199,28 @@ export default function Login() {
                   </select>
                 </div>
               </div>
+              <div className="mb-5">
+                <label className="mb-2 block text-sm font-semibold">Apiary / business address</label>
+                <input value={form.addressLine} onChange={setField('addressLine')} placeholder="House or plot number, street" className={inputClass} required />
+              </div>
+              <div className="mb-5 grid gap-5 sm:grid-cols-3">
+                <div>
+                  <label className="mb-2 block text-sm font-semibold">Village / town</label>
+                  <input value={form.locality} onChange={setField('locality')} placeholder="Thirumangalam" className={inputClass} required />
+                </div>
+                <div>
+                  <label className="mb-2 block text-sm font-semibold">District</label>
+                  <input value={form.district} onChange={setField('district')} placeholder="Madurai" className={inputClass} />
+                </div>
+                <div>
+                  <label className="mb-2 block text-sm font-semibold">PIN code</label>
+                  <input value={form.pincode} onChange={setField('pincode')} placeholder="625706" inputMode="numeric" maxLength={6} className={inputClass} required />
+                </div>
+              </div>
               <div className="mb-5 grid gap-5 sm:grid-cols-2">
                 <div>
-                  <label className="mb-2 block text-sm font-semibold">Phone</label>
-                  <input value={form.phone} onChange={setField('phone')} placeholder="+91 98765 43210" className={inputClass} />
+                  <label className="mb-2 block text-sm font-semibold">Mobile number</label>
+                  <input value={form.phone} onChange={setField('phone')} placeholder="9876543210" inputMode="numeric" className={inputClass} />
                 </div>
                 <div>
                   <label className="mb-2 block text-sm font-semibold">Business Email</label>

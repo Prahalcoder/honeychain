@@ -25,6 +25,7 @@ import {
 import { SigningError, signAsOfficer } from '../services/signing.js'
 import { REQUIRE_LAB_DOCUMENT, sendDocument } from '../services/labDocuments.js'
 import { onLabVerified, chainStatus, recentOutbox } from '../services/chain.js'
+import { allOffices } from '../services/offices.js'
 import { BACKUP_DIR, backupNow, listBackups, verifyDatabases } from '../services/backup.js'
 import {
   TicketError, decideCentral, escalate, getTicket, officerMessage, officerThread, officerTickets, returnTicket, setStatus, ticketAlerts,
@@ -60,7 +61,8 @@ async function scopedOrganizations(user, { status, query } = {}) {
       o.registration_body AS registrationBody, o.madhukranti_id AS registrationId,
       o.fssai_license AS fssai, o.gstin, o.state, o.region, o.status,
       o.created_at AS createdAt, o.reviewed_at AS reviewedAt, o.review_note AS reviewNote,
-      rb.name AS reviewedBy, u.name AS ownerName, s.phone, s.email
+      rb.name AS reviewedBy, u.name AS ownerName, s.phone, s.email,
+      o.address_line AS addressLine, o.locality, o.district, o.pincode, o.address_sample AS addressSample
     FROM organizations o
     JOIN users u ON u.id = o.owner_user_id
     LEFT JOIN user_settings s ON s.user_id = u.id
@@ -653,16 +655,21 @@ router.get('/directory', async (req, res) => {
     FROM organizations GROUP BY state, region
   `).all()
   const states = user.role === ROLES.HEAD ? Object.keys(REGIONS) : [user.state]
+  const offices = await allOffices()
+  const officeOf = (level, state = '', region = '') => offices.find((office) => office.level === level && (office.state || '') === state && (office.region || '') === region) || null
 
   res.json({
+    nationalOffice: officeOf('CENTRAL'),
     national: officers.filter((row) => row.role === ROLES.HEAD),
     states: states.map((state) => ({
       state,
+      office: officeOf('STATE', state),
       officers: officers.filter((row) => row.role === ROLES.STATE && row.state === state),
       regions: REGIONS[state]
         .filter((region) => user.role !== ROLES.REGIONAL || region === user.region)
         .map((region) => ({
           region,
+          office: officeOf('REGIONAL', state, region),
           officers: officers.filter((row) => row.role === ROLES.REGIONAL && row.state === state && row.region === region),
           organizations: counts.find((row) => row.state === state && row.region === region) || { approved: 0, pending: 0, total: 0 },
         })),
@@ -1221,7 +1228,7 @@ router.post('/officers/:id/reset-password', requireRole(ROLES.HEAD), async (req,
     return res.status(400).json({ message: 'Password must be at least 8 characters' })
   }
 
-  await db.prepare('UPDATE users SET password = ? WHERE id = ?').run(bcrypt.hashSync(req.body.password, 10), officer.id)
+  await db.prepare('UPDATE users SET password = ?, password_changed_at = ? WHERE id = ?').run(bcrypt.hashSync(req.body.password, 10), new Date().toISOString(), officer.id)
   await recordAudit(req.user, 'OFFICER_PASSWORD_RESET', 'USER', officer.id, { username: officer.username })
 
   res.json({ message: 'Password reset' })
