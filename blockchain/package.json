@@ -1,0 +1,19 @@
+{
+  "name": "honeychain-contracts",
+  "private": true,
+  "type": "module",
+  "description": "HoneyChain smart contract (Solidity) and a local development chain",
+  "scripts": {
+    "compile": "node scripts/compile.mjs",
+    "test": "node scripts/compile.mjs && node --test test/HoneyChain.test.mjs",
+    "node": "node scripts/serve.mjs",
+    "deploy": "node scripts/deploy.mjs",
+    "account": "node scripts/account.mjs",
+    "verify": "node scripts/verify.mjs"
+  },
+  "dependencies": {
+    "ethers": "^6.13.4",
+    "hardhat": "^2.26.0",
+    "solc": "^0.8.28"
+  }
+}

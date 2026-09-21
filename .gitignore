@@ -1,0 +1,37 @@
+# ---- Secrets and settings that must never be pushed
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# ---- Databases and everything the app creates while running
+APICtech/backend/data/
+APICtech/backend/backups/
+APICtech/backend/backup-before-*/
+APICtech/backend/apictech.db*
+*.db
+*.db-shm
+*.db-wal
+tools/.demo/
+
+# ---- Installed packages and build output (npm install / npm run build recreate them)
+node_modules/
+dist/
+.vite/
+blockchain/artifacts/
+blockchain/deployments/
+blockchain/cache/
+
+# ---- Python
+__pycache__/
+*.pyc
+.venv/
+APICtech/beehive/python_app/data_logs/
+
+# ---- Generated reports and local files
+Honey-Chain-Data-Explorer.html
+Honey-Chain-Demo-Explorer.html
+*.log
+.DS_Store
+Thumbs.db

@@ -1,0 +1,11 @@
+{
+  "name": "honey-chain",
+  "private": true,
+  "description": "Honey Chain: one command starts the API, IoT service, Keeper, Admin and the public website",
+  "scripts": {
+    "start": "node start.mjs",
+    "inspect": "node tools/jury-explorer.mjs --live",
+    "jury": "node tools/jury-explorer.mjs",
+    "jury:live": "node tools/jury-explorer.mjs --live"
+  }
+}
