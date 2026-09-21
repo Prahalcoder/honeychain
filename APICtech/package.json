@@ -1,0 +1,11 @@
+{
+  "name": "apictech",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"npm --prefix backend run dev\" \"npm --prefix frontend run dev\"",
+    "dev:all": "concurrently \"npm --prefix backend run dev\" \"npm --prefix frontend run dev\" \"npm --prefix ../apictech-admin run dev\""
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.5"
+  }
+}

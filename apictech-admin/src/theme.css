@@ -1,0 +1,69 @@
+/* ================= Type and sidebar (final layer) ================= */
+h1, h2, h3, h4 { font-family: 'Fraunces Variable', Georgia, serif; font-weight: 600; letter-spacing: -0.01em; }
+strong { font-family: inherit; }
+button, input, select, textarea { font-family: inherit; }
+.metric-value, .big-number { font-variant-numeric: lining-nums tabular-nums; }
+
+.sidebar { background: #0d3532 !important; padding: 0 !important; width: 268px !important; border-right: 1px solid rgba(255, 255, 255, 0.06); box-shadow: none !important; overflow: hidden !important; }
+.sidebar-backdrop { position: fixed; inset: 0; z-index: 25; background: rgba(6, 24, 22, 0.55); }
+
+.sidebar .brand { display: flex; align-items: center; gap: 12px; padding: 20px 20px 18px !important; border-bottom: 1px solid rgba(255, 255, 255, 0.08); color: #fff; }
+.brand-logo { flex: none; width: 44px; height: 44px; border-radius: 10px; object-fit: cover; }
+.sidebar .brand strong { display: block; font-family: 'Fraunces Variable', Georgia, serif; font-size: 22px; font-weight: 600; line-height: 1.1; color: #fff; }
+.sidebar .brand span { display: block; margin-top: 3px; font-size: 12px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: #8fd3cb !important; }
+.sidebar .brand .mobile-close { margin-left: auto; color: rgba(255, 255, 255, 0.75); }
+
+.workspace-switcher { margin: 14px 14px 2px !important; padding: 10px 12px !important; border-radius: 10px !important; background: rgba(255, 255, 255, 0.06) !important; border: 1px solid rgba(255, 255, 255, 0.08) !important; }
+.workspace-switcher span { display: block; color: rgba(255, 255, 255, 0.55) !important; font-size: 12.5px; }
+.workspace-switcher strong { display: block; color: #fff !important; font-size: 15.5px; font-weight: 600; }
+
+.sidebar nav { flex: 1; overflow-y: auto; padding: 2px 12px 14px; scrollbar-width: thin; scrollbar-color: rgba(255, 255, 255, 0.25) transparent; }
+.nav-group { margin-bottom: 4px !important; }
+.nav-group > p { margin: 18px 8px 6px !important; padding: 0 !important; font-size: 12px !important; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255, 255, 255, 0.42) !important; }
+.nav-item { position: relative; min-height: 44px; padding: 0 12px !important; margin: 2px 0 !important; border-radius: 8px !important; color: rgba(255, 255, 255, 0.76) !important; font-size: 16px !important; font-weight: 500; background: transparent !important; box-shadow: none !important; transform: none !important; }
+.nav-item svg { width: 19px !important; height: 19px !important; flex: none; stroke-width: 1.75; opacity: 0.85; }
+.nav-item:hover { background: rgba(255, 255, 255, 0.06) !important; color: #fff !important; }
+.nav-item.active { background: rgba(255, 255, 255, 0.1) !important; color: #fff !important; font-weight: 600; box-shadow: none !important; }
+.nav-item.active::before { content: ''; position: absolute; left: -12px; top: 9px; bottom: 9px; width: 3px; border-radius: 0 3px 3px 0; background: #F97360; }
+.nav-item.active svg { color: #F97360; opacity: 1; }
+.nav-item b { margin-left: auto; min-width: 22px; padding: 2px 7px !important; border-radius: 999px; text-align: center; font-size: 12.5px; font-weight: 700; background: #F97360 !important; color: #2a0c07 !important; }
+.nav-item.active b { background: #F97360 !important; color: #2a0c07 !important; }
+
+.sidebar-bottom { margin-top: 0 !important; padding: 12px 14px 14px; border-top: 1px solid rgba(255, 255, 255, 0.08); }
+.sidebar-bottom .profile { display: flex; align-items: center; gap: 11px; padding: 0 !important; }
+.sidebar-bottom .avatar { flex: none; display: grid; place-items: center; width: 38px; height: 38px; border-radius: 50%; background: #F97360 !important; color: #2a0c07 !important; font-weight: 700; }
+.sidebar-bottom .profile strong { display: block; color: #fff !important; font-size: 15px; font-weight: 600; }
+.sidebar-bottom .profile span { display: block; color: rgba(255, 255, 255, 0.55) !important; font-size: 12.5px; }
+.sidebar-bottom .signout { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 40px; margin-top: 10px !important; padding: 0 12px !important; border-radius: 8px !important; color: rgba(255, 255, 255, 0.72) !important; background: rgba(255, 255, 255, 0.05) !important; font-size: 15px; }
+.sidebar-bottom .signout:hover { background: rgba(249, 115, 96, 0.2) !important; color: #ffd2c9 !important; }
+.sidebar .brand-mark { display: none; }
+
+@media (max-width: 1000px) {
+  .sidebar { position: fixed !important; inset: 0 auto 0 0; z-index: 30; height: 100vh; transform: translateX(-100%); transition: transform 0.22s ease; }
+  .sidebar.sidebar-open { transform: translateX(0) !important; box-shadow: 14px 0 40px rgba(0, 0, 0, 0.35) !important; }
+}
+
+/* ================= Phone layout ================= */
+html, body { max-width: 100%; overflow-x: hidden; }
+.main-content, .page-wrap { min-width: 0; }
+.panel, .metric, .modal { max-width: 100%; }
+.panel-header { flex-wrap: wrap; }
+.tabs { display: flex; flex-wrap: nowrap; gap: 4px; max-width: 100%; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+.tabs::-webkit-scrollbar { display: none; }
+.tab { flex: none; white-space: nowrap; }
+.chips { display: flex; flex-wrap: nowrap; max-width: 100%; overflow-x: auto; scrollbar-width: none; }
+.chip { flex: none; white-space: nowrap; }
+.mini-bars { max-width: 100%; overflow-x: auto; }
+table { max-width: 100%; }
+@media (max-width: 700px) {
+  .topbar { gap: 8px !important; padding-left: 12px !important; padding-right: 12px !important; }
+  .topbar .breadcrumb span:first-child { display: none; }
+  .top-actions { gap: 8px !important; flex: none; }
+  .top-actions .lang-toggle { padding: 2px 6px; }
+  .top-actions .lang-toggle svg { display: none; }
+  .top-actions .lang-toggle select { max-width: 78px; }
+  .connection { display: none !important; }
+  .page-wrap { padding: 18px 14px 44px !important; }
+}
+.chart-pair > *, .page-wrap [class*="grid"] > * { min-width: 0; }
+@media (max-width: 900px) { .chart-pair { grid-template-columns: minmax(0, 1fr) !important; } }

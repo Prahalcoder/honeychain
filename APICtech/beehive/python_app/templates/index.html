@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Smart Beehive Monitoring & Climate Control Dashboard</title>
+
+    <!-- ------------------------------ -->
+    <!-- ------- Google Fonts ----------- -->
+    <!-- ------------------------------ -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- ------------------------------ -->
+    <!-- ------- Font Awesome Vector Icons ----------- -->
+    <!-- ------------------------------ -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- ------------------------------ -->
+    <!-- ------- Chart.js for Environmental Trends ----------- -->
+    <!-- ------------------------------ -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- ------------------------------ -->
+    <!-- ------- Light Theme CSS Stylesheet ----------- -->
+    <!-- ------------------------------ -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body class="light-theme">
+    <div class="app-container">
+
+        <!-- ------------------------------ -->
+        <!-- ------- Header Banner ----------- -->
+        <!-- ------------------------------ -->
+        <header class="app-header">
+            <div class="brand-section">
+                <div class="brand-icon-wrapper">
+                    <i class="fa-solid fa-brands fa-hive brand-icon"></i>
+                </div>
+                <div class="brand-text">
+                    <div class="title-row">
+                        <h1>Beehive Environmental Monitor</h1>
+                        <span class="system-badge"><i class="fa-solid fa-microchip"></i> ESP32 Station</span>
+                    </div>
+                    <p class="subtitle">Real-time Biometric Probes, Climate Gauges, Python OpenCV Live Camera Feed & Automated Control</p>
+                </div>
+            </div>
+
+            <div class="header-status-area">
+                <div class="connection-pill" id="connectionBadge">
+                    <span class="status-indicator-dot offline" id="statusDot"></span>
+                    <div class="status-details">
+                        <span class="status-state" id="connectionState">Connecting...</span>
+                        <span class="status-ip" id="connectionIp">Target: ESP32</span>
+                    </div>
+                </div>
+
+                <button class="btn btn-connect-toggle btn-disconnect" id="btnConnectToggle"
+                    onclick="toggleEspConnection()">
+                    <i class="fa-solid fa-link-slash"></i>
+                    <span>Disconnect</span>
+                </button>
+
+                <div class="live-clock-card">
+                    <i class="fa-regular fa-clock clock-icon"></i>
+                    <span id="liveClock">--:--:--</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- ------------------------------ -->
+        <!-- ------- Navigation Tabs ----------- -->
+        <!-- ------------------------------ -->
+        <nav class="navigation-bar">
+            <button class="nav-tab-btn active" onclick="switchTab('dashboard')">
+                <i class="fa-solid fa-gauge-high"></i>
+                <span>Live Dashboard & Trends</span>
+            </button>
+            <button class="nav-tab-btn" onclick="switchTab('calendar')">
+                <i class="fa-solid fa-calendar-days"></i>
+                <span>Daily Data Logs</span>
+            </button>
+            <button class="nav-tab-btn" onclick="switchTab('config')">
+                <i class="fa-solid fa-sliders"></i>
+                <span>Config</span>
+            </button>
+        </nav>
+
+        <!-- ------------------------------ -->
+        <!-- ------- Main Content Viewport ----------- -->
+        <!-- ------------------------------ -->
+        <main class="content-viewport">
+
+            <!-- ------------------------------ -->
+            <!-- ------- TAB 1: Live Dashboard ----------- -->
+            <!-- ------------------------------ -->
+            <section id="tab-dashboard" class="tab-view active">
+
+                <!-- ------------------------------ -->
+                <!-- ------- Top Section: Hardware Probes & Actuators ----------- -->
+                <!-- ------------------------------ -->
+                <div class="section-title-bar">
+                    <div class="title-with-icon">
+                        <i class="fa-solid fa-microchip icon-primary"></i>
+                        <h2>Hardware Probes & Climate Actuators</h2>
+                    </div>
+                    <span class="live-pulse-badge" id="liveStreamBadge">
+                        <span class="pulse-ring" id="streamPulseRing"></span>
+                        <span id="streamBadgeText">Live Stream Active</span>
+                    </span>
+                </div>
+
+                <div class="dashboard-top-grid">
+
+                    <div class="probes-column">
+
+                        <div class="card sensor-detail-card">
+                            <div class="card-top-bar">
+                                <div class="sensor-header-title">
+                                    <span class="sensor-dot sensor-dot-1"></span>
+                                    <h4>DHT11 Probe #1</h4>
+                                </div>
+                                <span class="pin-badge"><i class="fa-solid fa-code-fork"></i> Pin 32</span>
+                            </div>
+                            <div class="sensor-metrics-row">
+                                <div class="mini-metric">
+                                    <span class="mini-label"><i class="fa-solid fa-temperature-arrow-up"></i> Temp 1</span>
+                                    <div class="mini-val-wrap">
+                                        <span class="mini-val" id="valTemp1">--</span><span class="mini-unit">°C</span>
+                                    </div>
+                                    <div class="progress-track">
+                                        <div id="barTemp1" class="progress-bar bar-amber" style="width: 0%;"></div>
+                                    </div>
+                                </div>
+                                <div class="mini-metric">
+                                    <span class="mini-label"><i class="fa-solid fa-droplet"></i> Humidity 1</span>
+                                    <div class="mini-val-wrap">
+                                        <span class="mini-val" id="valHum1">--</span><span class="mini-unit">%</span>
+                                    </div>
+                                    <div class="progress-track">
+                                        <div id="barHum1" class="progress-bar bar-cyan" style="width: 0%;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card sensor-detail-card">
+                            <div class="card-top-bar">
+                                <div class="sensor-header-title">
+                                    <span class="sensor-dot sensor-dot-2"></span>
+                                    <h4>DHT11 Probe #2</h4>
+                                </div>
+                                <span class="pin-badge"><i class="fa-solid fa-code-fork"></i> Pin 33</span>
+                            </div>
+                            <div class="sensor-metrics-row">
+                                <div class="mini-metric">
+                                    <span class="mini-label"><i class="fa-solid fa-temperature-arrow-up"></i> Temp 2</span>
+                                    <div class="mini-val-wrap">
+                                        <span class="mini-val" id="valTemp2">--</span><span class="mini-unit">°C</span>
+                                    </div>
+                                    <div class="progress-track">
+                                        <div id="barTemp2" class="progress-bar bar-amber" style="width: 0%;"></div>
+                                    </div>
+                                </div>
+                                <div class="mini-metric">
+                                    <span class="mini-label"><i class="fa-solid fa-droplet"></i> Humidity 2</span>
+                                    <div class="mini-val-wrap">
+                                        <span class="mini-val" id="valHum2">--</span><span class="mini-unit">%</span>
+                                    </div>
+                                    <div class="progress-track">
+                                        <div id="barHum2" class="progress-bar bar-cyan" style="width: 0%;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="actuators-column">
+
+                        <div class="card actuator-card" id="bulbCard">
+                            <div class="actuator-inner-layout">
+                                <div class="actuator-icon-container bulb-theme" id="bulbIconWrapper">
+                                    <i class="fa-solid fa-fire actuator-fa-icon" id="bulbFaIcon"></i>
+                                    <div class="bulb-glow-ring"></div>
+                                </div>
+                                <div class="actuator-info-container">
+                                    <div class="actuator-title-row">
+                                        <div>
+                                            <h4>Warmer</h4>
+                                            <span class="actuator-meta"><i class="fa-solid fa-microchip"></i> Relay Pin 14 (<span id="lblBulbSource">Average Temp</span> Controlled)</span>
+                                        </div>
+                                        <span class="relay-state-badge badge-off" id="bulbStateBadge">
+                                            <i class="fa-solid fa-power-off"></i> WARMER OFF
+                                        </span>
+                                    </div>
+                                    <div class="threshold-logic-banner">
+                                        <div class="logic-step">
+                                            <i class="fa-solid fa-arrow-down-long text-rose"></i>
+                                            <span>Turns ON below <strong id="lblBulbOn">--</strong>°C</span>
+                                        </div>
+                                        <div class="logic-separator">|</div>
+                                        <div class="logic-step">
+                                            <i class="fa-solid fa-arrow-up-long text-slate"></i>
+                                            <span>Turns OFF above <strong id="lblBulbOff">--</strong>°C</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card actuator-card" id="fanCard">
+                            <div class="actuator-inner-layout">
+                                <div class="actuator-icon-container fan-theme" id="fanIconWrapper">
+                                    <i class="fa-solid fa-wind actuator-fa-icon" id="fanFaIcon"></i>
+                                </div>
+                                <div class="actuator-info-container">
+                                    <div class="actuator-title-row">
+                                        <div>
+                                            <h4>Cooler</h4>
+                                            <span class="actuator-meta"><i class="fa-solid fa-microchip"></i> Relay Pin 23 (<span id="lblFanSource">Average Temp</span> Controlled)</span>
+                                        </div>
+                                        <span class="relay-state-badge badge-off" id="fanStateBadge">
+                                            <i class="fa-solid fa-power-off"></i> COOLER OFF
+                                        </span>
+                                    </div>
+                                    <div class="threshold-logic-banner">
+                                        <div class="logic-step">
+                                            <i class="fa-solid fa-arrow-up-long text-cyan"></i>
+                                            <span>Turns ON above <strong id="lblFanOn">--</strong>°C</span>
+                                        </div>
+                                        <div class="logic-separator">|</div>
+                                        <div class="logic-step">
+                                            <i class="fa-solid fa-arrow-down-long text-slate"></i>
+                                            <span>Turns OFF below <strong id="lblFanOff">--</strong>°C</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- ------------------------------ -->
+                <!-- ------- Middle Section: Gauges & OpenCV Live Camera ----------- -->
+                <!-- ------------------------------ -->
+                <div class="section-title-bar mt-6">
+                    <div class="title-with-icon">
+                        <i class="fa-solid fa-chart-pie icon-primary"></i>
+                        <h2>Environmental Analysis & Python OpenCV Live Camera</h2>
+                    </div>
+                </div>
+
+                <div class="climate-camera-composite-layout">
+
+                    <div class="gauges-left-column">
+
+                        <div class="card co2-sensor-card">
+                            <div class="card-top-bar">
+                                <div class="card-title-group">
+                                    <i class="fa-solid fa-wind icon-emerald"></i>
+                                    <h3>Carbon Dioxide & Air Quality</h3>
+                                </div>
+                                <span class="chip chip-emerald"><i class="fa-solid fa-leaf"></i> MQ Sensor</span>
+                            </div>
+
+                            <div class="co2-main-readout-wrap">
+                                <div class="co2-num-cluster">
+                                    <span class="reading-number text-emerald" id="gaugeCo2Val">--</span>
+                                    <span class="reading-unit">PPM</span>
+                                </div>
+                                <span class="gauge-status-pill pill-emerald" id="co2QualityBadge">
+                                    <i class="fa-solid fa-circle-check"></i> Good Air Quality
+                                </span>
+                            </div>
+
+                            <div class="progress-track co2-track">
+                                <div id="barCo2" class="progress-bar bar-emerald" style="width: 0%;"></div>
+                            </div>
+
+                            <div class="co2-scale-row">
+                                <span>0 PPM</span>
+                                <span class="co2-target-hint">&lt; 800 Ideal</span>
+                                <span>2000 PPM</span>
+                            </div>
+
+                            <div class="gauge-footer-stats">
+                                <div class="sub-stat">
+                                    <span class="sub-stat-lbl">Sensor Pin</span>
+                                    <span class="sub-stat-val">GPIO 35</span>
+                                </div>
+                                <div class="sub-stat-divider"></div>
+                                <div class="sub-stat">
+                                    <span class="sub-stat-lbl">Raw Analog Value</span>
+                                    <span class="sub-stat-val" id="cardGas1Val">-- ADC</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="dual-gauges-row">
+
+                            <div class="card gauge-card">
+                                <div class="card-top-bar">
+                                    <div class="card-title-group">
+                                        <i class="fa-solid fa-temperature-half icon-amber"></i>
+                                        <h3>Average Temp</h3>
+                                    </div>
+                                    <span class="chip chip-amber"><i class="fa-solid fa-calculator"></i> (T1+T2)/2</span>
+                                </div>
+                                <div class="gauge-display-container">
+                                    <div class="unified-gauge-wrapper">
+                                        <svg class="unified-gauge-svg" viewBox="0 0 180 180">
+                                            <circle class="gauge-track" cx="90" cy="90" r="70" fill="none"
+                                                stroke="#e2e8f0" stroke-width="13" stroke-linecap="round"
+                                                stroke-dasharray="293.21 439.82" transform="rotate(150 90 90)" />
+                                            <circle id="tempGaugeArc" class="gauge-progress temp-progress" cx="90"
+                                                cy="90" r="70" fill="none" stroke="#d97706" stroke-width="13"
+                                                stroke-linecap="round" stroke-dasharray="293.21 439.82"
+                                                stroke-dashoffset="293.21" transform="rotate(150 90 90)" />
+                                        </svg>
+                                        <div class="gauge-center-content">
+                                            <i class="fa-solid fa-temperature-half gauge-top-icon icon-amber"></i>
+                                            <div class="gauge-value-wrap">
+                                                <span class="reading-number" id="gaugeAvgTempVal">--</span>
+                                                <span class="reading-unit">°C</span>
+                                            </div>
+                                            <span class="gauge-status-pill pill-emerald" id="tempStatusBadge">
+                                                <i class="fa-solid fa-circle-check"></i> Ideal (28-35°C)
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="gauge-scale-row">
+                                        <span class="scale-limit">0°C</span>
+                                        <span class="scale-target"><i class="fa-solid fa-shield-halved"></i> 28 - 35°C</span>
+                                        <span class="scale-limit">60°C</span>
+                                    </div>
+                                </div>
+                                <div class="gauge-footer-stats">
+                                    <div class="sub-stat">
+                                        <span class="sub-stat-lbl">Sensor 1 (GPIO 32)</span>
+                                        <span class="sub-stat-val" id="cardTemp1Val">-- °C</span>
+                                    </div>
+                                    <div class="sub-stat-divider"></div>
+                                    <div class="sub-stat">
+                                        <span class="sub-stat-lbl">Sensor 2 (GPIO 33)</span>
+                                        <span class="sub-stat-val" id="cardTemp2Val">-- °C</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card gauge-card">
+                                <div class="card-top-bar">
+                                    <div class="card-title-group">
+                                        <i class="fa-solid fa-droplet icon-cyan"></i>
+                                        <h3>Average Humidity</h3>
+                                    </div>
+                                    <span class="chip chip-cyan"><i class="fa-solid fa-water"></i> Relative Hum</span>
+                                </div>
+                                <div class="gauge-display-container">
+                                    <div class="unified-gauge-wrapper">
+                                        <svg class="unified-gauge-svg" viewBox="0 0 180 180">
+                                            <circle class="gauge-track" cx="90" cy="90" r="70" fill="none"
+                                                stroke="#e2e8f0" stroke-width="13" stroke-linecap="round"
+                                                stroke-dasharray="293.21 439.82" transform="rotate(150 90 90)" />
+                                            <circle id="humRingCircle" class="gauge-progress hum-progress" cx="90"
+                                                cy="90" r="70" fill="none" stroke="#0ea5e9" stroke-width="13"
+                                                stroke-linecap="round" stroke-dasharray="293.21 439.82"
+                                                stroke-dashoffset="293.21" transform="rotate(150 90 90)" />
+                                        </svg>
+                                        <div class="gauge-center-content">
+                                            <i class="fa-solid fa-droplet gauge-top-icon icon-cyan"></i>
+                                            <div class="gauge-value-wrap">
+                                                <span class="reading-number" id="gaugeAvgHumVal">--</span>
+                                                <span class="reading-unit">%</span>
+                                            </div>
+                                            <span class="gauge-status-pill pill-cyan" id="humStatusBadge">
+                                                Comfort Zone (40-70%)
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="gauge-scale-row">
+                                        <span class="scale-limit">0%</span>
+                                        <span class="scale-target"><i class="fa-solid fa-water"></i> 55 - 65%</span>
+                                        <span class="scale-limit">100%</span>
+                                    </div>
+                                </div>
+                                <div class="gauge-footer-stats">
+                                    <div class="sub-stat">
+                                        <span class="sub-stat-lbl">Sensor 1 Hum</span>
+                                        <span class="sub-stat-val" id="cardHum1Val">-- %</span>
+                                    </div>
+                                    <div class="sub-stat-divider"></div>
+                                    <div class="sub-stat">
+                                        <span class="sub-stat-lbl">Sensor 2 Hum</span>
+                                        <span class="sub-stat-val" id="cardHum2Val">-- %</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <!-- ------------------------------ -->
+                    <!-- ------- Right Column: Python OpenCV Live Camera View ----------- -->
+                    <!-- ------------------------------ -->
+                    <div class="camera-right-column">
+                        <div class="card camera-feed-card">
+                            <div class="camera-card-header">
+                                <div class="camera-select-area">
+                                    <label for="cameraSelectDropdown"><i class="fa-solid fa-camera"></i> Camera Device:</label>
+                                    <div class="camera-select-with-refresh">
+                                        <select id="cameraSelectDropdown" onchange="onCameraDeviceChanged()">
+                                            <option value="0">Detecting connected cameras...</option>
+                                        </select>
+                                        <button class="btn btn-secondary btn-sm" onclick="fetchCameraDevices()"
+                                            title="Rescan Connected Cameras">
+                                            <i class="fa-solid fa-arrows-rotate"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="camera-controls-area">
+                                    <button class="btn btn-primary btn-sm" id="btnToggleCamera"
+                                        onclick="toggleCameraStream()">
+                                        <i class="fa-solid fa-video"></i> <span id="cameraBtnText">Enable Camera Preview</span>
+                                    </button>
+                                    <button class="btn btn-secondary btn-sm" id="btnSnapshot"
+                                        onclick="takeCameraSnapshot()" disabled title="Capture Snapshot Still Frame">
+                                        <i class="fa-solid fa-camera-retro"></i> <span>Snapshot</span>
+                                    </button>
+                                    <button class="btn btn-secondary btn-sm" id="btnFullscreen"
+                                        onclick="toggleCameraFullscreen()" disabled title="Fullscreen View">
+                                        <i class="fa-solid fa-expand"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="camera-viewport-box" id="cameraViewportBox">
+
+                                <div class="camera-standby-placeholder" id="cameraPlaceholder">
+                                    <div class="cam-standby-icon">
+                                        <i class="fa-solid fa-video-slash"></i>
+                                    </div>
+                                    <h4>OpenCV Camera Preview Inactive</h4>
+                                    <p>Select camera device and click <strong>Enable Camera Preview</strong> to start OpenCV live stream.</p>
+                                </div>
+
+                                <!-- ------------------------------ -->
+                                <!-- ------- OpenCV Stream Image Element ----------- -->
+                                <!-- ------------------------------ -->
+                                <img id="cameraStreamImg" class="camera-stream-feed" src="" alt="Live OpenCV Video Feed" style="display: none;">
+
+                                <div class="camera-hud-badge" id="cameraHudBadge" style="display: none;">
+                                    <span class="hud-rec-dot"></span>
+                                    <span>OPENCV LIVE STREAM</span>
+                                    <span class="hud-separator">|</span>
+                                    <span id="hudResolution">--</span>
+                                </div>
+                            </div>
+
+                            <div class="snapshot-preview-drawer" id="snapshotDrawer" style="display: none;">
+                                <div class="snapshot-header">
+                                    <span><i class="fa-solid fa-image"></i> Captured Frame</span>
+                                    <button class="btn-close-snap" onclick="closeSnapshotDrawer()"><i
+                                            class="fa-solid fa-xmark"></i></button>
+                                </div>
+                                <div class="snapshot-body">
+                                    <img id="snapshotImgPreview" src="" alt="Snapshot Preview">
+                                    <div class="snapshot-actions">
+                                        <a id="snapshotDownloadLink" class="btn btn-outline btn-sm"
+                                            download="beehive_snapshot.jpg">
+                                            <i class="fa-solid fa-download"></i> Save Image
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- ------------------------------ -->
+                <!-- ------- Bottom Section: Environmental Trends Charts ----------- -->
+                <!-- ------------------------------ -->
+                <div class="section-title-bar mt-6">
+                    <div class="title-with-icon">
+                        <i class="fa-solid fa-chart-line icon-primary"></i>
+                        <h2>Environmental Trends & Dynamics</h2>
+                    </div>
+                    <div class="trends-controls">
+                        <div class="filter-label-wrap">
+                            <i class="fa-solid fa-filter"></i> <span>Points:</span>
+                        </div>
+                        <div class="segmented-control">
+                            <button class="segment-btn" id="btnRange5" onclick="setTrendRange(5)">5</button>
+                            <button class="segment-btn" id="btnRange10" onclick="setTrendRange(10)">10</button>
+                            <button class="segment-btn active" id="btnRange30" onclick="setTrendRange(30)">30</button>
+                            <button class="segment-btn" id="btnRange50" onclick="setTrendRange(50)">50</button>
+                            <button class="segment-btn" id="btnRangeToday" onclick="setTrendRange('today')">
+                                <i class="fa-solid fa-calendar-day"></i> Today
+                            </button>
+                        </div>
+                        <button class="btn btn-secondary btn-sm" onclick="refreshTrendData()"
+                            title="Refresh Trend Charts">
+                            <i class="fa-solid fa-rotate"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="charts-grid">
+
+                    <div class="card chart-card">
+                        <div class="chart-header">
+                            <div class="chart-heading">
+                                <i class="fa-solid fa-temperature-half icon-amber"></i>
+                                <h4>Temperature (°C)</h4>
+                            </div>
+                            <div class="chart-legend-custom">
+                                <span class="legend-item"><span class="legend-dot bg-amber"></span> P1</span>
+                                <span class="legend-item"><span class="legend-dot bg-orange"></span> P2</span>
+                                <span class="legend-item"><span class="legend-dot bg-indigo"></span> Avg</span>
+                            </div>
+                        </div>
+                        <div class="chart-canvas-wrapper">
+                            <canvas id="tempTrendChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="card chart-card">
+                        <div class="chart-header">
+                            <div class="chart-heading">
+                                <i class="fa-solid fa-droplet icon-cyan"></i>
+                                <h4>Humidity (%)</h4>
+                            </div>
+                            <div class="chart-legend-custom">
+                                <span class="legend-item"><span class="legend-dot bg-cyan"></span> P1</span>
+                                <span class="legend-item"><span class="legend-dot bg-blue"></span> P2</span>
+                                <span class="legend-item"><span class="legend-dot bg-teal"></span> Avg</span>
+                            </div>
+                        </div>
+                        <div class="chart-canvas-wrapper">
+                            <canvas id="humTrendChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="card chart-card">
+                        <div class="chart-header">
+                            <div class="chart-heading">
+                                <i class="fa-solid fa-wind icon-emerald"></i>
+                                <h4>Gas (PPM)</h4>
+                            </div>
+                            <div class="chart-legend-custom">
+                                <span class="legend-item"><span class="legend-dot bg-emerald"></span> Gas Sensor</span>
+                                <span class="legend-badge badge-good">&lt; 800 OK</span>
+                                <span class="legend-badge badge-warning">&gt; 1500</span>
+                            </div>
+                        </div>
+                        <div class="chart-canvas-wrapper">
+                            <canvas id="co2TrendChart"></canvas>
+                        </div>
+                    </div>
+
+                </div>
+
+            </section>
+
+            <!-- ------------------------------ -->
+            <!-- ------- TAB 2: Daily Data Logs View ----------- -->
+            <!-- ------------------------------ -->
+            <section id="tab-calendar" class="tab-view">
+
+                <div class="card logs-control-card">
+                    <div class="logs-control-layout">
+                        <div class="date-picker-group">
+                            <label for="calendarDateInput"><i class="fa-regular fa-calendar-check"></i> Select Log Date:</label>
+                            <div class="input-with-actions">
+                                <input type="date" id="calendarDateInput" onchange="loadDateLogs()">
+                                <button class="btn btn-primary" onclick="loadTodayLogs()">
+                                    <i class="fa-solid fa-calendar-day"></i> Today
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="available-dates-group">
+                            <label for="availableDatesSelect"><i class="fa-solid fa-folder-open"></i> Stored Date Logs (`python_app/data_logs/`):</label>
+                            <select id="availableDatesSelect" onchange="selectDateFromDropdown()">
+                                <option value="">Loading stored log dates...</option>
+                            </select>
+                        </div>
+
+                        <div class="log-actions-group">
+                            <button class="btn btn-outline" onclick="downloadCurrentLog()">
+                                <i class="fa-solid fa-download"></i> Export JSON Log
+                            </button>
+                            <button class="btn btn-secondary" onclick="loadDateLogs()">
+                                <i class="fa-solid fa-arrows-rotate"></i> Refresh
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="summary-metrics-grid">
+                    <div class="card summary-metric-box">
+                        <span class="sum-icon icon-rose"><i class="fa-solid fa-temperature-low"></i></span>
+                        <div>
+                            <span class="sum-label">Min Temperature</span>
+                            <span class="sum-value" id="sumMinTemp">-- °C</span>
+                        </div>
+                    </div>
+                    <div class="card summary-metric-box">
+                        <span class="sum-icon icon-amber"><i class="fa-solid fa-temperature-high"></i></span>
+                        <div>
+                            <span class="sum-label">Max Temperature</span>
+                            <span class="sum-value" id="sumMaxTemp">-- °C</span>
+                        </div>
+                    </div>
+                    <div class="card summary-metric-box">
+                        <span class="sum-icon icon-indigo"><i class="fa-solid fa-temperature-half"></i></span>
+                        <div>
+                            <span class="sum-label">Avg Temperature</span>
+                            <span class="sum-value" id="sumAvgTemp">-- °C</span>
+                        </div>
+                    </div>
+                    <div class="card summary-metric-box">
+                        <span class="sum-icon icon-cyan"><i class="fa-solid fa-droplet"></i></span>
+                        <div>
+                            <span class="sum-label">Avg Humidity</span>
+                            <span class="sum-value" id="sumAvgHum">-- %</span>
+                        </div>
+                    </div>
+                    <div class="card summary-metric-box">
+                        <span class="sum-icon icon-emerald"><i class="fa-solid fa-wind"></i></span>
+                        <div>
+                            <span class="sum-label">Avg Gas Value</span>
+                            <span class="sum-value" id="sumAvgCo2">-- ADC</span>
+                        </div>
+                    </div>
+                    <div class="card summary-metric-box">
+                        <span class="sum-icon icon-primary"><i class="fa-solid fa-list-check"></i></span>
+                        <div>
+                            <span class="sum-label">Logged Records</span>
+                            <span class="sum-value" id="logRecordCount">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card log-table-card">
+                    <div class="table-toolbar">
+                        <div class="table-info">
+                            <i class="fa-solid fa-table-list icon-primary"></i>
+                            <h4>Telemetry Log Entries for <span id="currentViewedDate" class="highlight-date">--</span></h4>
+                        </div>
+                        <div class="table-search-box">
+                            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                            <input type="text" id="logSearchInput" placeholder="Filter by time, state, temp..."
+                                oninput="filterLogTable()">
+                        </div>
+                    </div>
+
+                    <div class="table-responsive-wrapper">
+                        <table class="modern-data-table">
+                            <thead>
+                                <tr>
+                                    <th><i class="fa-regular fa-clock"></i> Timestamp</th>
+                                    <th><i class="fa-solid fa-temperature-half"></i> Temp 1</th>
+                                    <th><i class="fa-solid fa-temperature-half"></i> Temp 2</th>
+                                    <th><i class="fa-solid fa-chart-simple"></i> Avg Temp</th>
+                                    <th><i class="fa-solid fa-droplet"></i> Avg Hum</th>
+                                    <th><i class="fa-solid fa-wind"></i> Gas Value</th>
+                                    <th><i class="fa-solid fa-fire"></i> Warmer (Pin 14)</th>
+                                    <th><i class="fa-solid fa-wind"></i> Cooler (Pin 23)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="logTableBody">
+                                <tr>
+                                    <td colspan="8" class="text-center empty-state">
+                                        <i class="fa-solid fa-spinner fa-spin"></i> Loading telemetry logs from data_logs folder...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- ------------------------------ -->
+            <!-- ------- TAB 3: Wireless & 4-Temp Configuration ----------- -->
+            <!-- ------------------------------ -->
+            <section id="tab-config" class="tab-view">
+                <div class="config-grid-layout">
+
+                    <div class="card config-section-card">
+                        <div class="config-card-header">
+                            <div class="header-icon-box icon-primary">
+                                <i class="fa-solid fa-network-wired"></i>
+                            </div>
+                            <div>
+                                <h3>Target ESP32 IP Configuration</h3>
+                                <p class="config-lead">Set the network IP address assigned to your ESP32 module by your WiFi or Mobile Hotspot.</p>
+                            </div>
+                        </div>
+
+                        <div class="form-container">
+                            <div class="form-group">
+                                <label for="inputEspIp"><i class="fa-solid fa-satellite-dish"></i> ESP32 Local IP Address:</label>
+                                <div class="input-with-button">
+                                    <input type="text" id="inputEspIp"
+                                        placeholder="e.g. 192.168.43.150 (Check OLED Display)">
+                                    <button class="btn btn-primary" onclick="setEspIp()">
+                                        <i class="fa-solid fa-link"></i> Connect & Update IP
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="form-notification" id="ipFeedback"></div>
+                        </div>
+                    </div>
+
+                    <div class="card config-section-card">
+                        <div class="config-card-header">
+                            <div class="header-icon-box icon-amber">
+                                <i class="fa-solid fa-sliders"></i>
+                            </div>
+                            <div>
+                                <h3>4-Temperature Climate Control Limits</h3>
+                                <p class="config-lead">Independent heating and cooling hysteresis setpoints stored in ESP32 EEPROM.</p>
+                            </div>
+                            <button class="btn btn-secondary btn-sm" onclick="syncCurrentConfigFromEsp()"
+                                title="Pull Active Values from ESP32" style="margin-left: auto;">
+                                <i class="fa-solid fa-arrows-rotate"></i> Sync from ESP32
+                            </button>
+                        </div>
+
+                        <div class="active-config-chips-row">
+                            <div class="active-chip">
+                                <span class="active-chip-lbl"><i class="fa-solid fa-circle-nodes text-primary"></i> Control Sensor:</span>
+                                <span class="active-chip-val" id="cfgActiveCtrlSource">Average (DHT1 + DHT2)</span>
+                            </div>
+                            <div class="active-chip">
+                                <span class="active-chip-lbl"><i class="fa-solid fa-fire text-amber"></i> Warmer ON:</span>
+                                <span class="active-chip-val" id="cfgActiveBulbOn">--</span>
+                            </div>
+                            <div class="active-chip">
+                                <span class="active-chip-lbl"><i class="fa-solid fa-power-off text-slate"></i> Warmer OFF:</span>
+                                <span class="active-chip-val" id="cfgActiveBulbOff">--</span>
+                            </div>
+                            <div class="active-chip">
+                                <span class="active-chip-lbl"><i class="fa-solid fa-wind text-cyan"></i> Cooler ON:</span>
+                                <span class="active-chip-val" id="cfgActiveFanOn">--</span>
+                            </div>
+                            <div class="active-chip">
+                                <span class="active-chip-lbl"><i class="fa-solid fa-power-off text-slate"></i> Cooler OFF:</span>
+                                <span class="active-chip-val" id="cfgActiveFanOff">--</span>
+                            </div>
+                        </div>
+
+                        <div class="form-container mt-3">
+                            <div class="threshold-group-header">
+                                <i class="fa-solid fa-circle-nodes text-primary"></i>
+                                <h4>Climate Control Sensor Source</h4>
+                            </div>
+                            <div class="form-group mb-4">
+                                <label for="selectCtrlSource"><i class="fa-solid fa-sliders"></i> Control Warmer & Cooler Based On:</label>
+                                <select id="selectCtrlSource" class="form-control form-select-styled">
+                                    <option value="0">Average Temperature (DHT11 #1 + DHT11 #2) / 2</option>
+                                    <option value="1">DHT11 Sensor #1 Only (Pin 32)</option>
+                                    <option value="2">DHT11 Sensor #2 Only (Pin 33)</option>
+                                </select>
+                                <span class="field-hint">Relay climate thresholds will be evaluated against the chosen sensor source.</span>
+                            </div>
+
+                            <div class="threshold-group-header">
+                                <i class="fa-solid fa-fire text-amber"></i>
+                                <h4>Warmer Setpoints (Relay GPIO 14)</h4>
+                            </div>
+                            <div class="form-dual-row">
+                                <div class="form-group">
+                                    <label for="inputBulbOn"><i class="fa-solid fa-arrow-down-long"></i> Warmer Turn-ON Temp (°C):</label>
+                                    <input type="number" step="0.5" id="inputBulbOn" placeholder="e.g. 33.0">
+                                    <span class="field-hint">Turns ON when Temp &lt; this setpoint</span>
+                                </div>
+                                <div class="form-group">
+                                    <label for="inputBulbOff"><i class="fa-solid fa-arrow-up-long"></i> Warmer Turn-OFF Temp (°C):</label>
+                                    <input type="number" step="0.5" id="inputBulbOff" placeholder="e.g. 35.0">
+                                    <span class="field-hint">Turns OFF when Temp &gt; this setpoint</span>
+                                </div>
+                            </div>
+
+                            <div class="threshold-group-header mt-4">
+                                <i class="fa-solid fa-wind text-cyan"></i>
+                                <h4>Cooler Setpoints (Relay GPIO 23)</h4>
+                            </div>
+                            <div class="form-dual-row">
+                                <div class="form-group">
+                                    <label for="inputFanOn"><i class="fa-solid fa-arrow-up-long"></i> Cooler Turn-ON Temp (°C):</label>
+                                    <input type="number" step="0.5" id="inputFanOn" placeholder="e.g. 37.0">
+                                    <span class="field-hint">Turns ON when Temp &gt; this setpoint</span>
+                                </div>
+                                <div class="form-group">
+                                    <label for="inputFanOff"><i class="fa-solid fa-arrow-down-long"></i> Cooler Turn-OFF Temp (°C):</label>
+                                    <input type="number" step="0.5" id="inputFanOff" placeholder="e.g. 35.0">
+                                    <span class="field-hint">Turns OFF when Temp &lt; this setpoint</span>
+                                </div>
+                            </div>
+
+                            <button class="btn btn-success btn-lg mt-3" onclick="updateThresholds()">
+                                <i class="fa-solid fa-floppy-disk"></i> Save Settings & Sensor Source to ESP32 EEPROM
+                            </button>
+                            <div class="form-notification" id="threshFeedback"></div>
+                        </div>
+                    </div>
+
+                    <div class="card config-section-card">
+                        <div class="config-card-header">
+                            <div class="header-icon-box icon-cyan">
+                                <i class="fa-solid fa-wifi"></i>
+                            </div>
+                            <div>
+                                <h3>Hotspot & WiFi Station Credentials</h3>
+                                <p class="config-lead">Update the SSID and Password that ESP32 connects to (Default: "Project" / "1234567890").</p>
+                            </div>
+                        </div>
+
+                        <div class="form-container">
+                            <div class="form-dual-row">
+                                <div class="form-group">
+                                    <label for="inputSsid"><i class="fa-solid fa-signal"></i> Hotspot SSID:</label>
+                                    <input type="text" id="inputSsid" placeholder="e.g. Project" value="Project">
+                                </div>
+                                <div class="form-group">
+                                    <label for="inputPass"><i class="fa-solid fa-key"></i> Hotspot Password:</label>
+                                    <input type="password" id="inputPass" placeholder="e.g. 1234567890"
+                                        value="1234567890">
+                                </div>
+                            </div>
+                            <button class="btn btn-warning btn-lg mt-3" onclick="updateWiFi()">
+                                <i class="fa-solid fa-arrow-rotate-right"></i> Save WiFi to EEPROM & Reconnect ESP32
+                            </button>
+                            <div class="form-notification" id="wifiFeedback"></div>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+        </main>
+
+    </div>
+
+    <!-- ------------------------------ -->
+    <!-- ------- JavaScript Controller ----------- -->
+    <!-- ------------------------------ -->
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+
+</html>
