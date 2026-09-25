@@ -31,6 +31,7 @@ import { refreshSummary, resetSummary, useSummary } from '../lib/store'
 import { LanguageToggle } from '../i18n'
 import NotificationBell from '../components/NotificationBell'
 import QuickSearch from '../components/QuickSearch'
+import RegistrationDetails from '../components/registration/RegistrationDetails'
 
 // A registration does not activate the account. Until the regional officer
 // approves the organisation, the keeper only sees this status screen.
@@ -81,7 +82,7 @@ const menuSections = [
     title: 'TRACEABILITY',
     items: [
       { name: 'Traceability', path: '/traceability', icon: Link2 },
-      { name: 'QR Management', path: '/qr-management', icon: QrCode },
+      { name: 'QR Management', path: '/qr-management', icon: QrCode, retailOnly: true },
     ],
   },
   {
@@ -124,8 +125,18 @@ const menuSections = [
 // The menu keeps its scroll position when you move between pages.
 let menuScroll = 0
 
+// Pages cache their own data (apictech_cached_*) so the app still has something to show with no signal.
+// It is not scoped per account, so it must not survive a log-out, or the next login on this device could
+// briefly see the previous keeper's cached hives, harvests, etc.
+function clearCachedData() {
+  for (const key of Object.keys(localStorage)) {
+    if (key.startsWith('apictech_cached_')) localStorage.removeItem(key)
+  }
+}
+
 export default function MainLayout({ children, title }) {
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [showRegistration, setShowRegistration] = useState(false)
   const menuRef = useRef(null)
   const navigate = useNavigate()
   const user = readUser()
@@ -140,13 +151,14 @@ export default function MainLayout({ children, title }) {
   const logout = () => {
     localStorage.removeItem('apictech_token')
     localStorage.removeItem('apictech_user')
+    clearCachedData()
     resetSummary()
     navigate('/login')
   }
 
   useEffect(() => {
     if (!localStorage.getItem('apictech_token') || (user.role && user.role !== 'BEEKEEPER')) {
-      navigate('/login', { replace: true })
+      navigate(localStorage.getItem('apictech_token') && user.role === 'WHOLESALER' ? '/trade' : '/login', { replace: true })
     }
   }, [navigate, user.role])
 
@@ -167,7 +179,7 @@ export default function MainLayout({ children, title }) {
 
   if (gate) {
     return (
-      <div className="app-shell flex min-h-screen items-center justify-center p-6 text-[#122c31]">
+      <div className="app-shell flex min-h-screen flex-col items-center justify-center gap-6 p-6 text-[#122c31]">
         <div className="fixed right-5 top-5 z-50"><LanguageToggle /></div>
         <div className="w-full max-w-lg rounded-3xl border border-[#c6e2e0] bg-white p-8 text-center shadow-[0_20px_60px_rgba(21,49,55,0.08)]">
           <img src="/apictech-logo.png" alt="Honey Chain" className="mx-auto h-20 w-20 rounded-full" />
@@ -203,11 +215,22 @@ export default function MainLayout({ children, title }) {
                 Withdraw request
               </button>
             )}
+            {['PENDING_APPROVAL', 'REJECTED'].includes(organization.status) && (
+              <button onClick={() => setShowRegistration(!showRegistration)} className="rounded-xl bg-[#0F766E] px-5 py-2.5 text-sm font-bold text-white">
+                {showRegistration ? 'Hide my application' : 'My application & documents'}
+              </button>
+            )}
             <button onClick={logout} className="rounded-xl border border-gray-200 px-5 py-2.5 text-sm font-bold hover:bg-gray-50">
               Sign Out
             </button>
           </div>
         </div>
+        {/* While waiting, the applicant can still correct details and add a missing document. */}
+        {showRegistration && (
+          <div className="w-full max-w-4xl rounded-3xl border border-[#c6e2e0] bg-white p-6 text-left">
+            <RegistrationDetails />
+          </div>
+        )}
       </div>
     )
   }
@@ -236,7 +259,7 @@ export default function MainLayout({ children, title }) {
               <div key={section.title}>
                 <p className="hc-navlabel">{section.title}</p>
 
-                {section.items.map((item) => {
+                {section.items.filter((item) => !item.retailOnly || organization?.sellingMode !== 'WHOLESALE').map((item) => {
                   const Icon = item.icon
 
                   return (

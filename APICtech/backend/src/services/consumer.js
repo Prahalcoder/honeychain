@@ -2,6 +2,7 @@ import db from '../database/database.js'
 import { validateBlockchain } from './blockchain.js'
 import { parseJson } from './batches.js'
 import { verifySignature } from './signing.js'
+import { scanSummary } from './qrGuard.js'
 
 // Public consumer verification record. It exposes only what a shopper needs to
 // trust a jar: product, producer, verified lab result, officer approval,
@@ -22,6 +23,7 @@ const EVENT_LABELS = {
   SHIPMENT_DELIVERED: 'Delivery to the buyer confirmed',
   DIRECT_SALE_RECORDED: 'Sold directly to a consumer',
   DIRECT_SALE_REVERSED: 'Direct sale reversed, jars returned',
+  PACK_FLAGGED_CLONED: 'KVIC confirmed this QR code was copied onto fake jars',
 }
 
 const PARTY_LABELS = { APICTECH: 'Keeper', WHOLESALER: 'Distributor / wholesaler', RETAILER: 'Retailer' }
@@ -114,10 +116,14 @@ async function buildRecord(pack, batchLevel) {
   `).all(pack.batch_code, pack.pack_batch_code, batchLevel ? 1 : 0, pack.batch_id, pack.pack_id))
     .filter((event) => batchLevel || !(event.event_type === 'CUSTODY_TRANSFER' && event.payload_json && JSON.parse(event.payload_json).metadata?.sale === 'LOOSE'))
 
+  // A hand-over the wholesaler recorded (and the keeper confirmed by OTP) says so, for the record.
+  const byWholesaler = (json) => { try { return JSON.parse(json || '{}').metadata?.initiatedBy === 'WHOLESALER' } catch { return false } }
   const timeline = events.map((event) => ({
     id: event.id,
     type: event.event_type,
-    label: EVENT_LABELS[event.event_type] || event.event_type,
+    label: event.event_type === 'CUSTODY_TRANSFER' && byWholesaler(event.payload_json)
+      ? 'Received by the wholesaler (recorded by the wholesaler, confirmed by the keeper with an OTP)'
+      : EVENT_LABELS[event.event_type] || event.event_type,
     at: event.created_at,
     blockHeight: event.block_height,
     hash: event.current_hash,
@@ -125,7 +131,7 @@ async function buildRecord(pack, batchLevel) {
   }))
 
   const custody = await db.prepare(`
-    SELECT from_party_type, from_party_id, to_party_type, to_party_id, quantity_kg, created_at
+    SELECT from_party_type, from_party_id, to_party_type, to_party_id, quantity_kg, created_at, metadata_json
     FROM custody_events WHERE batch_id = ? AND (? = 1 OR COALESCE(metadata_json::json->>'sale', '') != 'LOOSE') ORDER BY id ASC
   `).all(pack.batch_id, batchLevel ? 1 : 0)
 
@@ -137,6 +143,7 @@ async function buildRecord(pack, batchLevel) {
       name: move.to_party_id,
       quantityKg: move.quantity_kg,
       at: move.created_at,
+      ...(byWholesaler(`{"metadata":${move.metadata_json || '{}'}}`) ? { note: 'Recorded by the wholesaler, confirmed by the keeper with an OTP' } : {}),
     })),
     { stage: 'CONSUMER', label: 'Consumer', name: 'You scanned this jar', at: null },
   ]
@@ -144,10 +151,15 @@ async function buildRecord(pack, batchLevel) {
   // A producer that was formally closed stays verifiable: honey packed while it
   // was registered is still authentic. Suspended or rejected producers are not.
   const producerOk = !producer || ['APPROVED', 'CLOSURE_PENDING', 'CLOSED'].includes(producer.status)
+  // How often, where and by how many phones this jar's code has been scanned (services/qrGuard.js).
+  const scans = !batchLevel && pack.pack_id ? await scanSummary(pack.pack_id) : null
   let authenticity = 'VALID'
   let reason = 'Laboratory-verified, officer-approved and recorded on the Honey Chain blockchain.'
 
-  if (!ledger.valid || pack.status !== 'ACTIVE' || !producerOk) {
+  if (ledger.valid && pack.status === 'CLONED') {
+    authenticity = 'COPY_CONFIRMED'
+    reason = 'KVIC has confirmed that this QR code was copied onto fake jars. Do not trust this jar: return it to the seller and report it.'
+  } else if (!ledger.valid || pack.status !== 'ACTIVE' || !producerOk) {
     authenticity = 'UNDER_REVIEW'
     reason = !ledger.valid
       ? 'The blockchain integrity check did not pass. Do not rely on this record.'
@@ -159,6 +171,9 @@ async function buildRecord(pack, batchLevel) {
     reason = review
       ? 'The officer signature on the laboratory certificate could not be verified.'
       : 'This jar has no KVIC-verified laboratory certificate on record.'
+  } else if (scans?.alerts.length) {
+    authenticity = 'SUSPECTED_COPY'
+    reason = 'The honey behind this code is genuine, but this QR code has been scanned in a way one real jar would not be. It may have been copied onto a fake jar. Check the seal and buy from the registered seller.'
   }
 
   return {
@@ -203,6 +218,7 @@ async function buildRecord(pack, batchLevel) {
     },
     timeline,
     supplyChain,
+    scans,
     ledger: {
       valid: ledger.valid,
       blocks: ledger.blocks ?? null,

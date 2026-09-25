@@ -1,0 +1,148 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif">
+<defs>
+<marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#0f766e"/></marker>
+<marker id="ahc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#f97360"/></marker>
+<pattern id="dots" width="28" height="28" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.4" fill="#d9e9e6"/></pattern>
+<filter id="sh" x="-5%" y="-5%" width="110%" height="120%"><feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#0a3d43" flood-opacity="0.12"/></filter>
+</defs>
+<rect width="1920" height="1080" fill="#f7fbfa"/><rect width="1920" height="1080" fill="url(#dots)"/>
+<rect x="0" y="0" width="1920" height="104" fill="#0a3d43"/>
+<rect x="0" y="100" width="1920" height="6" fill="#f5a524"/>
+<polygon points="90.0,37.0 90.0,67.0 64.0,82.0 38.0,67.0 38.0,37.0 64.0,22.0" fill="#f5a524"/>
+<polygon points="77.0,44.5 77.0,59.5 64.0,67.0 51.0,59.5 51.0,44.5 64.0,37.0" fill="#0a3d43"/>
+<text x="112" y="60" font-size="40" font-weight="700" fill="#ffffff" text-anchor="start" >Technology Stack</text>
+<text x="112" y="88" font-size="20" font-weight="400" fill="#b9dcd8" text-anchor="start" >Everything runs on one laptop with one command: npm start (no paid cloud needed)</text>
+<text x="1864" y="62" font-size="28" font-weight="700" fill="#f5a524" text-anchor="end" >Honey Chain</text>
+<text x="1864" y="88" font-size="17" font-weight="400" fill="#b9dcd8" text-anchor="end" >SIH 2026 · Problem 26021 · KVIC / MSME</text>
+<rect x="25" y="140" width="350" height="640" rx="16" fill="#fff" stroke="#0f766e" stroke-width="2.5" filter="url(#sh)"/>
+<rect x="25" y="140" width="350" height="58" rx="16" fill="#0f766e"/><rect x="25" y="170" width="350" height="28" fill="#0f766e"/>
+<text x="200.0" y="179" font-size="27" font-weight="700" fill="#fff" text-anchor="middle" >Frontend</text>
+<rect x="43" y="209" width="314" height="50" rx="12" fill="#0f766e18" stroke="#0f766e55"/>
+<text x="200.0" y="241" font-size="19" font-weight="600" fill="#1f3b3f" text-anchor="middle" >React 19</text>
+<rect x="43" y="270" width="314" height="50" rx="12" fill="#0f766e18" stroke="#0f766e55"/>
+<text x="200.0" y="302" font-size="19" font-weight="600" fill="#1f3b3f" text-anchor="middle" >Vite 8</text>
+<rect x="43" y="331" width="314" height="50" rx="12" fill="#0f766e18" stroke="#0f766e55"/>
+<text x="200.0" y="363" font-size="19" font-weight="600" fill="#1f3b3f" text-anchor="middle" >Tailwind CSS 4</text>
+<rect x="43" y="392" width="314" height="50" rx="12" fill="#0f766e18" stroke="#0f766e55"/>
+<text x="200.0" y="424" font-size="19" font-weight="600" fill="#1f3b3f" text-anchor="middle" >React Router 7</text>
+<rect x="43" y="453" width="314" height="50" rx="12" fill="#0f766e18" stroke="#0f766e55"/>
+<text x="200.0" y="485" font-size="19" font-weight="600" fill="#1f3b3f" text-anchor="middle" >Recharts</text>
+<rect x="43" y="514" width="314" height="50" rx="12" fill="#0f766e18" stroke="#0f766e55"/>
+<text x="200.0" y="546" font-size="19" font-weight="600" fill="#1f3b3f" text-anchor="middle" >lucide-react icons</text>
+<rect x="43" y="575" width="314" height="50" rx="12" fill="#0f766e18" stroke="#0f766e55"/>
+<text x="200.0" y="607" font-size="19" font-weight="600" fill="#1f3b3f" text-anchor="middle" >qrcode (UPI + jar QR)</text>
+<rect x="43" y="636" width="314" height="50" rx="12" fill="#0f766e18" stroke="#0f766e55"/>
+<text x="200.0" y="668" font-size="19" font-weight="600" fill="#1f3b3f" text-anchor="middle" >Fraunces + Source Sans 3 fonts</text>
+<rect x="43" y="697" width="314" height="50" rx="12" fill="#0f766e18" stroke="#0f766e55"/>
+<text x="200.0" y="729" font-size="19" font-weight="600" fill="#1f3b3f" text-anchor="middle" >English + Hindi</text>
+<rect x="405" y="140" width="350" height="640" rx="16" fill="#fff" stroke="#f5a524" stroke-width="2.5" filter="url(#sh)"/>
+<rect x="405" y="140" width="350" height="58" rx="16" fill="#f5a524"/><rect x="405" y="170" width="350" height="28" fill="#f5a524"/>
+<text x="580.0" y="179" font-size="27" font-weight="700" fill="#0a3d43" text-anchor="middle" >Backend API</text>
+<rect x="423" y="209" width="314" height="50" rx="12" fill="#f5a52418" stroke="#f5a52455"/>
+<text x="580.0" y="241" font-size="19" font-weight="600" fill="#1f3b3f" text-anchor="middle" >Node.js 20+ (ES modules)</text>
+<rect x="423" y="270" width="314" height="50" rx="12" fill="#f5a52418" stroke="#f5a52455"/>
+<text x="580.0" y="302" font-size="19" font-weight="600" fill="#1f3b3f" text-anchor="middle" >Express 5</text>
+<rect x="423" y="331" width="314" height="50" rx="12" fill="#f5a52418" stroke="#f5a52455"/>
+<text x="580.0" y="363" font-size="19" font-weight="600" fill="#1f3b3f" text-anchor="middle" >jsonwebtoken (JWT)</text>
+<rect x="423" y="392" width="314" height="50" rx="12" fill="#f5a52418" stroke="#f5a52455"/>
+<text x="580.0" y="424" font-size="19" font-weight="600" fill="#1f3b3f" text-anchor="middle" >bcryptjs</text>
+<rect x="423" y="453" width="314" height="50" rx="12" fill="#f5a52418" stroke="#f5a52455"/>
+<text x="580.0" y="485" font-size="19" font-weight="600" fill="#1f3b3f" text-anchor="middle" >Helmet + CORS</text>
+<rect x="423" y="514" width="314" height="50" rx="12" fill="#f5a52418" stroke="#f5a52455"/>
+<text x="580.0" y="546" font-size="19" font-weight="600" fill="#1f3b3f" text-anchor="middle" >express-rate-limit</text>
+<rect x="423" y="575" width="314" height="50" rx="12" fill="#f5a52418" stroke="#f5a52455"/>
+<text x="580.0" y="607" font-size="19" font-weight="600" fill="#1f3b3f" text-anchor="middle" >dotenv</text>
+<rect x="423" y="636" width="314" height="50" rx="12" fill="#f5a52418" stroke="#f5a52455"/>
+<text x="580.0" y="668" font-size="19" font-weight="600" fill="#1f3b3f" text-anchor="middle" >node:crypto (SHA-256, AES)</text>
+<rect x="423" y="697" width="314" height="50" rx="12" fill="#f5a52418" stroke="#f5a52455"/>
+<text x="580.0" y="729" font-size="19" font-weight="600" fill="#1f3b3f" text-anchor="middle" >multiformats (IPFS CIDs)</text>
+<rect x="785" y="140" width="350" height="640" rx="16" fill="#fff" stroke="#6d5bd0" stroke-width="2.5" filter="url(#sh)"/>
+<rect x="785" y="140" width="350" height="58" rx="16" fill="#6d5bd0"/><rect x="785" y="170" width="350" height="28" fill="#6d5bd0"/>
+<text x="960.0" y="179" font-size="27" font-weight="700" fill="#fff" text-anchor="middle" >Database</text>
+<rect x="803" y="209" width="314" height="50" rx="12" fill="#6d5bd018" stroke="#6d5bd055"/>
+<text x="960.0" y="241" font-size="19" font-weight="600" fill="#1f3b3f" text-anchor="middle" >PostgreSQL 18</text>
+<rect x="803" y="270" width="314" height="50" rx="12" fill="#6d5bd018" stroke="#6d5bd055"/>
+<text x="960.0" y="302" font-size="19" font-weight="600" fill="#1f3b3f" text-anchor="middle" >pg driver, async pooling</text>
+<rect x="803" y="331" width="314" height="50" rx="12" fill="#6d5bd018" stroke="#6d5bd055"/>
+<text x="960.0" y="363" font-size="19" font-weight="600" fill="#1f3b3f" text-anchor="middle" >Schema per company (privacy)</text>
+<rect x="803" y="392" width="314" height="50" rx="12" fill="#6d5bd018" stroke="#6d5bd055"/>
+<text x="960.0" y="424" font-size="19" font-weight="600" fill="#1f3b3f" text-anchor="middle" >Row-level security</text>
+<rect x="803" y="453" width="314" height="50" rx="12" fill="#6d5bd018" stroke="#6d5bd055"/>
+<text x="960.0" y="485" font-size="19" font-weight="600" fill="#1f3b3f" text-anchor="middle" >Advisory locks</text>
+<rect x="803" y="514" width="314" height="50" rx="12" fill="#6d5bd018" stroke="#6d5bd055"/>
+<text x="960.0" y="546" font-size="19" font-weight="600" fill="#1f3b3f" text-anchor="middle" >Immutable ledger triggers</text>
+<rect x="803" y="575" width="314" height="50" rx="12" fill="#6d5bd018" stroke="#6d5bd055"/>
+<text x="960.0" y="607" font-size="19" font-weight="600" fill="#1f3b3f" text-anchor="middle" >PGlite (embedded, for tests)</text>
+<rect x="803" y="636" width="314" height="50" rx="12" fill="#6d5bd018" stroke="#6d5bd055"/>
+<text x="960.0" y="668" font-size="19" font-weight="600" fill="#1f3b3f" text-anchor="middle" >Automated backups</text>
+<rect x="803" y="697" width="314" height="50" rx="12" fill="#6d5bd018" stroke="#6d5bd055"/>
+<text x="960.0" y="729" font-size="19" font-weight="600" fill="#1f3b3f" text-anchor="middle" >JSON ledger payloads</text>
+<rect x="1165" y="140" width="350" height="640" rx="16" fill="#fff" stroke="#2563eb" stroke-width="2.5" filter="url(#sh)"/>
+<rect x="1165" y="140" width="350" height="58" rx="16" fill="#2563eb"/><rect x="1165" y="170" width="350" height="28" fill="#2563eb"/>
+<text x="1340.0" y="179" font-size="27" font-weight="700" fill="#fff" text-anchor="middle" >Blockchain</text>
+<rect x="1183" y="209" width="314" height="50" rx="12" fill="#2563eb18" stroke="#2563eb55"/>
+<text x="1340.0" y="241" font-size="19" font-weight="600" fill="#1f3b3f" text-anchor="middle" >Solidity 0.8.24 contract</text>
+<rect x="1183" y="270" width="314" height="50" rx="12" fill="#2563eb18" stroke="#2563eb55"/>
+<text x="1340.0" y="302" font-size="19" font-weight="600" fill="#1f3b3f" text-anchor="middle" >Hardhat local EVM</text>
+<rect x="1183" y="331" width="314" height="50" rx="12" fill="#2563eb18" stroke="#2563eb55"/>
+<text x="1340.0" y="363" font-size="19" font-weight="600" fill="#1f3b3f" text-anchor="middle" >ethers v6</text>
+<rect x="1183" y="392" width="314" height="50" rx="12" fill="#2563eb18" stroke="#2563eb55"/>
+<text x="1340.0" y="424" font-size="19" font-weight="600" fill="#1f3b3f" text-anchor="middle" >EIP-712 typed signatures</text>
+<rect x="1183" y="453" width="314" height="50" rx="12" fill="#2563eb18" stroke="#2563eb55"/>
+<text x="1340.0" y="485" font-size="19" font-weight="600" fill="#1f3b3f" text-anchor="middle" >Merkle proofs for jars</text>
+<rect x="1183" y="514" width="314" height="50" rx="12" fill="#2563eb18" stroke="#2563eb55"/>
+<text x="1340.0" y="546" font-size="19" font-weight="600" fill="#1f3b3f" text-anchor="middle" >Custodial wallets (AES)</text>
+<rect x="1183" y="575" width="314" height="50" rx="12" fill="#2563eb18" stroke="#2563eb55"/>
+<text x="1340.0" y="607" font-size="19" font-weight="600" fill="#1f3b3f" text-anchor="middle" >Outbox + relayer pattern</text>
+<rect x="1183" y="636" width="314" height="50" rx="12" fill="#2563eb18" stroke="#2563eb55"/>
+<text x="1340.0" y="668" font-size="19" font-weight="600" fill="#1f3b3f" text-anchor="middle" >Polygon Amoy (optional)</text>
+<rect x="1183" y="697" width="314" height="50" rx="12" fill="#2563eb18" stroke="#2563eb55"/>
+<text x="1340.0" y="729" font-size="19" font-weight="600" fill="#1f3b3f" text-anchor="middle" >IPFS CIDv1 documents</text>
+<rect x="1545" y="140" width="350" height="640" rx="16" fill="#fff" stroke="#f97360" stroke-width="2.5" filter="url(#sh)"/>
+<rect x="1545" y="140" width="350" height="58" rx="16" fill="#f97360"/><rect x="1545" y="170" width="350" height="28" fill="#f97360"/>
+<text x="1720.0" y="179" font-size="27" font-weight="700" fill="#fff" text-anchor="middle" >IoT and AI</text>
+<rect x="1563" y="209" width="314" height="50" rx="12" fill="#f9736018" stroke="#f9736055"/>
+<text x="1720.0" y="241" font-size="19" font-weight="600" fill="#1f3b3f" text-anchor="middle" >ESP32 (Arduino C++)</text>
+<rect x="1563" y="270" width="314" height="50" rx="12" fill="#f9736018" stroke="#f9736055"/>
+<text x="1720.0" y="302" font-size="19" font-weight="600" fill="#1f3b3f" text-anchor="middle" >DHT11 ×2, MQ gas sensor</text>
+<rect x="1563" y="331" width="314" height="50" rx="12" fill="#f9736018" stroke="#f9736055"/>
+<text x="1720.0" y="363" font-size="19" font-weight="600" fill="#1f3b3f" text-anchor="middle" >SSD1306 OLED</text>
+<rect x="1563" y="392" width="314" height="50" rx="12" fill="#f9736018" stroke="#f9736055"/>
+<text x="1720.0" y="424" font-size="19" font-weight="600" fill="#1f3b3f" text-anchor="middle" >Relays: fan, heater</text>
+<rect x="1563" y="453" width="314" height="50" rx="12" fill="#f9736018" stroke="#f9736055"/>
+<text x="1720.0" y="485" font-size="19" font-weight="600" fill="#1f3b3f" text-anchor="middle" >Python 3 + Flask</text>
+<rect x="1563" y="514" width="314" height="50" rx="12" fill="#f9736018" stroke="#f9736055"/>
+<text x="1720.0" y="546" font-size="19" font-weight="600" fill="#1f3b3f" text-anchor="middle" >OpenCV camera</text>
+<rect x="1563" y="575" width="314" height="50" rx="12" fill="#f9736018" stroke="#f9736055"/>
+<text x="1720.0" y="607" font-size="19" font-weight="600" fill="#1f3b3f" text-anchor="middle" >SQLite hive log</text>
+<rect x="1563" y="636" width="314" height="50" rx="12" fill="#f9736018" stroke="#f9736055"/>
+<text x="1720.0" y="668" font-size="19" font-weight="600" fill="#1f3b3f" text-anchor="middle" >Rule-based engines</text>
+<rect x="1563" y="697" width="314" height="50" rx="12" fill="#f9736018" stroke="#f9736055"/>
+<text x="1720.0" y="729" font-size="19" font-weight="600" fill="#1f3b3f" text-anchor="middle" >Wi-Fi HTTP JSON</text>
+<rect x="25" y="810" width="1870" height="236" rx="16" fill="#fff" stroke="#b7d3cf" stroke-width="2" filter="url(#sh)"/>
+<text x="49" y="848" font-size="23" font-weight="700" fill="#0a3d43" text-anchor="start" >Security and quality built in</text>
+<rect x="49.0" y="866" width="288.6666666666667" height="156" rx="12" fill="#e6f4f1" stroke="none" stroke-width="1.5"/>
+<text x="63.0" y="896" font-size="19" font-weight="700" fill="#0f766e" text-anchor="start" >Access</text>
+<text x="63.0" y="926" font-size="15" font-weight="400" fill="#1f3b3f" text-anchor="start" >Roles and jurisdiction scope</text>
+<text x="63.0" y="951" font-size="15" font-weight="400" fill="#1f3b3f" text-anchor="start" >JWT ends on password change</text>
+<rect x="355.6666666666667" y="866" width="288.6666666666667" height="156" rx="12" fill="#e6f4f1" stroke="none" stroke-width="1.5"/>
+<text x="369.6666666666667" y="896" font-size="19" font-weight="700" fill="#0f766e" text-anchor="start" >Abuse limits</text>
+<text x="369.6666666666667" y="926" font-size="15" font-weight="400" fill="#1f3b3f" text-anchor="start" >Login, register, verify, order</text>
+<text x="369.6666666666667" y="951" font-size="15" font-weight="400" fill="#1f3b3f" text-anchor="start" >rate limits; account lock-out</text>
+<rect x="662.3333333333334" y="866" width="288.6666666666667" height="156" rx="12" fill="#e6f4f1" stroke="none" stroke-width="1.5"/>
+<text x="676.3333333333334" y="896" font-size="19" font-weight="700" fill="#0f766e" text-anchor="start" >Integrity</text>
+<text x="676.3333333333334" y="926" font-size="15" font-weight="400" fill="#1f3b3f" text-anchor="start" >Hash-chained ledger, immutable</text>
+<text x="676.3333333333334" y="951" font-size="15" font-weight="400" fill="#1f3b3f" text-anchor="start" >tables, chain anchoring</text>
+<rect x="969.0" y="866" width="288.6666666666667" height="156" rx="12" fill="#e6f4f1" stroke="none" stroke-width="1.5"/>
+<text x="983.0" y="896" font-size="19" font-weight="700" fill="#0f766e" text-anchor="start" >Privacy</text>
+<text x="983.0" y="926" font-size="15" font-weight="400" fill="#1f3b3f" text-anchor="start" >Buyer and finance data stay in</text>
+<text x="983.0" y="951" font-size="15" font-weight="400" fill="#1f3b3f" text-anchor="start" >each company&#x27;s own schema</text>
+<rect x="1275.6666666666667" y="866" width="288.6666666666667" height="156" rx="12" fill="#e6f4f1" stroke="none" stroke-width="1.5"/>
+<text x="1289.6666666666667" y="896" font-size="19" font-weight="700" fill="#0f766e" text-anchor="start" >Concurrency</text>
+<text x="1289.6666666666667" y="926" font-size="15" font-weight="400" fill="#1f3b3f" text-anchor="start" >Advisory locks, atomic stock,</text>
+<text x="1289.6666666666667" y="951" font-size="15" font-weight="400" fill="#1f3b3f" text-anchor="start" >race-tested honey capacity</text>
+<rect x="1582.3333333333335" y="866" width="288.6666666666667" height="156" rx="12" fill="#e6f4f1" stroke="none" stroke-width="1.5"/>
+<text x="1596.3333333333335" y="896" font-size="19" font-weight="700" fill="#0f766e" text-anchor="start" >Tooling</text>
+<text x="1596.3333333333335" y="926" font-size="15" font-weight="400" fill="#1f3b3f" text-anchor="start" >GitHub, DBeaver, Arduino IDE,</text>
+<text x="1596.3333333333335" y="951" font-size="15" font-weight="400" fill="#1f3b3f" text-anchor="start" >Node end-to-end test scripts</text>
+</svg>

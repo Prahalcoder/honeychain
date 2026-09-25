@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   Plus,
   Search,
@@ -9,19 +9,29 @@ import {
   CheckCircle2,
   MapPin,
   Eye,
+  WifiOff,
+  CloudUpload,
+  ShieldAlert,
 } from 'lucide-react'
 
 import MainLayout from '../layouts/MainLayout'
 import { apiRequest } from '../lib/api'
 import { formatDate, refreshSummary, useApi, useSummary } from '../lib/store'
+import { useOfflineHarvests } from '../lib/offlineHarvests'
 
-const honeyTypes = [
-  'Natural Honey',
-  'Forest Honey',
-  'Wildflower Honey',
-  'Floral Honey',
-  'Other',
-]
+// Used until the list for the keeper's state arrives from the API.
+const fallbackTypes = ['Natural Honey', 'Forest Honey', 'Wildflower Honey', 'Floral Honey', 'Other']
+
+// This page's own data, cached so a cold start of the app with no signal still has it: the hive list (otherwise
+// "Record Harvest" would wrongly look unavailable, "Add a hive first", instead of just being offline), the
+// harvest history (so past batches are still visible) and the honey types (so the form has real choices).
+const cache = (key, fallback) => ({
+  read: () => { try { return JSON.parse(localStorage.getItem(key)) ?? fallback } catch { return fallback } },
+  write: (value) => { try { localStorage.setItem(key, JSON.stringify(value)) } catch { /* storage full or blocked */ } },
+})
+const hivesCache = cache('apictech_cached_hives', [])
+const harvestsCache = cache('apictech_cached_harvests', [])
+const typesCache = cache('apictech_cached_honey_types', null)
 
 const today = () => new Date().toLocaleDateString('en-CA')
 // The harvest location starts as the farm name the keeper gave, and can be edited.
@@ -37,16 +47,25 @@ const emptyForm = (hive = '', location = '') => ({
 export default function Harvest() {
   const harvestData = useApi('/company/harvests')
   const hiveData = useApi('/company/hives')
+  const typeData = useApi('/company/honey-types')
+  const cachedTypes = typesCache.read()
+  const honeyTypes = typeData.data?.types || (typeData.error && cachedTypes?.types) || fallbackTypes
   const { summary } = useSummary()
   const [showModal, setShowModal] = useState(false)
+  const [confirming, setConfirming] = useState(false)
   const [selectedHarvest, setSelectedHarvest] = useState(null)
   const [search, setSearch] = useState('')
   const [submitError, setSubmitError] = useState('')
   const [isSaving, setIsSaving] = useState(false)
   const [form, setForm] = useState(emptyForm())
+  const offline = useOfflineHarvests(harvestData.reload)
 
-  const harvests = harvestData.data || []
-  const hives = hiveData.data || []
+  const harvests = harvestData.data || (harvestData.error ? harvestsCache.read() : [])
+  const hives = hiveData.data || (hiveData.error ? hivesCache.read() : [])
+
+  useEffect(() => { if (harvestData.data) harvestsCache.write(harvestData.data) }, [harvestData.data])
+  useEffect(() => { if (hiveData.data) hivesCache.write(hiveData.data) }, [hiveData.data])
+  useEffect(() => { if (typeData.data) typesCache.write(typeData.data) }, [typeData.data])
   const approved = summary?.organization?.status === 'APPROVED'
   const thisMonth = today().slice(0, 7)
 
@@ -81,41 +100,104 @@ export default function Harvest() {
 
   const openModal = () => {
     setSubmitError('')
-    setForm(emptyForm(hives[0]?.hive_code || '', summary?.farmName || ''))
+    setConfirming(false)
+    // The region's special honey is offered first, so it is the default choice.
+    setForm({ ...emptyForm(hives[0]?.hive_code || '', summary?.farmName || ''), honeyType: honeyTypes[0] })
     setShowModal(true)
   }
 
   const handleSubmit = async (event) => {
     event.preventDefault()
     setSubmitError('')
+
+    // Every harvest becomes a permanent record — sealed to the KVIC chain if online, locked on this device
+    // until it can upload if not — so a first "Record Harvest" always asks to confirm first, online or
+    // offline (see the panel below), before anything is actually saved.
+    if (!confirming) {
+      setConfirming(true)
+      return
+    }
+
     setIsSaving(true)
-
     try {
-      // The server assigns the batch ID and writes the batch to the KVIC chain.
-      const created = await apiRequest('/company/harvests', {
-        method: 'POST',
-        body: JSON.stringify({
-          hiveCode: form.hive,
-          harvestDate: form.date,
-          honeyType: form.honeyType,
-          quantityKg: Number(form.quantity),
-          location: form.location,
-          notes: form.notes,
-        }),
-      })
+      if (!offline.isOnline) {
+        offline.queue({
+          hiveCode: form.hive, harvestDate: form.date, honeyType: form.honeyType,
+          quantityKg: Number(form.quantity), location: form.location, notes: form.notes,
+        })
+        setShowModal(false)
+      } else {
+        try {
+          // The server assigns the batch ID and writes the batch to the KVIC chain.
+          const created = await apiRequest('/company/harvests', {
+            method: 'POST',
+            body: JSON.stringify({
+              hiveCode: form.hive,
+              harvestDate: form.date,
+              honeyType: form.honeyType,
+              quantityKg: Number(form.quantity),
+              location: form.location,
+              notes: form.notes,
+            }),
+          })
 
-      await Promise.all([harvestData.reload(), refreshSummary()])
-      setShowModal(false)
-      setSelectedHarvest(created)
+          await Promise.all([harvestData.reload(), refreshSummary()])
+          setShowModal(false)
+          setSelectedHarvest(created)
+        } catch (error) {
+          // A TypeError here means the request never reached the server at all (no route to it, DNS, etc.) —
+          // a real network failure, not the server rejecting the harvest: navigator.onLine is not always
+          // right, especially in an installed app's WebView. Save it offline instead of dead-ending on a raw
+          // "Failed to fetch" — already confirmed above, so no second prompt.
+          if (error instanceof TypeError) {
+            offline.queue({
+              hiveCode: form.hive, harvestDate: form.date, honeyType: form.honeyType,
+              quantityKg: Number(form.quantity), location: form.location, notes: form.notes,
+            })
+            setShowModal(false)
+          } else {
+            throw error
+          }
+        }
+      }
     } catch (error) {
       setSubmitError(error.message)
     } finally {
       setIsSaving(false)
+      setConfirming(false)
     }
   }
 
   return (
     <MainLayout title="Harvest">
+
+      {!offline.isOnline && (
+        <div className="mb-6 flex items-start gap-3 rounded-2xl border border-orange-200 bg-orange-50 p-4 text-sm text-orange-900">
+          <WifiOff size={18} className="mt-0.5 shrink-0" />
+          <div>
+            <p className="font-bold">No connection right now</p>
+            <p className="mt-1 text-orange-800">You can still record a harvest. It is saved on this phone, cannot be edited once confirmed, and uploads to the KVIC chain by itself as soon as you are back online.</p>
+          </div>
+        </div>
+      )}
+
+      {offline.pending.length > 0 && (
+        <div className="mb-6 flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+          <CloudUpload size={18} className="mt-0.5 shrink-0" />
+          <div>
+            <p className="font-bold">{offline.pending.length} harvest{offline.pending.length === 1 ? '' : 's'} waiting to upload{offline.syncing ? ' — uploading now…' : ''}</p>
+            <ul className="mt-1 space-y-0.5 text-amber-800">
+              {offline.pending.map((item) => <li key={item.clientId}>{item.quantityKg} kg {item.honeyType}, recorded {new Date(item.offlineRecordedAt).toLocaleString()}</li>)}
+            </ul>
+          </div>
+        </div>
+      )}
+
+      {offline.lastSyncMessage && (
+        <div className="mb-6 flex items-center gap-3 rounded-2xl border border-teal-200 bg-teal-50 p-4 text-sm font-semibold text-teal-800">
+          <CheckCircle2 size={18} /> {offline.lastSyncMessage}
+        </div>
+      )}
 
       {/* PAGE HEADER */}
       <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
@@ -441,14 +523,30 @@ export default function Harvest() {
                 />
               </div>
 
-              <div className="rounded-xl bg-[#f4fbfb] p-4">
-                <p className="text-xs font-bold uppercase tracking-wide text-gray-500">What happens next?</p>
-                <p className="mt-2 text-sm leading-6 text-gray-600">
-                  A unique Batch ID is created and sealed into the shared KVIC blockchain.
-                  Your notes and location stay in your private database. You can then share
-                  the lab report with your regional officer and create bottle QR codes.
-                </p>
-              </div>
+              {!confirming && (
+                <div className="rounded-xl bg-[#f4fbfb] p-4">
+                  <p className="text-xs font-bold uppercase tracking-wide text-gray-500">What happens next?</p>
+                  <p className="mt-2 text-sm leading-6 text-gray-600">
+                    {offline.isOnline
+                      ? 'A unique Batch ID is created and sealed into the shared KVIC blockchain. Your notes and location stay in your private database. You can then share the lab report with your regional officer and create bottle QR codes.'
+                      : 'You are offline. Recording it now saves it on this device with today’s date and time. It cannot be edited or removed once you confirm, and it uploads and gets its Batch ID by itself the next time this device is online.'}
+                  </p>
+                </div>
+              )}
+
+              {confirming && (
+                <div className="flex items-start gap-3 rounded-xl border-2 border-orange-300 bg-orange-50 p-4">
+                  <ShieldAlert size={20} className="mt-0.5 shrink-0 text-orange-600" />
+                  <div>
+                    <p className="text-sm font-bold text-orange-900">{offline.isOnline ? 'Confirm: record this harvest?' : 'Confirm: save this offline?'}</p>
+                    <p className="mt-1 text-sm leading-6 text-orange-800">
+                      {offline.isOnline
+                        ? 'Check the hive, date, honey type and quantity above. Once you confirm, a Batch ID is created and sealed to the KVIC chain — this cannot be undone here.'
+                        : 'Check the hive, date, honey type and quantity above. Once you confirm, this entry is locked: it cannot be edited or deleted here, and it will upload exactly as entered when this device is back online.'}
+                    </p>
+                  </div>
+                </div>
+              )}
 
               {submitError && (
                 <div className="rounded-xl bg-red-50 p-4 text-sm text-red-600">
@@ -459,10 +557,10 @@ export default function Harvest() {
               <div className="flex gap-3 pt-2">
                 <button
                   type="button"
-                  onClick={() => setShowModal(false)}
+                  onClick={() => (confirming ? setConfirming(false) : setShowModal(false))}
                   className="flex-1 rounded-xl border border-gray-200 py-3 text-sm font-bold hover:bg-gray-50"
                 >
-                  Cancel
+                  {confirming ? 'Go back and check' : 'Cancel'}
                 </button>
 
                 <button
@@ -470,7 +568,7 @@ export default function Harvest() {
                   disabled={isSaving}
                   className="flex-1 rounded-xl bg-[#F97360] py-3 text-sm font-bold hover:bg-[#0F766E] disabled:opacity-60"
                 >
-                  {isSaving ? 'Recording...' : 'Record Harvest'}
+                  {isSaving ? 'Recording...' : confirming ? (offline.isOnline ? 'Yes, record harvest' : 'Yes, save offline (locked)') : 'Record Harvest'}
                 </button>
               </div>
 

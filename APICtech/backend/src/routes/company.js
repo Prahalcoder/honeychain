@@ -13,20 +13,27 @@ import { buildInsights } from '../services/insights.js'
 import { keeperInspections, upcomingFor } from '../services/inspections.js'
 import { visibleAnnouncements } from '../services/announcements.js'
 import { pdfBody, saveDocument, sendDocument } from '../services/labDocuments.js'
+import { checkDocType, listOrgDocuments, saveOrgDocument, sendOrgDocument } from '../services/orgDocuments.js'
 import salesRoutes from './sales.js'
 import shopKeeperRoutes from './shopKeeper.js'
-import { openShopOrders } from '../services/shop.js'
+import tradeKeeperRoutes from './tradeKeeper.js'
+import { backfillMissingInvoices, bookMissingIncome, openShopOrders } from '../services/shop.js'
+import { JarError, orgLots, returnJars, takeJars } from '../services/jars.js'
+import { ALL_HONEY_TYPES, honeyTypesFor } from '../config/honeyCatalogue.js'
+import { getGstPercent, guidance, minPerJar } from '../services/pricing.js'
 import { onHarvest } from '../services/chain.js'
 import { TicketError, keeperReply, keeperThread, keeperTicketNotices, keeperTickets, openTicket, getTicket } from '../services/tickets.js'
 import { analyzeLabResult } from '../services/labAnalysis.js'
 import { currentMonth, recentMonths, syncMonthlyReport } from '../services/reports.js'
 import { appendTraceabilityEvent } from '../services/traceabilityLog.js'
+import { AlertError, alertOverview, linkMonitor, sendTestSms, setSmsAlerts, unlinkMonitor } from '../services/hiveAlerts.js'
 
 // Everything here is scoped to the signed-in beekeeper's own company.
 const router = express.Router()
 router.use(authenticateToken, requireRole('BEEKEEPER'), loadOrganization)
 
-const HONEY_TYPES = ['Natural Honey', 'Forest Honey', 'Wildflower Honey', 'Floral Honey', 'Other']
+// The basic types plus the special honey of every state (config/honeyCatalogue.js).
+const HONEY_TYPES = ALL_HONEY_TYPES
 const FINANCE_CATEGORIES = ['Sales income', 'Labor', 'Packaging', 'Maintenance', 'Operations', 'Other']
 const LAB_OUTCOMES = ['PASSED', 'FAILED']
 const DISTRIBUTOR_TYPES = ['WHOLESALER', 'RETAILER']
@@ -79,6 +86,7 @@ router.get('/summary', async (req, res) => {
       status: req.org.status,
       state: req.org.state,
       region: req.org.region,
+      sellingMode: req.org.selling_mode,
       reviewNote: req.org.review_note,
       closure: await (async () => { const open = await getOpenClosure(req.org.id); return open ? { reason: open.reason, initiatedBy: open.initiated_by_role } : null })(),
     },
@@ -92,6 +100,33 @@ router.get('/summary', async (req, res) => {
     monthIncome: money.income,
     monthExpense: money.expense,
   })
+})
+
+// ---------------------------------------------------------- registration documents
+// FSSAI licence, GST certificate, an ID/address proof: can be uploaded right after registration, before
+// approval, and replaced any time after. Not gated by requireApprovedOrg (registered below it).
+router.get('/documents', async (req, res) => {
+  res.json(await listOrgDocuments(req.org.id))
+})
+
+router.put('/documents/:type', pdfBody, async (req, res) => {
+  try {
+    checkDocType(req.params.type)
+  } catch (error) { return res.status(error.status).json({ message: error.message }) }
+
+  const saved = await saveOrgDocument({
+    orgId: req.org.id, orgCode: req.org.organization_code, docType: req.params.type,
+    buffer: req.body, fileName: decodeURIComponent(String(req.get('x-file-name') || '')), userId: req.user.id,
+  })
+  if (saved.error) return res.status(saved.status).json({ message: saved.error })
+  res.status(201).json(saved)
+})
+
+router.get('/documents/:type', async (req, res) => {
+  try {
+    checkDocType(req.params.type)
+  } catch (error) { return res.status(error.status).json({ message: error.message }) }
+  return sendOrgDocument(res, req.org.id, req.params.type)
 })
 
 // ------------------------------------------------------ closing the company
@@ -237,6 +272,7 @@ router.post('/inspections/:id/acknowledge', async (req, res) => {
 router.use(requireApprovedOrg)
 router.use('/sales', salesRoutes)
 router.use('/shop', shopKeeperRoutes)
+router.use('/trade-requests', tradeKeeperRoutes)
 
 // ------------------------------------------------------------------- hives
 router.get('/hives', async (req, res) => {
@@ -258,7 +294,42 @@ router.post('/hives', async (req, res) => {
   res.status(201).json(await privateDb.prepare('SELECT * FROM hives WHERE hive_code = ?').get(hiveCode))
 })
 
+// ------------------------------------------------------ hive-health SMS alerts
+// The hive monitor texts the keeper through an SMS API when its hive-health analysis finds a problem
+// (services/hiveAlerts.js); here the keeper links a monitor to a hive, sees the alerts and turns SMS on or off.
+const alertFail = (error, res) => {
+  if (error instanceof AlertError) return res.status(error.status).json({ message: error.message })
+  throw error
+}
+
+router.get('/hive-alerts', async (req, res) => {
+  res.json(await alertOverview(req.org))
+})
+
+router.put('/hive-alerts/sms', async (req, res) => {
+  await setSmsAlerts(req.org, req.body?.enabled !== false)
+  res.json(await alertOverview(req.org))
+})
+
+router.post('/hive-alerts/test-sms', async (req, res) => {
+  try { res.json(await sendTestSms(req.org)) } catch (error) { alertFail(error, res) }
+})
+
+router.post('/hives/:code/monitor-link', async (req, res) => {
+  try { res.status(201).json(await linkMonitor(req.org, req.user, req.params.code)) } catch (error) { alertFail(error, res) }
+})
+
+router.delete('/hives/:code/monitor-link', async (req, res) => {
+  await unlinkMonitor(req.org, req.params.code)
+  res.json({ unlinked: true })
+})
+
 // ---------------------------------------------------------------- harvests
+// The honey types this keeper is offered first: the special honey of the keeper's state, then the basic types.
+router.get('/honey-types', (req, res) => {
+  res.json({ state: req.org.state, types: honeyTypesFor(req.org.state), all: ALL_HONEY_TYPES })
+})
+
 router.get('/harvests', async (req, res) => {
   res.json(await (await companyDb(req)).prepare('SELECT * FROM harvests ORDER BY harvest_date DESC, id DESC').all())
 })
@@ -289,6 +360,20 @@ router.post('/harvests', async (req, res) => {
   const type = HONEY_TYPES.includes(honeyType) ? honeyType : 'Other'
   const kg = Math.round(quantityKg * 1000) / 1000
 
+  // Who really recorded this: the keeper themselves, or the keeper's own
+  // phone with no signal at the time (offlineRecordedAt is the phone's own clock; clientId keeps a retried
+  // upload from creating the batch twice). None of this shows on the QR or the public verify pages.
+  const offline = req.body.offline === true
+  const clientId = offline ? String(req.body.clientId || '').trim().slice(0, 64) || null : null
+  if (offline && !clientId) return res.status(400).json({ message: 'An offline entry needs a client id so a retried upload is not recorded twice' })
+
+  // A retried offline upload (same clientId) must not create the batch, or this record, a second time.
+  if (clientId) {
+    const existingBatch = await db.prepare('SELECT batch_code FROM batches WHERE client_id = ?').get(clientId)
+    const already = existingBatch && await privateDb.prepare('SELECT * FROM harvests WHERE batch_code = ?').get(existingBatch.batch_code)
+    if (already) return res.status(201).json(already)
+  }
+
   const batchCode = await createChainBatch({
     organization: req.org,
     userId: req.user.id,
@@ -296,6 +381,9 @@ router.post('/harvests', async (req, res) => {
     quantityKg: kg,
     honeyType: type,
     harvestDate,
+    via: offline ? 'OFFLINE_SYNC' : 'APP',
+    offlineRecordedAt: offline ? (Number.isFinite(Date.parse(req.body.offlineRecordedAt)) ? new Date(req.body.offlineRecordedAt).toISOString() : new Date().toISOString()) : null,
+    clientId,
   })
 
   await onHarvest({ userId: req.user.id, batchCode, quantityKg: kg, harvestDate })
@@ -322,9 +410,63 @@ router.get('/batches', async (req, res) => {
   res.json(await Promise.all(rows.map(async (batch) => ({ ...batch, capacity: await batchCapacity(batch), packaging: await packagingStatus(batch) }))))
 })
 
+// ------------------------------------------------------------------ prices, GST and the profile summary
+// The standard GST and the KVIC minimum price of each honey type, as set by the head office.
+router.get('/pricing', async (req, res) => {
+  res.json({ gstPercent: await getGstPercent(), guidance: await guidance(), stateTypes: honeyTypesFor(req.org.state) })
+})
+
+// Bills (invoices and paid shop orders) and profit, for the keeper's profile page.
+router.get('/profile-summary', async (req, res) => {
+  const privateDb = await companyDb(req)
+  await bookMissingIncome(req.org, privateDb)
+  await backfillMissingInvoices(req.org, privateDb)
+  const month = currentMonth()
+
+  const money = async (where, params = []) => await privateDb.prepare(`
+    SELECT COALESCE(SUM(CASE WHEN type = 'INCOME' THEN amount_inr END), 0) AS income,
+      COALESCE(SUM(CASE WHEN type = 'EXPENSE' THEN amount_inr END), 0) AS expense
+    FROM finance_entries ${where}
+  `).get(...params)
+  const all = await money('')
+  const thisMonth = await money('WHERE substr(entry_date, 1, 7) = ?', [month])
+
+  // A Sellers-nearby order also gets its own PORTAL invoice (see services/shop.js) so it shows up as a proper
+  // bill in Billing, but it must not be counted or listed twice here alongside the "Shop order" rows below.
+  const invoices = await privateDb.prepare(`
+    SELECT i.invoice_number, i.issue_date, i.total_inr, i.gst_inr, i.status, b.name AS buyer_name
+    FROM invoices i JOIN buyers b ON b.id = i.buyer_id WHERE i.source <> 'PORTAL' ORDER BY i.id DESC LIMIT 25
+  `).all()
+  const orders = await privateDb.prepare(`
+    SELECT order_code, created_at, total_inr, gst_inr, payment_status, buyer_name
+    FROM shop_orders WHERE order_status <> 'CANCELLED' ORDER BY id DESC LIMIT 25
+  `).all()
+
+  const sum = async (sql) => await privateDb.prepare(sql).get()
+  const invoiceTotals = await sum("SELECT COALESCE(SUM(CASE WHEN status = 'Paid' THEN total_inr END), 0) AS paid, COALESCE(SUM(CASE WHEN status = 'Pending' THEN total_inr END), 0) AS pending, COALESCE(SUM(CASE WHEN status = 'Paid' THEN gst_inr END), 0) AS gst FROM invoices WHERE source <> 'PORTAL'")
+  const orderTotals = await sum("SELECT COALESCE(SUM(CASE WHEN payment_status = 'PAID' THEN total_inr END), 0) AS paid, COALESCE(SUM(CASE WHEN payment_status <> 'PAID' THEN total_inr END), 0) AS pending, COALESCE(SUM(CASE WHEN payment_status = 'PAID' THEN gst_inr END), 0) AS gst FROM shop_orders WHERE order_status <> 'CANCELLED'")
+
+  const bills = [
+    ...invoices.map((row) => ({ kind: 'Invoice', ref: row.invoice_number, date: row.issue_date, party: row.buyer_name, total: row.total_inr, gst: row.gst_inr, status: row.status })),
+    ...orders.map((row) => ({ kind: 'Shop order', ref: row.order_code, date: String(row.created_at).slice(0, 10), party: row.buyer_name, total: row.total_inr, gst: row.gst_inr, status: row.payment_status === 'PAID' ? 'Paid' : 'Pending' })),
+  ].sort((a, b) => String(b.date).localeCompare(String(a.date)) || String(b.ref).localeCompare(String(a.ref))).slice(0, 30)
+
+  res.json({
+    gstPercent: await getGstPercent(),
+    month,
+    income: round2(all.income), expense: round2(all.expense), profit: round2(all.income - all.expense),
+    monthIncome: round2(thisMonth.income), monthExpense: round2(thisMonth.expense), monthProfit: round2(thisMonth.income - thisMonth.expense),
+    billedPaid: round2(Number(invoiceTotals.paid) + Number(orderTotals.paid)),
+    billedPending: round2(Number(invoiceTotals.pending) + Number(orderTotals.pending)),
+    gstCollected: round2(Number(invoiceTotals.gst) + Number(orderTotals.gst)),
+    bills,
+  })
+})
+
 // ------------------------------------------------------------------ finance
 router.get('/finance', async (req, res) => {
   const privateDb = await companyDb(req)
+  await bookMissingIncome(req.org, privateDb)
   const months = recentMonths(6)
 
   const totals = await privateDb.prepare(`
@@ -459,7 +601,10 @@ async function sellerDetails(req) {
 }
 
 router.get('/invoices', async (req, res) => {
-  const rows = await (await companyDb(req)).prepare(`
+  const privateDb = await companyDb(req)
+  await backfillMissingInvoices(req.org, privateDb)
+
+  const rows = await privateDb.prepare(`
     SELECT i.*, b.name AS buyer_name, b.gstin AS buyer_gstin, b.address AS buyer_address
     FROM invoices i JOIN buyers b ON b.id = i.buyer_id ORDER BY i.id DESC
   `).all()
@@ -479,13 +624,17 @@ router.post('/invoices', async (req, res) => {
     description: String(line.description || '').trim().slice(0, 120),
     quantity: Number(line.quantity),
     unitPrice: Number(line.unitPrice),
+    ...(line.packBatchCode ? { packBatchCode: String(line.packBatchCode).trim().slice(0, 40) } : {}),
   }))
 
   if (lines.length === 0 || lines.some((line) => !line.description || !(line.quantity > 0) || !(line.unitPrice >= 0))) {
     return res.status(400).json({ message: 'Every invoice line needs a description, a positive quantity and a price' })
   }
 
-  const gstPercent = Number(req.body.gstPercent || 0)
+  // Jars are always billed with the standard GST that the KVIC head office set for every keeper.
+  const standardGst = await getGstPercent()
+  const sellsJars = lines.some((line) => line.packBatchCode)
+  const gstPercent = sellsJars ? standardGst : Number(req.body.gstPercent ?? standardGst)
   if (!(gstPercent >= 0 && gstPercent <= 28)) return res.status(400).json({ message: 'GST must be between 0 and 28 percent' })
 
   const issueDate = req.body.issueDate || today()
@@ -499,19 +648,48 @@ router.post('/invoices', async (req, res) => {
     batchCode = batch.batch_code
   }
 
+  // A line that names a packaging run sells jars from the inventory: whole jars, from the keeper's own run, and not
+  // below the KVIC minimum price (before GST).
+  const jarPlan = []
+  for (const line of lines.filter((item) => item.packBatchCode)) {
+    const lot = await db.prepare(`
+      SELECT pb.id, pb.jar_size_grams, b.honey_type FROM pack_batches pb JOIN batches b ON b.id = pb.batch_id
+      WHERE pb.pack_batch_code = ? AND b.org_id = ?
+    `).get(line.packBatchCode, req.org.id)
+    if (!lot) return res.status(400).json({ message: `Packaging run ${line.packBatchCode} was not found in your organisation` })
+    if (!Number.isInteger(line.quantity)) return res.status(400).json({ message: 'Jars are sold in whole numbers. Use a whole quantity for a line taken from stock.' })
+
+    const floor = await minPerJar(lot.honey_type, lot.jar_size_grams)
+    if (line.unitPrice < floor) return res.status(400).json({ message: `The KVIC minimum for ${lot.honey_type} in a ${lot.jar_size_grams} g jar is Rs ${floor} (before GST). Enter that or more.` })
+    jarPlan.push({ line, packBatchId: lot.id })
+  }
+
   const subtotal = round2(lines.reduce((sum, line) => sum + line.quantity * line.unitPrice, 0))
   const gst = round2((subtotal * gstPercent) / 100)
-  const number = await privateDb.transaction(async () => {
-    await lockNamed(`invoice:${req.org.id}`)
-    const next = await nextSequence(privateDb, 'invoices', 'INV', 'invoice_number')
 
-    await privateDb.prepare(`
-      INSERT INTO invoices
-      (invoice_number, buyer_id, batch_code, issue_date, due_date, lines_json, subtotal_inr, gst_percent, gst_inr, total_inr)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `).run(next, buyer.id, batchCode, issueDate, dueDate, JSON.stringify(lines), subtotal, gstPercent, gst, round2(subtotal + gst))
-    return next
-  })()
+  let number
+  try {
+    number = await privateDb.transaction(async () => {
+      await lockNamed(`invoice:${req.org.id}`)
+      const next = await nextSequence(privateDb, 'invoices', 'INV', 'invoice_number')
+
+      // The jars on the bill leave the inventory in the same transaction, and the bill names their QR codes.
+      for (const { line, packBatchId } of jarPlan) {
+        const taken = await takeJars({ orgId: req.org.id, packBatchId, quantity: line.quantity, channel: 'BILL', ref: next, assign: true })
+        line.jarIds = taken.jarIds
+      }
+
+      await privateDb.prepare(`
+        INSERT INTO invoices
+        (invoice_number, buyer_id, batch_code, issue_date, due_date, lines_json, subtotal_inr, gst_percent, gst_inr, total_inr)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `).run(next, buyer.id, batchCode, issueDate, dueDate, JSON.stringify(lines), subtotal, gstPercent, gst, round2(subtotal + gst))
+      return next
+    })()
+  } catch (error) {
+    if (error instanceof JarError) return res.status(error.status).json({ message: error.message })
+    throw error
+  }
 
   res.status(201).json(await privateDb.prepare('SELECT * FROM invoices WHERE invoice_number = ?').get(number))
 })
@@ -523,6 +701,9 @@ router.patch('/invoices/:id', async (req, res) => {
     .get(Number(req.params.id))
 
   if (!invoice) return res.status(404).json({ message: 'Invoice not found' })
+  // A Sellers-nearby order's invoice follows the order, not the other way round, so payment/parcel status
+  // in Billing and in Orders can never disagree: change it from Orders (Payment received / Cancel order).
+  if (invoice.source === 'PORTAL') return res.status(409).json({ message: 'This bill is from a Sellers nearby order. Confirm the payment or cancel it from Orders.' })
   if (invoice.status !== 'Pending') return res.status(409).json({ message: `This invoice is already ${invoice.status.toLowerCase()}` })
   if (!['Paid', 'Cancelled'].includes(req.body.status)) return res.status(400).json({ message: 'Status must be Paid or Cancelled' })
 
@@ -533,11 +714,14 @@ router.patch('/invoices/:id', async (req, res) => {
       entryId = (await privateDb.prepare(`
         INSERT INTO finance_entries (entry_date, type, category, description, amount_inr)
         VALUES (?, 'INCOME', 'Sales income', ?, ?)
-      `).run(today(), `Invoice ${invoice.invoice_number} · ${invoice.buyer_name}`, invoice.total_inr)).lastInsertRowid
+      `).run(today(), `Invoice ${invoice.invoice_number} · ${invoice.buyer_name}${invoice.gst_inr > 0 ? ` (GST Rs ${invoice.gst_inr} collected, not counted as income)` : ''}`, invoice.subtotal_inr)).lastInsertRowid
     }
 
     await privateDb.prepare('UPDATE invoices SET status = ?, paid_at = ?, finance_entry_id = ? WHERE id = ?')
       .run(req.body.status, req.body.status === 'Paid' ? new Date().toISOString() : null, entryId, invoice.id)
+
+    // A cancelled bill puts its jars back in stock.
+    if (req.body.status === 'Cancelled') await returnJars({ orgId: req.org.id, channel: 'BILL', ref: invoice.invoice_number })
   })()
 
   if (req.body.status === 'Paid') await syncMonthlyReport(req.org)
@@ -555,6 +739,15 @@ router.get('/inventory', async (req, res) => {
   `).all(req.org.id)
   const holdingByBatch = new Map(balances.map((row) => [row.batch_id, row.quantity_kg]))
 
+  const lots = await orgLots(req.org.id)
+  const bottlesBy = new Map()
+  for (const lot of lots) {
+    const entry = bottlesBy.get(lot.batchCode) || { sold: 0, inStock: 0 }
+    entry.sold += lot.sold
+    entry.inStock += lot.inStock
+    bottlesBy.set(lot.batchCode, entry)
+  }
+
   const items = await Promise.all(batches.map(async (batch) => {
     const capacity = await batchCapacity(batch)
     const holdingKg = holdingByBatch.has(batch.id) ? holdingByBatch.get(batch.id) : batch.quantity_kg
@@ -569,6 +762,8 @@ router.get('/inventory', async (req, res) => {
       holdingKg: round2(holdingKg),
       transferredKg: round2(batch.quantity_kg - holdingKg),
       packedBottles: capacity.packedBottles,
+      soldBottles: bottlesBy.get(batch.batch_code)?.sold || 0,
+      bottlesInStock: bottlesBy.get(batch.batch_code)?.inStock || 0,
       packedKg: round2(packedKg),
       looseSoldKg: round2(capacity.looseGrams / 1000),
       unpackedKg: round2(Math.max(0, batch.quantity_kg - packedKg - capacity.looseGrams / 1000)),
@@ -580,11 +775,14 @@ router.get('/inventory', async (req, res) => {
 
   res.json({
     items,
+    lots,
     totals: {
       harvestedKg: sum('harvestedKg'),
       holdingKg: sum('holdingKg'),
       transferredKg: sum('transferredKg'),
       packedBottles: items.reduce((total, item) => total + item.packedBottles, 0),
+      soldBottles: items.reduce((total, item) => total + item.soldBottles, 0),
+      bottlesInStock: items.reduce((total, item) => total + item.bottlesInStock, 0),
     },
   })
 })
@@ -868,6 +1066,65 @@ async function listNotifications(req, res) {
       title: order.payment_status === 'CLAIMED' ? `Confirm the payment for order ${order.order_code}` : order.payment_status === 'PAID' ? `Order ${order.order_code} is paid: ship it` : `New order ${order.order_code}`,
       message: `${order.quantity} x ${order.product_title}. Open Orders to act on it.`,
       time: order.updated_at || order.created_at,
+    })
+  }
+
+  // Offers from KVIC-approved wholesalers to buy loose honey, waiting for an answer.
+  const offers = await db.prepare(`
+    SELECT pr.request_code, pr.quantity_kg, pr.offer_price_per_kg, pr.created_at, b.batch_code, o.legal_name AS trader
+    FROM purchase_requests pr JOIN batches b ON b.id = pr.batch_id JOIN organizations o ON o.id = pr.trader_org_id
+    WHERE pr.keeper_org_id = ? AND pr.status = 'PENDING' ORDER BY pr.id DESC LIMIT 10
+  `).all(req.org.id)
+  for (const offer of offers) {
+    items.push({
+      id: `offer-${offer.request_code}`,
+      type: 'order',
+      title: `Wholesale offer from ${offer.trader}`,
+      message: `${offer.quantity_kg} kg of ${offer.batch_code} at Rs ${offer.offer_price_per_kg}/kg. Open Supply Chain > Wholesale offers to accept or decline.`,
+      time: offer.created_at,
+    })
+  }
+
+  // Hive-health problems the hive monitor reported in the last day (texted to the keeper when worth it).
+  const hiveAlerts = await db.prepare(`
+    SELECT id, hive_code, risk_name, level, action, sms_status, created_at FROM hive_alerts
+    WHERE org_id = ? AND created_at > ? AND sms_status <> 'COOLDOWN' ORDER BY id DESC LIMIT 10
+  `).all(req.org.id, new Date(Date.now() - 86400000).toISOString())
+  for (const alert of hiveAlerts) {
+    items.push({
+      id: `hive-alert-${alert.id}`,
+      type: 'inspection',
+      title: `Hive ${alert.hive_code}: ${alert.risk_name} (${alert.level})`,
+      message: `${alert.action || 'Inspect the hive.'}${alert.sms_status === 'SENT' ? ' Also sent to you by SMS.' : ''}`,
+      time: alert.created_at,
+    })
+  }
+
+  // Honey a wholesaler recorded as received (the keeper confirmed by OTP) that still needs its harvest recorded.
+  const waitingReceipts = await db.prepare(`
+    SELECT r.receipt_code, r.quantity_kg, r.honey_type, r.confirmed_at, o.legal_name AS trader
+    FROM wholesale_receipts r JOIN organizations o ON o.id = r.trader_org_id
+    WHERE r.keeper_org_id = ? AND r.status = 'AWAITING_HARVEST' ORDER BY r.id DESC LIMIT 10
+  `).all(req.org.id)
+  for (const receipt of waitingReceipts) {
+    items.push({
+      id: `receipt-${receipt.receipt_code}`,
+      type: 'order',
+      title: `Record the harvest for ${receipt.trader}'s receipt`,
+      message: `You confirmed ${receipt.quantity_kg} kg of ${receipt.honey_type} (receipt ${receipt.receipt_code}). Record that harvest, then attach it under Supply Chain > Wholesale offers.`,
+      time: receipt.confirmed_at,
+    })
+  }
+
+  // A jar of this keeper whose QR code looks copied onto other jars.
+  const alerts = await db.prepare("SELECT id, pack_id, reason, created_at FROM jar_alerts WHERE org_id = ? AND status = 'OPEN' ORDER BY id DESC LIMIT 10").all(req.org.id)
+  for (const alert of alerts) {
+    items.push({
+      id: `jar-alert-${alert.id}`,
+      type: 'inspection',
+      title: `Possible copied QR code on jar ${alert.pack_id}`,
+      message: 'This jar has been scanned in places or by phones that do not fit one real jar. KVIC is reviewing it. If you sold it recently, note who you sold it to.',
+      time: alert.created_at,
     })
   }
 

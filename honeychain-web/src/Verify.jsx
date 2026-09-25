@@ -17,6 +17,43 @@ export function parseCode(input) {
   return /^PB-/i.test(text) ? { pack: text } : { batch: text.toUpperCase() }
 }
 
+// A random ID for this browser, so the server can tell one person re-opening a jar from many phones scanning the
+// same code (services/qrGuard.js). No name, no phone number.
+function deviceId() {
+  try {
+    let id = localStorage.getItem('hc_device')
+    if (!id || !/^[A-Za-z0-9-]{8,64}$/.test(id)) {
+      id = window.crypto?.randomUUID ? window.crypto.randomUUID() : `d-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`
+      localStorage.setItem('hc_device', id)
+    }
+    return id
+  } catch {
+    return `d-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`
+  }
+}
+
+const postJson = async (path, body) => {
+  const response = await fetch(`${API_URL}${path}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+  const payload = await response.json().catch(() => ({}))
+  if (!response.ok) throw new Error(payload.message || 'FAILED')
+  return payload
+}
+
+// Only asks the browser for a location it has already been allowed to give; otherwise the buyer can choose to share.
+function currentPosition({ ask = false } = {}) {
+  return new Promise((resolve) => {
+    if (!navigator.geolocation) return resolve(null)
+    const read = () => navigator.geolocation.getCurrentPosition(
+      (position) => resolve({ latitude: position.coords.latitude, longitude: position.coords.longitude, accuracyM: position.coords.accuracy }),
+      () => resolve(null),
+      { enableHighAccuracy: false, timeout: 8000, maximumAge: 10 * 60 * 1000 },
+    )
+    if (ask) return read()
+    if (!navigator.permissions?.query) return resolve(null)
+    navigator.permissions.query({ name: 'geolocation' }).then((status) => (status.state === 'granted' ? read() : resolve(null))).catch(() => resolve(null))
+  })
+}
+
 const dateOf = (value, lang) => {
   if (!value) return ''
   const text = String(value)
@@ -46,6 +83,14 @@ export default function VerifyPanel({ initial }) {
       const payload = await response.json().catch(() => ({}))
       if (!response.ok) throw new Error(response.status === 404 ? 'NOT_FOUND' : 'FAILED')
       setState({ record: payload, error: '', loading: false })
+
+      // Log this scan of a jar (not of a whole batch) and show what the scan history says about the code.
+      if (code.pack) {
+        const place = await currentPosition()
+        postJson('/verify/scan', { packId: code.pack, deviceId: deviceId(), ...(place || {}) })
+          .then((scans) => setState((current) => (current.record === payload ? { ...current, scans, located: Boolean(place) } : current)))
+          .catch(() => { /* the check itself already worked */ })
+      }
     } catch (error) {
       setState({ record: null, error: error.message === 'NOT_FOUND' ? v.notFound : v.failed, loading: false })
     }
@@ -93,7 +138,7 @@ export default function VerifyPanel({ initial }) {
     }
   }
 
-  const { record, error, loading } = state
+  const { record, error, loading, scans, located } = state
 
   return (
     <div className="verify-panel">
@@ -112,14 +157,16 @@ export default function VerifyPanel({ initial }) {
       {scanError && <p className="verify-note">{scanError}</p>}
       {loading && <p className="verify-note">{v.checking}</p>}
       {error && <div className="verdict bad"><h3>{error}</h3><button className="btn-ghost dark" onClick={() => setState({ record: null, error: '', loading: false })}>{v.another}</button></div>}
-      {record && <Result record={record} lang={lang} v={v} />}
+      {record && <Result record={record} lang={lang} v={v} scans={scans || record.scans} located={located} onScans={(next) => setState((current) => ({ ...current, scans: next }))} />}
     </div>
   )
 }
 
-function Result({ record, lang, v }) {
-  const verdict = v.verdicts[record.authenticity] || v.verdicts.UNDER_REVIEW
-  const tone = record.authenticity === 'VALID' ? 'good' : record.authenticity === 'NOT_CERTIFIED' ? 'warn' : 'bad'
+function Result({ record, lang, v, scans, located, onScans }) {
+  // A scan logged just now can raise the first alert on a jar the lookup still showed as VALID.
+  const authenticity = record.authenticity === 'VALID' && scans?.alerts?.length ? 'SUSPECTED_COPY' : record.authenticity
+  const verdict = v.verdicts[authenticity] || v.verdicts.UNDER_REVIEW
+  const tone = authenticity === 'VALID' ? 'good' : ['NOT_CERTIFIED', 'SUSPECTED_COPY'].includes(authenticity) ? 'warn' : 'bad'
   const batchLevel = record.scope === 'BATCH'
   const L = v.labels
 
@@ -128,11 +175,13 @@ function Result({ record, lang, v }) {
       <div className={`verdict ${tone}`}>
         <span className="verdict-mark">{tone === 'good' ? '✓' : '!'}</span>
         <div>
-          <p className="verdict-code">{record.authenticity.replace('_', ' ')}</p>
+          <p className="verdict-code">{authenticity.replace(/_/g, ' ')}</p>
           <h3>{verdict.title}</h3>
           <p>{verdict.reason}</p>
         </div>
       </div>
+
+      {record.product.packId && scans && <ScanPanel packId={record.product.packId} scans={scans} located={located} lang={lang} v={v} onScans={onScans} />}
 
       <div className="result-grid">
         <Card title={v.sections.product}>
@@ -196,6 +245,7 @@ function Result({ record, lang, v }) {
               <li key={`${step.stage}-${index}`} className={step.stage === 'CONSUMER' ? 'last' : ''}>
                 <b>{v.stages[step.stage] || step.label}</b>
                 <small>{step.stage === 'CONSUMER' ? v.youScanned : `${step.name}${step.quantityKg ? ` · ${step.quantityKg} kg` : ''}`}</small>
+                {step.note && <small>{step.note}</small>}
               </li>
             ))}
           </ol>
@@ -255,6 +305,63 @@ function ChainProof({ record, lang }) {
       </ol>
       <p className="verify-note small">{proof.live && !proof.live.error ? L.live : L.offline}</p>
     </Card>
+  )
+}
+
+// How often, and by how many phones, this jar's code has been scanned; why it is flagged, if it is; a way to add
+// a location to this scan and to report the jar.
+function ScanPanel({ packId, scans, located, lang, v, onScans }) {
+  const s = v.scans
+  const [locationNote, setLocationNote] = useState('')
+  const [reporting, setReporting] = useState(false)
+  const [reportText, setReportText] = useState('')
+  const [reportNote, setReportNote] = useState('')
+
+  async function shareLocation() {
+    const place = await currentPosition({ ask: true })
+    if (!place) { setLocationNote(s.locationDenied); return }
+    try {
+      onScans(await postJson('/verify/scan', { packId, deviceId: deviceId(), ...place }))
+      setLocationNote(s.locationShared)
+    } catch { setLocationNote(s.locationDenied) }
+  }
+
+  async function sendReport() {
+    if (reportText.trim().length < 5) { setReportNote(s.reportShort); return }
+    try {
+      onScans(await postJson('/verify/report', { packId, deviceId: deviceId(), reason: reportText }))
+      setReporting(false); setReportText(''); setReportNote(s.reportThanks)
+    } catch (err) { setReportNote(err.message) }
+  }
+
+  const flagged = scans.alerts?.length > 0 || scans.confirmedCopy
+  return (
+    <section className={`rcard wide scan-panel ${flagged ? 'flagged' : ''}`}>
+      <h4>{s.title}</h4>
+      <p><b>{s.summary(scans.scans, scans.phones)}</b> {scans.firstScannedByYou ? s.firstYou : scans.firstScannedAt ? s.firstOther(dateOf(scans.firstScannedAt, lang)) : ''}</p>
+      {scans.alerts?.length > 0 && (
+        <>
+          <p className="scan-alert-title">{s.alerts}</p>
+          <ul className="scan-alerts">
+            {scans.alerts.map((alert) => <li key={alert.reason}>{s.reasons[alert.reason] || alert.label}</li>)}
+          </ul>
+        </>
+      )}
+      <p className="muted small">{s.explain}</p>
+      <div className="scan-actions">
+        {!located && !locationNote && <button type="button" className="btn-ghost dark" onClick={shareLocation}>{s.shareLocation}</button>}
+        {!reporting && <button type="button" className="btn-ghost dark" onClick={() => { setReporting(true); setReportNote('') }}>{s.report}</button>}
+      </div>
+      {locationNote && <p className="verify-note small">{locationNote}</p>}
+      {reporting && (
+        <div className="scan-report">
+          <textarea rows={3} value={reportText} onChange={(event) => setReportText(event.target.value)} placeholder={s.reportPrompt} maxLength={300} />
+          <button type="button" className="btn-gold" onClick={sendReport}>{s.reportSend}</button>
+        </div>
+      )}
+      {reportNote && <p className="verify-note small">{reportNote}</p>}
+      <p className="muted small">{s.privacy}</p>
+    </section>
   )
 }
 

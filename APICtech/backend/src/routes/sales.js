@@ -2,13 +2,13 @@ import express from 'express'
 
 import db from '../database/database.js'
 import { sealPendingBlock } from '../services/blockchain.js'
-import { lockNamed } from '../services/ledgerLock.js'
 import { batchCapacity, getBatch, packagingStatus } from '../services/batches.js'
 import { getCompanyDb } from '../services/companyDb.js'
 import { TransferError, recordTransfer } from '../services/custody.js'
 import { appendTraceabilityEvent } from '../services/traceabilityLog.js'
-import { syncMonthlyReport } from '../services/reports.js'
-import { onLooseSale, onLooseSaleReversed } from '../services/chain.js'
+import { onLooseSaleReversed } from '../services/chain.js'
+import { MIN_GRAMS, SaleError, createLooseSale } from '../services/looseSales.js'
+import { releaseForCancelledSale } from '../services/trade.js'
 
 // Loose honey sold straight after harvest to a named wholesaler, in kg or grams, at a fixed
 // price per kg. The wholesaler tests the honey on their own and sells it on, so no KVIC lab
@@ -21,22 +21,9 @@ import { onLooseSale, onLooseSaleReversed } from '../services/chain.js'
 const router = express.Router()
 
 const privateDb = async (req) => await getCompanyDb(req.org.organization_code)
-const isDate = (value) => /^\d{4}-\d{2}-\d{2}$/.test(String(value)) && !Number.isNaN(Date.parse(value))
 const today = () => new Date().toLocaleDateString('en-CA')
 const clean = (value, max) => String(value ?? '').trim().slice(0, max)
 const round2 = (value) => Math.round(value * 100) / 100
-const MIN_GRAMS = 50
-
-// The buyer's type decides which link of the public supply chain the hand-over is.
-const PARTY_FOR = { Wholesaler: 'WHOLESALER', Company: 'WHOLESALER', Retailer: 'RETAILER', 'Direct Consumer': null }
-const PARTY_LABEL = { WHOLESALER: 'Wholesaler', RETAILER: 'Retailer' }
-
-async function nextCode(db2, table, prefix, column) {
-  const key = `${prefix}-${new Date().getFullYear()}-`
-  const highest = (await db2.prepare(`SELECT ${column} AS code FROM ${table} WHERE ${column} LIKE ?`).all(`${key}%`))
-    .reduce((max, row) => Math.max(max, Number(row.code.slice(key.length)) || 0), 0)
-  return `${key}${String(highest + 1).padStart(3, '0')}`
-}
 
 // Honey of each harvest that can still be sold loose: harvested, minus what is reserved for QR jars, minus what was sold.
 router.get('/stock', async (req, res) => {
@@ -106,90 +93,17 @@ router.post('/', async (req, res) => {
   const unit = req.body.unit === 'g' ? 'g' : 'kg'
   const quantity = Number(req.body.quantity)
   const grams = Math.round(unit === 'g' ? quantity : quantity * 1000)
-  if (!Number.isFinite(quantity) || grams < MIN_GRAMS) return res.status(400).json({ message: `Enter the quantity sold (at least ${MIN_GRAMS} g)` })
-
-  const pricePerKg = Number(req.body.pricePerKg)
-  if (!Number.isFinite(pricePerKg) || pricePerKg <= 0 || pricePerKg > 100000) return res.status(400).json({ message: 'Enter the agreed price per kg' })
-
-  const gstPercent = Number(req.body.gstPercent || 0)
-  if (!(gstPercent >= 0 && gstPercent <= 28)) return res.status(400).json({ message: 'GST must be between 0 and 28 percent' })
-
-  const saleDate = req.body.saleDate || today()
-  if (!isDate(saleDate) || saleDate > today() || saleDate < batch.harvest_date) {
-    return res.status(400).json({ message: 'The sale date must be between the harvest date and today' })
-  }
-
-  const capacity = await batchCapacity(batch)
-  if (grams > capacity.remainingGrams) {
-    return res.status(409).json({
-      code: 'NOT_ENOUGH_HONEY',
-      message: `Only ${round2(capacity.remainingGrams / 1000)} kg of ${batch.batch_code} is left to sell. ${round2(capacity.packedGrams / 1000)} kg is reserved for QR jars and ${round2(capacity.looseGrams / 1000)} kg was already sold loose.`,
-    })
-  }
-
-  const kg = grams / 1000
-  const amount = round2(kg * pricePerKg)
-  const gst = round2((amount * gstPercent) / 100)
-  const party = PARTY_FOR[buyer.type] ?? null
-  const publicName = req.body.publicName !== false
-  const partyId = party ? (publicName ? buyer.name : `${PARTY_LABEL[party]} (name withheld)`) : null
-  const paidNow = req.body.paid === true
+  if (!Number.isFinite(quantity)) return res.status(400).json({ message: `Enter the quantity sold (at least ${MIN_GRAMS} g)` })
 
   try {
-    const created = await db2.transaction(async () => {
-      await lockNamed(`sale:${req.org.id}`)
-
-      // The honey check above ran before the lock; run it again so two requests cannot both take the last honey.
-      await lockNamed(`honey:${batch.id}`)
-      const fresh = await batchCapacity(batch)
-      if (grams > fresh.remainingGrams) throw new TransferError(`Only ${round2(fresh.remainingGrams / 1000)} kg of ${batch.batch_code} is left to sell.`, 409)
-
-      const code = await nextCode(db2, 'honey_sales', 'SAL', 'sale_code')
-      const invoiceNumber = await nextCode(db2, 'invoices', 'INV', 'invoice_number')
-      const description = `Loose honey ${batch.honey_type}, batch ${batch.batch_code} (${kg} kg at ₹${pricePerKg}/kg)`
-
-      const invoiceId = (await db2.prepare(`
-        INSERT INTO invoices (invoice_number, buyer_id, batch_code, issue_date, lines_json, subtotal_inr, gst_percent, gst_inr, total_inr, status, paid_at, finance_entry_id)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'Pending', NULL, NULL)
-      `).run(invoiceNumber, buyer.id, batch.batch_code, saleDate, JSON.stringify([{ description, quantity: kg, unitPrice: pricePerKg }]),
-        amount, gstPercent, gst, round2(amount + gst))).lastInsertRowid
-
-      if (paidNow) {
-        const entryId = (await db2.prepare(`
-          INSERT INTO finance_entries (entry_date, type, category, description, amount_inr) VALUES (?, 'INCOME', 'Sales income', ?, ?)
-        `).run(today(), `Invoice ${invoiceNumber} · ${buyer.name}`, round2(amount + gst))).lastInsertRowid
-        await db2.prepare("UPDATE invoices SET status = 'Paid', paid_at = ?, finance_entry_id = ? WHERE id = ?").run(new Date().toISOString(), entryId, invoiceId)
-      }
-
-      const id = (await db2.prepare(`
-        INSERT INTO honey_sales (sale_code, buyer_id, batch_code, quantity_grams, price_per_kg, amount_inr, sale_date, invoice_id, note, public_name, party_type, party_id)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `).run(code, buyer.id, batch.batch_code, grams, pricePerKg, amount, saleDate, invoiceId, clean(req.body.note, 200), publicName ? 1 : 0, party, partyId)).lastInsertRowid
-
-      await db.prepare("INSERT INTO loose_sales (sale_code, org_id, batch_id, grams, created_at) VALUES (?, ?, ?, ?, ?)")
-        .run(code, req.org.id, batch.id, grams, new Date().toISOString())
-
-      if (party) {
-        await recordTransfer({
-          batch, actorType: 'KEEPER', actorId: req.user.id, toPartyType: party, toPartyId: partyId, quantityKg: kg,
-          metadata: { sale: 'LOOSE', saleCode: code, grams }, createdBy: req.user.id,
-        })
-      } else {
-        await appendTraceabilityEvent({
-          entityType: 'BATCH', entityId: batch.batch_code, eventType: 'DIRECT_SALE_RECORDED',
-          payload: { saleCode: code, quantityKg: kg, sale: 'LOOSE' }, createdBy: req.user.id,
-        })
-        await sealPendingBlock()
-      }
-
-      return { id, code, invoiceNumber, amountInr: amount, totalInr: round2(amount + gst) }
-    })()
-
-    if (paidNow) await syncMonthlyReport(req.org)
-    await onLooseSale({ userId: req.user.id, organizationCode: req.org.organization_code, saleCode: created.code, batchCode: batch.batch_code, grams, buyerLabel: partyId || 'direct-consumer' })
+    const created = await createLooseSale({
+      org: req.org, user: req.user, privateDb: db2, buyer, batch, grams,
+      pricePerKg: Number(req.body.pricePerKg), gstPercent: Number(req.body.gstPercent || 0),
+      saleDate: req.body.saleDate || today(), paid: req.body.paid === true, publicName: req.body.publicName !== false, note: req.body.note,
+    })
     res.status(201).json(created)
   } catch (error) {
-    if (error instanceof TransferError) return res.status(error.status).json({ message: error.message })
+    if (error instanceof SaleError) return res.status(error.status).json({ message: error.message, ...(error.code ? { code: error.code } : {}) })
     throw error
   }
 })
@@ -233,6 +147,7 @@ router.post('/:id/cancel', async (req, res) => {
     throw error
   }
 
+  await releaseForCancelledSale(req.org.id, sale.code)
   await onLooseSaleReversed({ userId: req.user.id, organizationCode: req.org.organization_code, saleCode: sale.code, batchCode: sale.batchCode })
   res.json({ status: 'CANCELLED' })
 })

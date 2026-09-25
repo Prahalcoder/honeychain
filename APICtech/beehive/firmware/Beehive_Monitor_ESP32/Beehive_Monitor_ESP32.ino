@@ -9,6 +9,7 @@
 #include <DHT.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
+#include <HX711.h>  // "HX711" by Bogdan Necula/Andreas Motl, install from Library Manager
 
 // ------------------------------
 // ------- EEPROM Size & Address Allocation -----------
@@ -34,6 +35,15 @@
 #define DHT2_PIN         33
 #define BULB_RELAY_PIN   14
 #define FAN_RELAY_PIN    23
+
+// A load cell (e.g. a bathroom-scale strain gauge) under the hive stand, read through an HX711 amplifier.
+#define HX711_DOUT_PIN   16
+#define HX711_SCK_PIN    17
+
+// Set once per physical load cell: tare with the hive off the scale (HX711_CALIBRATION_FACTOR = 1), note the
+// raw reading get_units() prints over Serial for a hive (or box) of a KNOWN weight, then set this so
+// rawReading / factor == that known weight in kg. A negative factor is normal if the wiring reads upside down.
+#define HX711_CALIBRATION_FACTOR  -21500.0f
 
 #define OLED_SCREEN_WIDTH  128
 #define OLED_SCREEN_HEIGHT 64
@@ -66,6 +76,8 @@ struct TelemetryData {
     float avgHum;
     float gasVal;
     float co2Ppm;
+    float weightKg;
+    bool weightAvailable;
     bool bulbStatus;
     bool fanStatus;
     float bulbOnTemp;
@@ -85,6 +97,7 @@ struct TelemetryData {
 DHT dht1(DHT1_PIN, DHTTYPE);
 DHT dht2(DHT2_PIN, DHTTYPE);
 Adafruit_SSD1306 display(OLED_SCREEN_WIDTH, OLED_SCREEN_HEIGHT, &Wire, OLED_RESET);
+HX711 scale;
 WebServer server(80);
 
 TelemetryData systemData;
@@ -183,6 +196,15 @@ void setup() {
     dht1.begin();
     dht2.begin();
 
+    scale.begin(HX711_DOUT_PIN, HX711_SCK_PIN);
+    scale.set_scale(HX711_CALIBRATION_FACTOR);
+    if (scale.wait_ready_timeout(1000)) {
+        scale.tare();  // the empty scale (hive stand with nothing on it yet) reads as 0 kg from here on
+        Serial.println("HX711 load cell found and tared.");
+    } else {
+        Serial.println("WARNING: HX711 load cell not responding (not wired?). Weight will be left unreported.");
+    }
+
     showBootScreen();
 
     dataMutex = xSemaphoreCreateMutex();
@@ -190,6 +212,7 @@ void setup() {
 
     systemData.bulbStatus = false;
     systemData.fanStatus = false;
+    systemData.weightAvailable = false;
     systemData.activeSsid = targetSsid;
     systemData.wifiStatus = "Connecting...";
 
@@ -462,6 +485,17 @@ void readSensorsAndUpdateControl() {
     float gasVal = (float)rawGas;
     float co2Ppm = (float)rawCo2;
 
+    // HX711 has its own natural sample rate (typically 10/s); is_ready() is the non-blocking way to ask
+    // "is a fresh reading waiting", so this never stalls the 200 ms sensor loop. If the chip never once
+    // responds (nothing wired to HX711_DOUT_PIN/HX711_SCK_PIN), haveScale simply stays false forever and
+    // weight is left unreported rather than sent as a fake, uncalibrated number.
+    static float cachedWeightKg = 0.0f;
+    static bool haveScale = false;
+    if (scale.is_ready()) {
+        cachedWeightKg = scale.get_units(1);
+        haveScale = true;
+    }
+
     float bOn = DEFAULT_BULB_ON_TEMP;
     float bOff = DEFAULT_BULB_OFF_TEMP;
     float fOn = DEFAULT_FAN_ON_TEMP;
@@ -489,8 +523,9 @@ void readSensorsAndUpdateControl() {
     static unsigned long lastDebugPrint = 0;
     if (millis() - lastDebugPrint >= 1000) {
         lastDebugPrint = millis();
-        Serial.printf("[SENSOR DEBUG] T1: %.1f C | T2: %.1f C | Avg: %.1f C | Ctrl Source: %s (%.1f C) | GAS(35): %d | CO2(33): %d\n", 
-            t1, t2, avgT, sourceMode == 1 ? "DHT1" : sourceMode == 2 ? "DHT2" : "AVERAGE", controlTemp, rawGas, rawCo2);
+        Serial.printf("[SENSOR DEBUG] T1: %.1f C | T2: %.1f C | Avg: %.1f C | Ctrl Source: %s (%.1f C) | GAS(35): %d | CO2(33): %d | Weight: %s\n",
+            t1, t2, avgT, sourceMode == 1 ? "DHT1" : sourceMode == 2 ? "DHT2" : "AVERAGE", controlTemp, rawGas, rawCo2,
+            haveScale ? (String(cachedWeightKg, 2) + " kg").c_str() : "no load cell");
     }
 
     static bool currentBulbState = false;
@@ -521,6 +556,8 @@ void readSensorsAndUpdateControl() {
         systemData.avgHum = avgH;
         systemData.gasVal = gasVal;
         systemData.co2Ppm = co2Ppm;
+        systemData.weightKg = cachedWeightKg;
+        systemData.weightAvailable = haveScale;
         systemData.bulbStatus = currentBulbState;
         systemData.fanStatus = currentFanState;
         systemData.controlTemp = controlTemp;
@@ -725,6 +762,13 @@ void handleGetData() {
     json += "\"avg_hum\":" + String(snap.avgHum, 2) + ",";
     json += "\"gas_val\":" + String(snap.gasVal, 1) + ",";
     json += "\"co2_ppm\":" + String(snap.co2Ppm, 1) + ",";
+
+    // Only sent when a load cell actually answered at least once: the server (database.py) stores weight_kg
+    // only when the key is present and numeric, so leaving it out here (rather than sending a fake 0) is what
+    // keeps an un-wired board from ever being logged as "an empty hive weighing 0 kg".
+    if (snap.weightAvailable) {
+        json += "\"weight_kg\":" + String(snap.weightKg, 2) + ",";
+    }
     
     if (snap.bulbStatus == true) {
         json += "\"bulb_status\":\"ON\",";

@@ -117,7 +117,7 @@ export default function Predictions() {
 
       </div>
 
-      <div className="mt-6 grid gap-6 xl:grid-cols-[1.3fr_1fr]">
+      <div className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-[1.3fr_1fr]">
 
         <section className="rounded-2xl border border-[#c0dfdd] bg-white p-6">
           <h2 className="font-bold">Income and expense trend</h2>

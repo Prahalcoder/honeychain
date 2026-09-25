@@ -121,6 +121,20 @@ const SCHEMA = `
     updated_at TEXT NOT NULL
   );
 
+  -- GST charged on an order and the finance entry that booked its income (added later: existing companies get them).
+  ALTER TABLE shop_orders ADD COLUMN IF NOT EXISTS gst_percent REAL NOT NULL DEFAULT 0;
+  ALTER TABLE shop_orders ADD COLUMN IF NOT EXISTS gst_inr REAL NOT NULL DEFAULT 0;
+  ALTER TABLE shop_orders ADD COLUMN IF NOT EXISTS finance_entry_id INTEGER;
+  -- JAR (packaged, from pack_batch_code) or LOOSE (by the kilogram, straight from a batch, no packaging).
+  ALTER TABLE shop_orders ADD COLUMN IF NOT EXISTS kind TEXT NOT NULL DEFAULT 'JAR';
+  ALTER TABLE shop_orders ADD COLUMN IF NOT EXISTS batch_code TEXT;
+  -- The Billing invoice auto-created for this order (see services/shop.js), so "payment received" here and
+  -- the invoice's own Paid status always agree, and the order shows up as a proper bill in Billing.
+  ALTER TABLE shop_orders ADD COLUMN IF NOT EXISTS invoice_id INTEGER REFERENCES invoices(id);
+  -- MANUAL (created by hand in Billing) or PORTAL (auto-created for a Sellers-nearby order); which order it came from.
+  ALTER TABLE invoices ADD COLUMN IF NOT EXISTS source TEXT NOT NULL DEFAULT 'MANUAL';
+  ALTER TABLE invoices ADD COLUMN IF NOT EXISTS order_code TEXT;
+
   CREATE TABLE IF NOT EXISTS meta (
     key TEXT PRIMARY KEY,
     value TEXT

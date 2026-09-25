@@ -2,6 +2,11 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 
 import SplashScreen from './pages/SplashScreen'
 import Login from './pages/Login'
+import Register from './pages/Register'
+import TradeMarket from './pages/trade/Market'
+import TradeOffers from './pages/trade/Offers'
+import TradeProfile from './pages/trade/TradeProfile'
+import TradeReceipts from './pages/trade/Receipts'
 import Dashboard from './pages/Dashboard'
 import Hives from './pages/HivesWorkspace'
 import BeehiveMonitor from './pages/BeehiveMonitorIntegrated'
@@ -23,9 +28,12 @@ import Help from './pages/Help'
 import Notifications from './pages/Notifications'
 import Settings from './pages/Settings'
 import PublicVerify from './pages/PublicVerify'
+import PwaUpdate from './PwaUpdate'
 
 export default function App() {
   return (
+    <>
+    <PwaUpdate />
     <Routes>
 
       <Route
@@ -37,6 +45,14 @@ export default function App() {
         path="/login"
         element={<Login />}
       />
+
+      <Route path="/register" element={<Register />} />
+
+      {/* Wholesaler / trader / packer workspace */}
+      <Route path="/trade" element={<TradeMarket />} />
+      <Route path="/trade/offers" element={<TradeOffers />} />
+      <Route path="/trade/profile" element={<TradeProfile />} />
+      <Route path="/trade/receipts" element={<TradeReceipts />} />
 
       {/* Public consumer verification, opened by scanning a bottle QR code */}
       <Route
@@ -155,5 +171,6 @@ export default function App() {
       />
 
     </Routes>
+    </>
   )
 }

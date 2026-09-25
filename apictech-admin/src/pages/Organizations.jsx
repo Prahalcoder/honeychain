@@ -1,11 +1,12 @@
 import { useState } from 'react'
-import { Ban, Blocks, CalendarClock, ChevronRight, Power, RotateCcw, Search } from 'lucide-react'
+import { Ban, Blocks, CalendarClock, ChevronRight, FileText, Power, RotateCcw, Search } from 'lucide-react'
 
-import { api, useLive } from '../api'
+import { API_URL, api, session, useLive } from '../api'
 import {
   Empty, ErrorNote, LiveBadge, Modal, ORG_TYPE_LABELS, PageIntro, StatusPill, fmtDate, fmtDateTime, inr, initials, kg, monthLabel, num,
 } from '../ui'
 import { DecisionModal } from './Requests'
+import OrgProfile, { CategoryTag, TradeActivity } from './OrgProfile'
 
 const FILTERS = [
   ['ALL', 'All'],
@@ -19,13 +20,18 @@ const FILTERS = [
 
 const TONES = ['gold', 'green', 'blue', 'rose', 'violet']
 
+// Beekeepers (individuals, firms, societies, companies) and wholesalers share the directory.
+const KINDS = [['ALL', 'Everyone'], ['KEEPERS', 'Beekeepers'], ['WHOLESALER', 'Wholesalers']]
+const kindMatches = (kind, org) => kind === 'ALL' || (kind === 'WHOLESALER' ? org.type === 'TRADER' : org.type !== 'TRADER')
+
 export default function Organizations({ user, params, go, notify, refreshOverview }) {
   const [status, setStatus] = useState(params.status || 'ALL')
   const [query, setQuery] = useState('')
   const [selectedId, setSelectedId] = useState(params.orgId || null)
+  const [kind, setKind] = useState('ALL')
 
   const list = useLive(`/admin/organizations?status=${status}&q=${encodeURIComponent(query)}`, { interval: 5000 })
-  const organizations = list.data || []
+  const organizations = (list.data || []).filter((org) => kindMatches(kind, org))
 
   return (
     <>
@@ -40,6 +46,9 @@ export default function Organizations({ user, params, go, notify, refreshOvervie
         <div className="searchbox"><Search size={17} /><input placeholder="Search by name, code or registration no." value={query} onChange={(event) => setQuery(event.target.value)} /></div>
         <div className="chips">{FILTERS.map(([value, label]) => <button key={value} className={`chip ${status === value ? 'active' : ''}`} onClick={() => setStatus(value)}>{label}</button>)}</div>
       </div>
+      <div className="toolbar">
+        <div className="chips">{KINDS.map(([value, label]) => <button key={value} className={`chip ${kind === value ? 'active' : ''}`} onClick={() => setKind(value)}>{label}</button>)}</div>
+      </div>
 
       <section className="panel org-panel">
         {organizations.length === 0 ? <Empty>No organisations match this filter.</Empty> : (
@@ -49,6 +58,7 @@ export default function Organizations({ user, params, go, notify, refreshOvervie
                 <div className="org-card-top"><div className={`org-avatar ${TONES[index % TONES.length]}`}>{initials(org.name)}</div><StatusPill status={org.status} /></div>
                 <h3>{org.name}</h3>
                 <p>{org.code} <i /> {ORG_TYPE_LABELS[org.type] || org.type}</p>
+                <div className="org-kind"><CategoryTag category={org.category} sample={org.profileSample} /></div>
                 <div className="org-meta"><span><strong>{org.batchCount}</strong> batches</span><span><strong>{num(org.bottles)}</strong> bottles</span><span><strong>{Math.round(org.honeyKg)}</strong> kg</span></div>
                 <div className="org-location"><span>{org.region}, {org.state}</span><ChevronRight size={16} /></div>
               </button>
@@ -79,7 +89,9 @@ function OrganizationDetail({ id, user, onClose, onChanged, notify, onOpenChain,
 
   if (!detail.data) return <Modal title="Loading organisation…" onClose={onClose} wide><Empty>{detail.error || 'Loading…'}</Empty></Modal>
 
-  const { organization: org, batches, monthlyIncome, decisions, closure } = detail.data
+  const { organization: org, batches, documents, documentsRequired, profile, trade, monthlyIncome, decisions, closure } = detail.data
+  const missingDocuments = (documents || []).filter((doc) => doc.required && !doc.fileName)
+  const trader = org.type === 'TRADER'
   const senior = user.role !== 'REGIONAL_OFFICER'
 
   async function submitDecision(note) {
@@ -94,6 +106,8 @@ function OrganizationDetail({ id, user, onClose, onChanged, notify, onOpenChain,
     <Modal title={org.name} eyebrow={`${org.code} · ${ORG_TYPE_LABELS[org.type] || org.type}`} onClose={onClose} wide>
       <div className="button-row" style={{ marginTop: 10 }}>
         <StatusPill status={org.status} />
+        <CategoryTag category={profile?.category} sample={profile?.sample} />
+        {!trader && <SellingModeControl org={org} senior={senior} onChanged={() => { detail.refresh(); notify(`Selling mode updated for ${org.name}`) }} />}
         {org.status === 'PENDING_APPROVAL' && <>
           <button className="small-button approve" onClick={() => setDecision({ kind: 'org', value: 'APPROVED', item: org })}>Accept into KVIC chain</button>
           <button className="small-button danger" onClick={() => setDecision({ kind: 'org', value: 'REJECTED', item: org })}>Reject</button>
@@ -106,28 +120,45 @@ function OrganizationDetail({ id, user, onClose, onChanged, notify, onOpenChain,
       </div>
 
       <div className="kv-grid">
-        <div><span>Registration no. ({org.registrationBody || 'KVIC'})</span><strong>{org.registrationId}</strong></div>
+        <div><span>{trader ? 'NBB trader / packer no.' : `Registration no. (${org.registrationBody || 'KVIC'})`}</span><strong>{org.registrationId}</strong></div>
         <div><span>FSSAI licence</span><strong>{org.fssai}</strong></div>
         <div><span>GSTIN</span><strong>{org.gstin || 'Not provided'}</strong></div>
         <div><span>Owner</span><strong>{org.ownerName}</strong></div>
         <div><span>Phone · email</span><strong>{[org.phone, org.email].filter(Boolean).join(' · ') || '—'}</strong></div>
         <div><span>Jurisdiction</span><strong>{org.region}, {org.state}</strong></div>
         <div><span>Address{org.addressSample ? ' (sample)' : ''}</span><strong>{[org.addressLine, org.locality, org.district].filter(Boolean).join(', ') || '—'}{org.pincode ? ` – ${org.pincode}` : ''}</strong></div>
-        <div><span>Honey recorded</span><strong>{kg(org.honeyKg)} in {org.batchCount} batches</strong></div>
-        <div><span>Bottle QR codes</span><strong>{num(org.bottles)}</strong></div>
+        {!trader && <div><span>Honey recorded</span><strong>{kg(org.honeyKg)} in {org.batchCount} batches</strong></div>}
+        {!trader && <div><span>Bottle QR codes</span><strong>{num(org.bottles)}</strong></div>}
         {org.monthIncomeInr !== undefined && <div><span>Income this month</span><strong>{inr(org.monthIncomeInr)}</strong></div>}
       </div>
 
-      <h3 className="section-title">Batches</h3>
-      {batches.length === 0 ? <p className="note">No batches recorded yet.</p> : (
+      <h3 className="section-title">Registration details</h3>
+      <OrgProfile profile={profile} />
+
+      <h3 className="section-title">Documents</h3>
+      {missingDocuments.length > 0 && org.status === 'PENDING_APPROVAL' && (
+        <p className="note" style={{ color: '#b45309' }}>
+          Not uploaded yet: {missingDocuments.map((doc) => doc.label).join('; ')}.{documentsRequired ? ' They must be on file before this company can be approved.' : ' Ask the applicant for them before approving.'}
+        </p>
+      )}
+      <div className="doc-list">
+        {(documents || []).map((doc) => <DocumentRow key={doc.docType} doc={doc} orgId={org.id} />)}
+      </div>
+
+      <h3 className="section-title">Wholesale offers {trader ? 'made' : 'received'}</h3>
+      <TradeActivity trade={trade} />
+
+      {!trader && <h3 className="section-title">Batches</h3>}
+      {trader ? null : batches.length === 0 ? <p className="note">No batches recorded yet.</p> : (
         <div className="table-scroll">
           <table className="dtable">
-            <thead><tr><th>Batch</th><th>Honey</th><th className="num">Quantity</th><th>Harvested</th><th className="num">Bottles</th><th>Lab</th><th>Status</th></tr></thead>
+            <thead><tr><th>Batch</th><th>Honey</th><th className="num">Quantity</th><th>Harvested</th><th className="num">Bottles</th><th>Lab</th><th>Status</th><th>Recorded</th></tr></thead>
             <tbody>{batches.map((batch) => (
               <tr key={batch.code}>
                 <td><strong>{batch.code}</strong></td><td>{batch.honeyType}</td><td className="num">{kg(batch.quantityKg)}</td>
                 <td>{fmtDate(batch.harvestDate)}</td><td className="num">{batch.bottles}</td>
                 <td>{batch.labStatus ? <StatusPill status={batch.labStatus} /> : <small>Not shared</small>}</td><td><StatusPill status={batch.status} /></td>
+                <td><RecordedVia batch={batch} /></td>
               </tr>
             ))}</tbody>
           </table>
@@ -192,5 +223,66 @@ function StartClosure({ org, onClose, onDone }) {
         <div className="button-row"><button className="primary-button danger-fill">Start closure</button><button type="button" className="secondary-button" onClick={onClose}>Cancel</button></div>
       </form>
     </Modal>
+  )
+}
+
+// How a batch reached the ledger: typed in by the keeper (the normal case, shown as nothing extra), or
+// recorded on the keeper's phone with no signal and uploaded once one came back. Admin-only: the QR code and public verify page never show this.
+function RecordedVia({ batch }) {
+  if (!batch.recordedVia || batch.recordedVia === 'APP') return <small className="note">Keeper</small>
+  return <em className="status blue" title={`Recorded offline at ${batch.offlineRecordedAt ? fmtDateTime(batch.offlineRecordedAt) : 'an unknown time'}, uploaded ${batch.syncedAt ? fmtDateTime(batch.syncedAt) : 'later'}`}>Offline, synced</em>
+}
+
+// The documents the company's registration category needs (bee-colony photo, ID proof, FSSAI, bye-laws, trade
+// licence ...), a PDF or a photo each, uploaded at registration or later. Missing ones still show, marked required.
+
+function DocumentRow({ doc, orgId }) {
+  const [error, setError] = useState('')
+
+  async function open() {
+    setError('')
+    try {
+      const response = await fetch(`${API_URL}/admin/organizations/${orgId}/documents/${doc.docType}`, { headers: { Authorization: `Bearer ${session.token}` } })
+      if (!response.ok) throw new Error((await response.json().catch(() => ({}))).message || 'The file could not be opened')
+      const url = URL.createObjectURL(await response.blob())
+      window.open(url, '_blank', 'noopener')
+      window.setTimeout(() => URL.revokeObjectURL(url), 60000)
+    } catch (openError) { setError(openError.message) }
+  }
+
+  return (
+    <div className="doc-row">
+      <FileText size={17} />
+      {doc.fileName
+        ? <><button type="button" className="text-button" onClick={open}>{doc.label}</button><span>{doc.fileName} · {doc.contentType === 'application/pdf' ? 'PDF' : 'photo'} · {fileSizeLabel(doc.sizeBytes)} · uploaded {fmtDateTime(doc.uploadedAt)}</span></>
+        : <span style={doc.required ? { color: '#b45309' } : undefined}>{doc.label}: {doc.required ? 'required, not uploaded.' : 'not uploaded (optional).'}</span>}
+      {error && <small style={{ color: '#b91c1c' }}>{error}</small>}
+    </div>
+  )
+}
+
+const fileSizeLabel = (bytes) => (bytes >= 1048576 ? `${(bytes / 1048576).toFixed(1)} MB` : `${Math.max(1, Math.round(bytes / 1024))} KB`)
+
+// How this company sells honey. Every officer sees it; only a state officer or the KVIC head can change it.
+function SellingModeControl({ org, senior, onChanged }) {
+  const [saving, setSaving] = useState(false)
+  const label = { RETAIL: 'Retail (jars, QR)', WHOLESALE: 'Wholesale only', BOTH: 'Retail + wholesale' }[org.sellingMode] || org.sellingMode
+
+  if (!senior) return <em className="status blue" title="How this company sells honey">{label}</em>
+
+  async function change(event) {
+    const mode = event.target.value
+    if (mode === org.sellingMode) return
+    setSaving(true)
+    try { await api(`/admin/organizations/${org.id}/selling-mode`, { method: 'PUT', body: { sellingMode: mode } }); onChanged() }
+    finally { setSaving(false) }
+  }
+
+  return (
+    <select value={org.sellingMode || 'BOTH'} onChange={change} disabled={saving} className="mode-select" title="How this company sells honey">
+      <option value="RETAIL">Retail (jars, QR)</option>
+      <option value="WHOLESALE">Wholesale only</option>
+      <option value="BOTH">Retail + wholesale</option>
+    </select>
   )
 }

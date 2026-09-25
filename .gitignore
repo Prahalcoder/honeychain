@@ -35,3 +35,6 @@ Honey-Chain-Demo-Explorer.html
 *.log
 .DS_Store
 Thumbs.db
+
+# Demo login sheet (credentials, not for the public repo)
+Honey-Chain-Logins.pdf

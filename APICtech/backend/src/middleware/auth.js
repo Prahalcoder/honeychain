@@ -87,3 +87,16 @@ export function requireApprovedOrg(req, res, next) {
 
   next()
 }
+
+// Packaging, QR codes and Sellers nearby listings are for a company that registered to sell packaged jars. A
+// wholesale-only company (no way to print or stick a QR label) skips this entirely and only ever sells loose
+// honey by invoice, until a senior officer switches the company to RETAIL or BOTH.
+export function requireRetailSelling(req, res, next) {
+  if (req.org.selling_mode === 'WHOLESALE') {
+    return res.status(403).json({
+      code: 'WHOLESALE_ONLY',
+      message: 'This company registered as wholesale-only (loose honey, no jars or QR codes). Ask KVIC to enable packaged selling if that has changed.',
+    })
+  }
+  next()
+}

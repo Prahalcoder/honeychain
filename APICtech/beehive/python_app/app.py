@@ -2,13 +2,30 @@ import time
 import threading
 import requests
 import os
+import re
 import json
 from flask import Flask, render_template, request, jsonify, send_file, Response
 from database import BeehiveDatabase
 from camera_manager import CameraManager
 from insights import analyze as analyze_hive
+from alerts import AlertWorker
 
 app = Flask(__name__)
+
+# The Keeper app (another port on the same computer or Wi-Fi) calls this API from the browser. Only origins on
+# this machine or a private network are allowed, the same rule the Honey Chain API uses (config/network.js).
+PRIVATE_ORIGIN = re.compile(r"^https?://(localhost|127\.0\.0\.1|10\.\d+\.\d+\.\d+|192\.168\.\d+\.\d+|172\.(1[6-9]|2\d|3[01])\.\d+\.\d+)(:\d+)?$")
+
+
+@app.after_request
+def allow_keeper_app(response):
+    origin = request.headers.get("Origin", "")
+    if origin and PRIVATE_ORIGIN.match(origin):
+        response.headers["Access-Control-Allow-Origin"] = origin
+        response.headers["Vary"] = "Origin"
+        response.headers["Access-Control-Allow-Headers"] = "Content-Type"
+        response.headers["Access-Control-Allow-Methods"] = "GET, POST, DELETE, OPTIONS"
+    return response
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 db = BeehiveDatabase(
@@ -361,10 +378,53 @@ def download_log_file():
         return jsonify({"status": "error", "message": "Log file not found for specified date"}), 404
 
 # ------------------------------
+# ------- Hive-health SMS alerts (no GSM module: the Honey Chain API sends the SMS) -----------
+# ------------------------------
+def _connected():
+    with telemetry_lock:
+        return is_connected
+
+alert_worker = AlertWorker(
+    get_link=lambda: server_config.get("alert_link"),
+    get_readings=lambda: db.get_recent_readings(limit=200),
+    is_connected=_connected,
+    analyze=analyze_hive,
+)
+
+
+@app.route("/api/alerts/link", methods=["GET", "POST", "DELETE", "OPTIONS"])
+def alert_link():
+    if request.method == "OPTIONS":
+        return ("", 204)
+    if request.method == "GET":
+        link = server_config.get("alert_link") or {}
+        return jsonify({"linked": bool(link.get("token")), "hive_code": link.get("hive_code"), "api_url": link.get("api_url"), "worker": alert_worker.status()})
+    if request.method == "DELETE":
+        server_config.pop("alert_link", None)
+        save_config(server_config)
+        alert_worker.linked_changed(False)
+        return jsonify({"linked": False})
+
+    body = request.get_json(silent=True) or {}
+    token = str(body.get("token", ""))
+    api_url = str(body.get("api_url", "")).strip()
+    hive_code = str(body.get("hive_code", "")).strip().upper()[:20]
+    if not re.match(r"^hcm_[A-Za-z0-9_-]{20,100}$", token):
+        return jsonify({"message": "Invalid monitor token"}), 400
+    if not re.match(r"^https?://[^\s/]+(/[^\s]*)?$", api_url):
+        return jsonify({"message": "Invalid API address"}), 400
+    server_config["alert_link"] = {"token": token, "api_url": api_url, "hive_code": hive_code}
+    save_config(server_config)
+    alert_worker.linked_changed(True)
+    return jsonify({"linked": True, "hive_code": hive_code})
+
+
+# ------------------------------
 # ------- Start Background Polling Worker Thread -----------
 # ------------------------------
 poll_thread = threading.Thread(target=poll_esp32_background, daemon=True)
 poll_thread.start()
+alert_worker.start()
 
 if __name__ == "__main__":
     print("==================================================")
