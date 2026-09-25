@@ -1,0 +1,171 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif">
+<defs>
+<marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#0f766e"/></marker>
+<marker id="ahc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#f97360"/></marker>
+<pattern id="dots" width="28" height="28" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.4" fill="#d9e9e6"/></pattern>
+<filter id="sh" x="-5%" y="-5%" width="110%" height="120%"><feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#0a3d43" flood-opacity="0.12"/></filter>
+</defs>
+<rect width="1920" height="1080" fill="#f7fbfa"/><rect width="1920" height="1080" fill="url(#dots)"/>
+<rect x="0" y="0" width="1920" height="104" fill="#0a3d43"/>
+<rect x="0" y="100" width="1920" height="6" fill="#f5a524"/>
+<polygon points="90.0,37.0 90.0,67.0 64.0,82.0 38.0,67.0 38.0,37.0 64.0,22.0" fill="#f5a524"/>
+<polygon points="77.0,44.5 77.0,59.5 64.0,67.0 51.0,59.5 51.0,44.5 64.0,37.0" fill="#0a3d43"/>
+<text x="112" y="60" font-size="40" font-weight="700" fill="#ffffff" text-anchor="start" >System Architecture</text>
+<text x="112" y="88" font-size="20" font-weight="400" fill="#b9dcd8" text-anchor="start" >Four layers: people and devices, web apps, one secure API, and two independent sources of truth</text>
+<text x="1864" y="62" font-size="28" font-weight="700" fill="#f5a524" text-anchor="end" >Honey Chain</text>
+<text x="1864" y="88" font-size="17" font-weight="400" fill="#b9dcd8" text-anchor="end" >SIH 2026 · Problem 26021 · KVIC / MSME</text>
+<rect x="40" y="130" width="56" height="150" rx="18" fill="#e8f1f9" stroke="none" stroke-width="1.5"/>
+<g transform="translate(62,205.0) rotate(-90)"><text x="0" y="6" font-size="19" font-weight="700" fill="#0a3d43" text-anchor="middle" letter-spacing="1.5">USERS</text></g>
+<rect x="40" y="300" width="56" height="170" rx="18" fill="#e6f4f1" stroke="none" stroke-width="1.5"/>
+<g transform="translate(62,385.0) rotate(-90)"><text x="0" y="6" font-size="19" font-weight="700" fill="#0a3d43" text-anchor="middle" letter-spacing="1.5">WEB APPS</text></g>
+<rect x="40" y="490" width="56" height="300" rx="18" fill="#fff4d6" stroke="none" stroke-width="1.5"/>
+<g transform="translate(62,640.0) rotate(-90)"><text x="0" y="6" font-size="19" font-weight="700" fill="#0a3d43" text-anchor="middle" letter-spacing="1.5">SERVICES</text></g>
+<rect x="40" y="810" width="56" height="236" rx="18" fill="#efeafd" stroke="none" stroke-width="1.5"/>
+<g transform="translate(62,928.0) rotate(-90)"><text x="0" y="6" font-size="19" font-weight="700" fill="#0a3d43" text-anchor="middle" letter-spacing="1.5">DATA &amp; TRUST</text></g>
+<rect x="120" y="138" width="420" height="138" rx="16" fill="#fff" stroke="#7aa7d1" stroke-width="2" filter="url(#sh)"/>
+<text x="140" y="176" font-size="24" font-weight="700" fill="#1e4e79" text-anchor="start" >Beekeeper</text>
+<text x="140" y="208" font-size="17" font-weight="400" fill="#475569" text-anchor="start" >Registers, records hives, harvests,</text>
+<text x="140" y="232" font-size="17" font-weight="400" fill="#475569" text-anchor="start" >sells, ships orders</text>
+<text x="140" y="260" font-size="15" font-weight="600" fill="#7aa7d1" text-anchor="start" >Phone or laptop</text>
+<rect x="565" y="138" width="420" height="138" rx="16" fill="#fff" stroke="#7aa7d1" stroke-width="2" filter="url(#sh)"/>
+<text x="585" y="176" font-size="24" font-weight="700" fill="#1e4e79" text-anchor="start" >KVIC officers</text>
+<text x="585" y="208" font-size="17" font-weight="400" fill="#475569" text-anchor="start" >Regional · State · Head: approve,</text>
+<text x="585" y="232" font-size="17" font-weight="400" fill="#475569" text-anchor="start" >verify labs, inspect, close</text>
+<text x="585" y="260" font-size="15" font-weight="600" fill="#7aa7d1" text-anchor="start" >Phone or laptop</text>
+<rect x="1010" y="138" width="420" height="138" rx="16" fill="#fff" stroke="#7aa7d1" stroke-width="2" filter="url(#sh)"/>
+<text x="1030" y="176" font-size="24" font-weight="700" fill="#1e4e79" text-anchor="start" >Consumer / buyer</text>
+<text x="1030" y="208" font-size="17" font-weight="400" fill="#475569" text-anchor="start" >Scans jar QR, checks the batch,</text>
+<text x="1030" y="232" font-size="17" font-weight="400" fill="#475569" text-anchor="start" >orders from a seller nearby</text>
+<text x="1030" y="260" font-size="15" font-weight="600" fill="#7aa7d1" text-anchor="start" >Phone, no account</text>
+<rect x="1455" y="138" width="420" height="138" rx="16" fill="#fff" stroke="#7aa7d1" stroke-width="2" filter="url(#sh)"/>
+<text x="1475" y="176" font-size="24" font-weight="700" fill="#1e4e79" text-anchor="start" >ESP32 hive device</text>
+<text x="1475" y="208" font-size="17" font-weight="400" fill="#475569" text-anchor="start" >Temp ×2, humidity, gas, camera;</text>
+<text x="1475" y="232" font-size="17" font-weight="400" fill="#475569" text-anchor="start" >fan and heater relays</text>
+<text x="1475" y="260" font-size="15" font-weight="600" fill="#7aa7d1" text-anchor="start" >Wi-Fi, HTTP JSON</text>
+<rect x="120" y="312" width="370" height="150" rx="16" fill="#fff" stroke="#0f766e" stroke-width="2.5" filter="url(#sh)"/>
+<rect x="120" y="312" width="370" height="44" rx="16" fill="#0f766e"/><rect x="120" y="336" width="370" height="20" fill="#0f766e"/>
+<text x="138" y="342" font-size="23" font-weight="700" fill="#fff" text-anchor="start" >Keeper app</text>
+<text x="472" y="342" font-size="20" font-weight="700" fill="#fff" text-anchor="end" >:5173</text>
+<text x="138" y="384" font-size="17" font-weight="700" fill="#0f766e" text-anchor="start" >React 19 · Vite · Tailwind</text>
+<text x="138" y="410" font-size="16" font-weight="400" fill="#475569" text-anchor="start" >Hives · Harvests · Lab</text>
+<text x="138" y="432" font-size="16" font-weight="400" fill="#475569" text-anchor="start" >Packaging · Finance · Orders</text>
+<text x="138" y="454" font-size="14" font-weight="600" fill="#0f766e" text-anchor="start" >English · Hindi · phone-friendly</text>
+<rect x="515" y="312" width="370" height="150" rx="16" fill="#fff" stroke="#2563eb" stroke-width="2.5" filter="url(#sh)"/>
+<rect x="515" y="312" width="370" height="44" rx="16" fill="#2563eb"/><rect x="515" y="336" width="370" height="20" fill="#2563eb"/>
+<text x="533" y="342" font-size="23" font-weight="700" fill="#fff" text-anchor="start" >Admin portal</text>
+<text x="867" y="342" font-size="20" font-weight="700" fill="#fff" text-anchor="end" >:5174</text>
+<text x="533" y="384" font-size="17" font-weight="700" fill="#2563eb" text-anchor="start" >React 19 · Vite · Tailwind</text>
+<text x="533" y="410" font-size="16" font-weight="400" fill="#475569" text-anchor="start" >Approvals · Lab review</text>
+<text x="533" y="432" font-size="16" font-weight="400" fill="#475569" text-anchor="start" >Inspections · Closure · Notices</text>
+<text x="533" y="454" font-size="14" font-weight="600" fill="#2563eb" text-anchor="start" >English · Hindi · phone-friendly</text>
+<rect x="910" y="312" width="370" height="150" rx="16" fill="#fff" stroke="#15803d" stroke-width="2.5" filter="url(#sh)"/>
+<rect x="910" y="312" width="370" height="44" rx="16" fill="#15803d"/><rect x="910" y="336" width="370" height="20" fill="#15803d"/>
+<text x="928" y="342" font-size="23" font-weight="700" fill="#fff" text-anchor="start" >Public website</text>
+<text x="1262" y="342" font-size="20" font-weight="700" fill="#fff" text-anchor="end" >:5175</text>
+<text x="928" y="384" font-size="17" font-weight="700" fill="#15803d" text-anchor="start" >React 19 · Vite · Tailwind</text>
+<text x="928" y="410" font-size="16" font-weight="400" fill="#475569" text-anchor="start" >Verify QR · Sellers nearby</text>
+<text x="928" y="432" font-size="16" font-weight="400" fill="#475569" text-anchor="start" >Order and track</text>
+<text x="928" y="454" font-size="14" font-weight="600" fill="#15803d" text-anchor="start" >English · Hindi · phone-friendly</text>
+<rect x="120" y="500" width="1160" height="290" rx="16" fill="#fffdf5" stroke="#f5a524" stroke-width="3" filter="url(#sh)"/>
+<rect x="120" y="500" width="1160" height="46" rx="16" fill="#f5a524"/><rect x="120" y="528" width="1160" height="18" fill="#f5a524"/>
+<text x="140" y="531" font-size="24" font-weight="700" fill="#0a3d43" text-anchor="start" >Honey Chain API</text>
+<text x="1262" y="531" font-size="19" font-weight="700" fill="#0a3d43" text-anchor="end" >Node.js 20+ · Express 5 · :5000</text>
+<rect x="140" y="558" width="76" height="34" rx="17" fill="#ffffff" stroke="#f97360" stroke-width="1.6"/>
+<text x="178.2" y="581" font-size="15" font-weight="600" fill="#f97360" text-anchor="middle" >Helmet</text>
+<rect x="224.4" y="558" width="160" height="34" rx="17" fill="#ffffff" stroke="#f97360" stroke-width="1.6"/>
+<text x="304.6" y="581" font-size="15" font-weight="600" fill="#f97360" text-anchor="middle" >CORS (LAN aware)</text>
+<rect x="392.8" y="558" width="118" height="34" rx="17" fill="#ffffff" stroke="#f97360" stroke-width="1.6"/>
+<text x="452.0" y="581" font-size="15" font-weight="600" fill="#f97360" text-anchor="middle" >Rate limits</text>
+<rect x="519.2" y="558" width="160" height="34" rx="17" fill="#ffffff" stroke="#f97360" stroke-width="1.6"/>
+<text x="599.4000000000001" y="581" font-size="15" font-weight="600" fill="#f97360" text-anchor="middle" >JWT 8 h + bcrypt</text>
+<rect x="687.6" y="558" width="194" height="34" rx="17" fill="#ffffff" stroke="#f97360" stroke-width="1.6"/>
+<text x="784.6" y="581" font-size="15" font-weight="600" fill="#f97360" text-anchor="middle" >Roles &amp; jurisdiction</text>
+<rect x="140" y="612" width="268" height="164" rx="16" fill="#fff" stroke="#0f766e" stroke-width="1.8"/>
+<text x="154" y="640" font-size="19" font-weight="700" fill="#0f766e" text-anchor="start" >Routes</text>
+<text x="154" y="672" font-size="16" font-weight="400" fill="#1f3b3f" text-anchor="start" >auth · company · platform</text>
+<text x="154" y="702" font-size="16" font-weight="400" fill="#1f3b3f" text-anchor="start" >sales · shop · shopKeeper</text>
+<text x="154" y="732" font-size="16" font-weight="400" fill="#1f3b3f" text-anchor="start" >admin · traceability</text>
+<rect x="424" y="612" width="268" height="164" rx="16" fill="#fff" stroke="#2563eb" stroke-width="1.8"/>
+<text x="438" y="640" font-size="19" font-weight="700" fill="#2563eb" text-anchor="start" >Business services</text>
+<text x="438" y="672" font-size="16" font-weight="400" fill="#1f3b3f" text-anchor="start" >custody · batches · closure</text>
+<text x="438" y="702" font-size="16" font-weight="400" fill="#1f3b3f" text-anchor="start" >inspections · reports · tickets</text>
+<text x="438" y="732" font-size="16" font-weight="400" fill="#1f3b3f" text-anchor="start" >offices · announcements</text>
+<rect x="708" y="612" width="268" height="164" rx="16" fill="#fff" stroke="#15803d" stroke-width="1.8"/>
+<text x="722" y="640" font-size="19" font-weight="700" fill="#15803d" text-anchor="start" >Intelligence</text>
+<text x="722" y="672" font-size="16" font-weight="400" fill="#1f3b3f" text-anchor="start" >Lab analysis (rule engine)</text>
+<text x="722" y="702" font-size="16" font-weight="400" fill="#1f3b3f" text-anchor="start" >Hive insights, finance trend</text>
+<text x="722" y="732" font-size="16" font-weight="400" fill="#1f3b3f" text-anchor="start" >Notification feed</text>
+<rect x="992" y="612" width="268" height="164" rx="16" fill="#fff" stroke="#6d5bd0" stroke-width="1.8"/>
+<text x="1006" y="640" font-size="19" font-weight="700" fill="#6d5bd0" text-anchor="start" >Trust services</text>
+<text x="1006" y="672" font-size="16" font-weight="400" fill="#1f3b3f" text-anchor="start" >Ledger blocks (hash chain)</text>
+<text x="1006" y="702" font-size="16" font-weight="400" fill="#1f3b3f" text-anchor="start" >Chain outbox + relayer</text>
+<text x="1006" y="732" font-size="16" font-weight="400" fill="#1f3b3f" text-anchor="start" >EIP-712 signing · IPFS CIDs</text>
+<rect x="1310" y="500" width="570" height="290" rx="16" fill="#fff" stroke="#f97360" stroke-width="3" filter="url(#sh)"/>
+<rect x="1310" y="500" width="570" height="46" rx="16" fill="#f97360"/><rect x="1310" y="528" width="570" height="18" fill="#f97360"/>
+<text x="1330" y="531" font-size="24" font-weight="700" fill="#fff" text-anchor="start" >Hive monitor service</text>
+<text x="1862" y="531" font-size="19" font-weight="700" fill="#fff" text-anchor="end" >Python · Flask · :5001</text>
+<circle cx="1336" cy="590" r="4" fill="#f97360"/>
+<text x="1350" y="596" font-size="18" font-weight="400" fill="#1f3b3f" text-anchor="start" >Receives ESP32 readings over Wi-Fi</text>
+<circle cx="1336" cy="624" r="4" fill="#f97360"/>
+<text x="1350" y="630" font-size="18" font-weight="400" fill="#1f3b3f" text-anchor="start" >SQLite log per day, JSON export</text>
+<circle cx="1336" cy="658" r="4" fill="#f97360"/>
+<text x="1350" y="664" font-size="18" font-weight="400" fill="#1f3b3f" text-anchor="start" >OpenCV camera stream and snapshots</text>
+<circle cx="1336" cy="692" r="4" fill="#f97360"/>
+<text x="1350" y="698" font-size="18" font-weight="400" fill="#1f3b3f" text-anchor="start" >Hive-health analysis (rule based)</text>
+<circle cx="1336" cy="726" r="4" fill="#f97360"/>
+<text x="1350" y="732" font-size="18" font-weight="400" fill="#1f3b3f" text-anchor="start" >Fan / heater control decisions</text>
+<text x="1330" y="770" font-size="16" font-weight="600" fill="#f97360" text-anchor="start" >Live charts shown in the Keeper app</text>
+<rect x="120" y="830" width="560" height="200" rx="16" fill="#fff" stroke="#6d5bd0" stroke-width="2.5" filter="url(#sh)"/>
+<text x="140" y="866" font-size="22" font-weight="700" fill="#6d5bd0" text-anchor="start" >PostgreSQL 18 (local, :54329)</text>
+<text x="140" y="896" font-size="16" font-weight="600" fill="#475569" text-anchor="start" >One database, many schemas</text>
+<rect x="140" y="912" width="278" height="34" rx="17" fill="#ffffff" stroke="#6d5bd0" stroke-width="1.6"/>
+<text x="279.0" y="935" font-size="15" font-weight="600" fill="#6d5bd0" text-anchor="middle" >public: users, batches, ledger</text>
+<rect x="140" y="956" width="236" height="34" rx="17" fill="#ffffff" stroke="#6d5bd0" stroke-width="1.6"/>
+<text x="258.0" y="979" font-size="15" font-weight="600" fill="#6d5bd0" text-anchor="middle" >co_&lt;org&gt;: private data ×N</text>
+<text x="140" y="1010" font-size="15" font-weight="400" fill="#475569" text-anchor="start" >Row-level security · immutable ledger triggers</text>
+<rect x="710" y="830" width="560" height="200" rx="16" fill="#fff" stroke="#6d5bd0" stroke-width="2.5" filter="url(#sh)"/>
+<text x="730" y="866" font-size="22" font-weight="700" fill="#6d5bd0" text-anchor="start" >Local Ethereum chain (Hardhat, :8545)</text>
+<text x="730" y="896" font-size="16" font-weight="600" fill="#475569" text-anchor="start" >Solidity 0.8 · HoneyChain.sol · ethers v6</text>
+<rect x="730" y="912" width="160" height="34" rx="17" fill="#ffffff" stroke="#6d5bd0" stroke-width="1.6"/>
+<text x="810.2" y="935" font-size="15" font-weight="600" fill="#6d5bd0" text-anchor="middle" >Batch registered</text>
+<rect x="900.4" y="912" width="152" height="34" rx="17" fill="#ffffff" stroke="#6d5bd0" stroke-width="1.6"/>
+<text x="976.4" y="935" font-size="15" font-weight="600" fill="#6d5bd0" text-anchor="middle" >Batch certified</text>
+<rect x="1062.4" y="912" width="160" height="34" rx="17" fill="#ffffff" stroke="#6d5bd0" stroke-width="1.6"/>
+<text x="1142.6000000000001" y="935" font-size="15" font-weight="600" fill="#6d5bd0" text-anchor="middle" >Jars Merkle root</text>
+<rect x="730" y="956" width="135" height="34" rx="17" fill="#ffffff" stroke="#6d5bd0" stroke-width="1.6"/>
+<text x="797.6" y="979" font-size="15" font-weight="600" fill="#6d5bd0" text-anchor="middle" >Ledger anchor</text>
+<text x="730" y="1010" font-size="15" font-weight="400" fill="#475569" text-anchor="start" >Public Amoy testnet optional (set CHAIN_RPC_URL)</text>
+<rect x="1310" y="830" width="570" height="200" rx="16" fill="#fff" stroke="#6d5bd0" stroke-width="2.5" filter="url(#sh)"/>
+<text x="1330" y="866" font-size="22" font-weight="700" fill="#6d5bd0" text-anchor="start" >Files and backups</text>
+<rect x="1330" y="890" width="152" height="34" rx="17" fill="#ffffff" stroke="#6d5bd0" stroke-width="1.6"/>
+<text x="1406.0" y="913" font-size="15" font-weight="600" fill="#6d5bd0" text-anchor="middle" >IPFS-style CIDs</text>
+<rect x="1492.0" y="890" width="160" height="34" rx="17" fill="#ffffff" stroke="#6d5bd0" stroke-width="1.6"/>
+<text x="1572.2" y="913" font-size="15" font-weight="600" fill="#6d5bd0" text-anchor="middle" >Lab PDFs (10 MB)</text>
+<rect x="1662.4" y="890" width="169" height="34" rx="17" fill="#ffffff" stroke="#6d5bd0" stroke-width="1.6"/>
+<text x="1746.8000000000002" y="913" font-size="15" font-weight="600" fill="#6d5bd0" text-anchor="middle" >Hourly DB backups</text>
+<rect x="1330" y="934" width="135" height="34" rx="17" fill="#ffffff" stroke="#6d5bd0" stroke-width="1.6"/>
+<text x="1397.6" y="957" font-size="15" font-weight="600" fill="#6d5bd0" text-anchor="middle" >Validator key</text>
+<text x="1330" y="1010" font-size="15" font-weight="400" fill="#475569" text-anchor="start" >Optional: Supabase / real IPFS node via env</text>
+<line x1="300" y1="278" x2="300" y2="310" stroke="#0f766e" stroke-width="3" marker-end="url(#ah)" marker-start="url(#ah)"/>
+<rect x="350" y="281" width="59" height="26" rx="13" fill="#f7fbfa" stroke="#0f766e" stroke-width="1.2"/>
+<text x="380" y="300" font-size="15" font-weight="600" fill="#0f766e" text-anchor="middle" >HTTPS</text>
+<line x1="700" y1="278" x2="700" y2="310" stroke="#0f766e" stroke-width="3" marker-end="url(#ah)" marker-start="url(#ah)"/>
+<line x1="1095" y1="278" x2="1095" y2="310" stroke="#0f766e" stroke-width="3" marker-end="url(#ah)" marker-start="url(#ah)"/>
+<line x1="1750" y1="278" x2="1750" y2="498" stroke="#f97360" stroke-width="3" marker-end="url(#ahc)"/>
+<rect x="1699" y="383" width="102" height="26" rx="13" fill="#f7fbfa" stroke="#f97360" stroke-width="1.2"/>
+<text x="1750" y="402" font-size="15" font-weight="600" fill="#f97360" text-anchor="middle" >Wi-Fi JSON</text>
+<line x1="300" y1="462" x2="300" y2="498" stroke="#0f766e" stroke-width="3" marker-end="url(#ah)" marker-start="url(#ah)"/>
+<rect x="344" y="465" width="102" height="26" rx="13" fill="#f7fbfa" stroke="#0f766e" stroke-width="1.2"/>
+<text x="395" y="484" font-size="15" font-weight="600" fill="#0f766e" text-anchor="middle" >REST + JWT</text>
+<line x1="700" y1="462" x2="700" y2="498" stroke="#0f766e" stroke-width="3" marker-end="url(#ah)" marker-start="url(#ah)"/>
+<line x1="1095" y1="462" x2="1095" y2="498" stroke="#0f766e" stroke-width="3" marker-end="url(#ah)" marker-start="url(#ah)"/>
+<line x1="400" y1="790" x2="400" y2="828" stroke="#0f766e" stroke-width="3" marker-end="url(#ah)" marker-start="url(#ah)"/>
+<rect x="379" y="797" width="42" height="26" rx="13" fill="#f7fbfa" stroke="#0f766e" stroke-width="1.2"/>
+<text x="400" y="816" font-size="15" font-weight="600" fill="#0f766e" text-anchor="middle" >SQL</text>
+<line x1="990" y1="790" x2="990" y2="828" stroke="#0f766e" stroke-width="3" marker-end="url(#ah)" marker-start="url(#ah)"/>
+<rect x="948" y="797" width="85" height="26" rx="13" fill="#f7fbfa" stroke="#0f766e" stroke-width="1.2"/>
+<text x="990" y="816" font-size="15" font-weight="600" fill="#0f766e" text-anchor="middle" >JSON-RPC</text>
+<line x1="1240" y1="792" x2="1390" y2="828" stroke="#0f766e" stroke-width="3" marker-end="url(#ah)"/>
+<rect x="1263" y="795" width="93" height="26" rx="13" fill="#f7fbfa" stroke="#0f766e" stroke-width="1.2"/>
+<text x="1310" y="814" font-size="15" font-weight="600" fill="#0f766e" text-anchor="middle" >documents</text>
+</svg>

@@ -11,6 +11,7 @@ import {
 import { useNavigate, useParams } from 'react-router-dom'
 import MainLayout from '../layouts/MainLayout'
 import { BEEHIVE_API_URL } from '../lib/api'
+import HiveSmsAlerts, { linkMonitorToHive } from '../components/HiveSmsAlerts'
 
 const tabs = [
   ['dashboard', 'Live Dashboard & Trends', Gauge],
@@ -125,6 +126,8 @@ export default function BeehiveMonitorIntegrated() {
       setPolling(result.polling_active)
       if (result.polling_active) {
         localStorage.setItem('apictech_connected_hive', hiveId)
+        // The hive now being monitored is the one its SMS alerts are about.
+        linkMonitorToHive(hiveId).catch(() => { /* the SMS alerts card offers the link again */ })
       } else if (localStorage.getItem('apictech_connected_hive') === hiveId) {
         localStorage.removeItem('apictech_connected_hive')
       }
@@ -180,6 +183,7 @@ export default function BeehiveMonitorIntegrated() {
     {notice && <div className="mt-5 flex items-center justify-between rounded-xl border border-teal-200 bg-teal-50 p-4 text-sm text-teal-700"><span className="flex items-center gap-2"><CheckCircle2 size={17} />{notice}</span><button onClick={() => setNotice('')}><X size={16} /></button></div>}
     {!hiveConnected && !loading && <div className="mt-5 rounded-xl border border-orange-200 bg-orange-50 p-4 text-sm text-orange-800">This hive is offline. Connect an ESP32 here to make {hiveId} the active hive. Other hive pages remain offline.</div>}
     {tab === 'dashboard' && <HiveHealthCard insights={insights} hiveId={hiveId} />}
+    {tab === 'dashboard' && <HiveSmsAlerts hiveId={hiveId} />}
     {tab === 'dashboard' && <Dashboard telemetry={hiveConnected ? telemetry : {}} loading={loading} trends={trends} range={range} setRange={setRange} camera={camera} cameraDevice={cameraDevice} onCameraChange={selectCamera} onCameraToggle={toggleCamera} onSnapshot={() => setSnapshot(true)} />}
     {tab === 'logs' && <Logs logs={filteredLogs} summary={summary} dates={dates} date={date} setDate={setDate} search={search} setSearch={setSearch} refresh={refreshLogs} />}
     {tab === 'config' && <Config config={config} setConfig={setConfig} saveClimate={saveClimate} saveWifi={saveWifi} sync={refreshLive} />}

@@ -141,6 +141,13 @@ ${paint(33, '  On your phone (same Wi-Fi):')}
     Keeper                          http://${lanAddress()}:5173
     Admin                           http://${lanAddress()}:5174
     Public website                  http://${lanAddress()}:5175
+
+${paint(33, '  Install Keeper/Admin as an app (phone home screen):')}
+    Open the Keeper or Admin link above on the phone's browser, then use
+    "Add to Home screen" / "Install app" from the browser menu (Chrome)
+    or the Share sheet (iOS Safari). It launches full-screen, like a
+    native app, against this same server. See README for the optional
+    HTTPS mode that also adds offline caching and background updates.
 ` : ''}  Press Ctrl+C to stop everything.
 `)
 }, 6000)

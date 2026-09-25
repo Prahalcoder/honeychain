@@ -1,0 +1,129 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif">
+<defs>
+<marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#0f766e"/></marker>
+<marker id="ahc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#f97360"/></marker>
+<pattern id="dots" width="28" height="28" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.4" fill="#d9e9e6"/></pattern>
+<filter id="sh" x="-5%" y="-5%" width="110%" height="120%"><feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#0a3d43" flood-opacity="0.12"/></filter>
+</defs>
+<rect width="1920" height="1080" fill="#f7fbfa"/><rect width="1920" height="1080" fill="url(#dots)"/>
+<rect x="0" y="0" width="1920" height="104" fill="#0a3d43"/>
+<rect x="0" y="100" width="1920" height="6" fill="#f5a524"/>
+<polygon points="90.0,37.0 90.0,67.0 64.0,82.0 38.0,67.0 38.0,37.0 64.0,22.0" fill="#f5a524"/>
+<polygon points="77.0,44.5 77.0,59.5 64.0,67.0 51.0,59.5 51.0,44.5 64.0,37.0" fill="#0a3d43"/>
+<text x="112" y="60" font-size="40" font-weight="700" fill="#ffffff" text-anchor="start" >End-to-End Process</text>
+<text x="112" y="88" font-size="20" font-weight="400" fill="#b9dcd8" text-anchor="start" >From a hive to the buyer: every step is recorded, and officers verify what matters</text>
+<text x="1864" y="62" font-size="28" font-weight="700" fill="#f5a524" text-anchor="end" >Honey Chain</text>
+<text x="1864" y="88" font-size="17" font-weight="400" fill="#b9dcd8" text-anchor="end" >SIH 2026 · Problem 26021 · KVIC / MSME</text>
+<rect x="70" y="150" width="330" height="210" rx="16" fill="#fff" stroke="#0f766e" stroke-width="2.5" filter="url(#sh)"/>
+<circle cx="112" cy="196" r="26" fill="#0f766e"/>
+<text x="112" y="205" font-size="26" font-weight="700" fill="#fff" text-anchor="middle" >1</text>
+<text x="150" y="204" font-size="24" font-weight="700" fill="#0f766e" text-anchor="start" >Register</text>
+<text x="92" y="254" font-size="18" font-weight="400" fill="#1f3b3f" text-anchor="start" >Keeper signs up with FSSAI,</text>
+<text x="92" y="280" font-size="18" font-weight="400" fill="#1f3b3f" text-anchor="start" >address and region</text>
+<rect x="90" y="318" width="89.0" height="28" rx="14" fill="#0f766e22" stroke="none" stroke-width="1.5"/>
+<text x="103" y="338" font-size="15" font-weight="700" fill="#0f766e" text-anchor="start" >Keeper</text>
+<rect x="440" y="150" width="330" height="210" rx="16" fill="#fff" stroke="#2563eb" stroke-width="2.5" filter="url(#sh)"/>
+<circle cx="482" cy="196" r="26" fill="#2563eb"/>
+<text x="482" y="205" font-size="26" font-weight="700" fill="#fff" text-anchor="middle" >2</text>
+<text x="520" y="204" font-size="24" font-weight="700" fill="#2563eb" text-anchor="start" >Approval</text>
+<text x="462" y="254" font-size="18" font-weight="400" fill="#1f3b3f" text-anchor="start" >Regional officer approves;</text>
+<text x="462" y="280" font-size="18" font-weight="400" fill="#1f3b3f" text-anchor="start" >private company schema is created</text>
+<rect x="460" y="318" width="99.5" height="28" rx="14" fill="#2563eb22" stroke="none" stroke-width="1.5"/>
+<text x="473" y="338" font-size="15" font-weight="700" fill="#2563eb" text-anchor="start" >Officer</text>
+<rect x="810" y="150" width="330" height="210" rx="16" fill="#fff" stroke="#0f766e" stroke-width="2.5" filter="url(#sh)"/>
+<circle cx="852" cy="196" r="26" fill="#0f766e"/>
+<text x="852" y="205" font-size="26" font-weight="700" fill="#fff" text-anchor="middle" >3</text>
+<text x="890" y="204" font-size="24" font-weight="700" fill="#0f766e" text-anchor="start" >Hives and harvest</text>
+<text x="832" y="254" font-size="18" font-weight="400" fill="#1f3b3f" text-anchor="start" >Hive sensors feed live data;</text>
+<text x="832" y="280" font-size="18" font-weight="400" fill="#1f3b3f" text-anchor="start" >harvest batch recorded</text>
+<rect x="830" y="318" width="152.0" height="28" rx="14" fill="#0f766e22" stroke="none" stroke-width="1.5"/>
+<text x="843" y="338" font-size="15" font-weight="700" fill="#0f766e" text-anchor="start" >Keeper + IoT</text>
+<rect x="1180" y="150" width="330" height="210" rx="16" fill="#fff" stroke="#0f766e" stroke-width="2.5" filter="url(#sh)"/>
+<circle cx="1222" cy="196" r="26" fill="#0f766e"/>
+<text x="1222" y="205" font-size="26" font-weight="700" fill="#fff" text-anchor="middle" >4</text>
+<text x="1260" y="204" font-size="24" font-weight="700" fill="#0f766e" text-anchor="start" >Lab test</text>
+<text x="1202" y="254" font-size="18" font-weight="400" fill="#1f3b3f" text-anchor="start" >Certificate result and PDF</text>
+<text x="1202" y="280" font-size="18" font-weight="400" fill="#1f3b3f" text-anchor="start" >uploaded for the batch</text>
+<rect x="1200" y="318" width="89.0" height="28" rx="14" fill="#0f766e22" stroke="none" stroke-width="1.5"/>
+<text x="1213" y="338" font-size="15" font-weight="700" fill="#0f766e" text-anchor="start" >Keeper</text>
+<rect x="1550" y="150" width="330" height="210" rx="16" fill="#fff" stroke="#2563eb" stroke-width="2.5" filter="url(#sh)"/>
+<circle cx="1592" cy="196" r="26" fill="#2563eb"/>
+<text x="1592" y="205" font-size="26" font-weight="700" fill="#fff" text-anchor="middle" >5</text>
+<text x="1630" y="204" font-size="24" font-weight="700" fill="#2563eb" text-anchor="start" >Lab review</text>
+<text x="1572" y="254" font-size="18" font-weight="400" fill="#1f3b3f" text-anchor="start" >Officer checks limits (moisture,</text>
+<text x="1572" y="280" font-size="18" font-weight="400" fill="#1f3b3f" text-anchor="start" >HMF, sucrose, antibiotics) and</text>
+<text x="1572" y="306" font-size="18" font-weight="400" fill="#1f3b3f" text-anchor="start" >signs</text>
+<rect x="1570" y="318" width="99.5" height="28" rx="14" fill="#2563eb22" stroke="none" stroke-width="1.5"/>
+<text x="1583" y="338" font-size="15" font-weight="700" fill="#2563eb" text-anchor="start" >Officer</text>
+<rect x="1550" y="450" width="330" height="210" rx="16" fill="#fff" stroke="#0f766e" stroke-width="2.5" filter="url(#sh)"/>
+<circle cx="1592" cy="496" r="26" fill="#0f766e"/>
+<text x="1592" y="505" font-size="26" font-weight="700" fill="#fff" text-anchor="middle" >6</text>
+<text x="1630" y="504" font-size="24" font-weight="700" fill="#0f766e" text-anchor="start" >Package</text>
+<text x="1572" y="554" font-size="18" font-weight="400" fill="#1f3b3f" text-anchor="start" >Jars and QR codes created, never</text>
+<text x="1572" y="580" font-size="18" font-weight="400" fill="#1f3b3f" text-anchor="start" >more than the honey held</text>
+<rect x="1570" y="618" width="89.0" height="28" rx="14" fill="#0f766e22" stroke="none" stroke-width="1.5"/>
+<text x="1583" y="638" font-size="15" font-weight="700" fill="#0f766e" text-anchor="start" >Keeper</text>
+<rect x="1180" y="450" width="330" height="210" rx="16" fill="#fff" stroke="#0f766e" stroke-width="2.5" filter="url(#sh)"/>
+<circle cx="1222" cy="496" r="26" fill="#0f766e"/>
+<text x="1222" y="505" font-size="26" font-weight="700" fill="#fff" text-anchor="middle" >7</text>
+<text x="1260" y="504" font-size="24" font-weight="700" fill="#0f766e" text-anchor="start" >Sell</text>
+<text x="1202" y="554" font-size="18" font-weight="400" fill="#1f3b3f" text-anchor="start" >Loose sale with invoice, or list</text>
+<text x="1202" y="580" font-size="18" font-weight="400" fill="#1f3b3f" text-anchor="start" >jars on Sellers nearby</text>
+<rect x="1200" y="618" width="89.0" height="28" rx="14" fill="#0f766e22" stroke="none" stroke-width="1.5"/>
+<text x="1213" y="638" font-size="15" font-weight="700" fill="#0f766e" text-anchor="start" >Keeper</text>
+<rect x="810" y="450" width="330" height="210" rx="16" fill="#fff" stroke="#15803d" stroke-width="2.5" filter="url(#sh)"/>
+<circle cx="852" cy="496" r="26" fill="#15803d"/>
+<text x="852" y="505" font-size="26" font-weight="700" fill="#fff" text-anchor="middle" >8</text>
+<text x="890" y="504" font-size="24" font-weight="700" fill="#15803d" text-anchor="start" >Order</text>
+<text x="832" y="554" font-size="18" font-weight="400" fill="#1f3b3f" text-anchor="start" >Buyer picks state, seller,</text>
+<text x="832" y="580" font-size="18" font-weight="400" fill="#1f3b3f" text-anchor="start" >product, pays by UPI QR</text>
+<rect x="830" y="618" width="78.5" height="28" rx="14" fill="#15803d22" stroke="none" stroke-width="1.5"/>
+<text x="843" y="638" font-size="15" font-weight="700" fill="#15803d" text-anchor="start" >Buyer</text>
+<rect x="440" y="450" width="330" height="210" rx="16" fill="#fff" stroke="#0f766e" stroke-width="2.5" filter="url(#sh)"/>
+<circle cx="482" cy="496" r="26" fill="#0f766e"/>
+<text x="482" y="505" font-size="26" font-weight="700" fill="#fff" text-anchor="middle" >9</text>
+<text x="520" y="504" font-size="24" font-weight="700" fill="#0f766e" text-anchor="start" >Ship and track</text>
+<text x="462" y="554" font-size="18" font-weight="400" fill="#1f3b3f" text-anchor="start" >Keeper confirms payment, ships,</text>
+<text x="462" y="580" font-size="18" font-weight="400" fill="#1f3b3f" text-anchor="start" >buyer tracks status</text>
+<rect x="460" y="618" width="173.0" height="28" rx="14" fill="#0f766e22" stroke="none" stroke-width="1.5"/>
+<text x="473" y="638" font-size="15" font-weight="700" fill="#0f766e" text-anchor="start" >Keeper + Buyer</text>
+<line x1="402" y1="255.0" x2="438" y2="255.0" stroke="#0f766e" stroke-width="3" marker-end="url(#ah)"/>
+<line x1="772" y1="255.0" x2="808" y2="255.0" stroke="#0f766e" stroke-width="3" marker-end="url(#ah)"/>
+<line x1="1142" y1="255.0" x2="1178" y2="255.0" stroke="#0f766e" stroke-width="3" marker-end="url(#ah)"/>
+<line x1="1512" y1="255.0" x2="1548" y2="255.0" stroke="#0f766e" stroke-width="3" marker-end="url(#ah)"/>
+<line x1="1715.0" y1="362" x2="1715.0" y2="448" stroke="#0f766e" stroke-width="3" marker-end="url(#ah)"/>
+<line x1="1548" y1="555.0" x2="1512" y2="555.0" stroke="#0f766e" stroke-width="3" marker-end="url(#ah)"/>
+<line x1="1178" y1="555.0" x2="1142" y2="555.0" stroke="#0f766e" stroke-width="3" marker-end="url(#ah)"/>
+<line x1="808" y1="555.0" x2="772" y2="555.0" stroke="#0f766e" stroke-width="3" marker-end="url(#ah)"/>
+<rect x="70" y="700" width="1780" height="150" rx="16" fill="#fff4d6" stroke="#f5a524" stroke-width="3" filter="url(#sh)"/>
+<text x="100" y="742" font-size="26" font-weight="700" fill="#0a3d43" text-anchor="start" >10  Consumer verification</text>
+<text x="100" y="776" font-size="18" font-weight="400" fill="#1f3b3f" text-anchor="start" >Scan the QR on the jar on the public website: the batch, harvest, lab certificate, officer signature, jar Merkle proof and the</text>
+<text x="100" y="802" font-size="18" font-weight="400" fill="#1f3b3f" text-anchor="start" >on-chain transaction are shown. Anyone can check that the honey is genuine without an account.</text>
+<text x="100" y="832" font-size="17" font-weight="600" fill="#0f766e" text-anchor="start" >Nothing about the seller&#x27;s finances or buyers is shown.</text>
+<rect x="1130" y="745" width="93" height="34" rx="17" fill="#ffffff" stroke="#f5a524" stroke-width="1.6"/>
+<text x="1176.32" y="768" font-size="17" font-weight="600" fill="#f5a524" text-anchor="middle" >Scan QR</text>
+<rect x="1232.64" y="745" width="150" height="34" rx="17" fill="#ffffff" stroke="#f5a524" stroke-width="1.6"/>
+<text x="1307.52" y="768" font-size="17" font-weight="600" fill="#f5a524" text-anchor="middle" >Public record</text>
+<rect x="1392.4" y="745" width="140" height="34" rx="17" fill="#ffffff" stroke="#f5a524" stroke-width="1.6"/>
+<text x="1462.52" y="768" font-size="17" font-weight="600" fill="#f5a524" text-anchor="middle" >Merkle proof</text>
+<rect x="1542.64" y="745" width="102" height="34" rx="17" fill="#ffffff" stroke="#f5a524" stroke-width="1.6"/>
+<text x="1593.72" y="768" font-size="17" font-weight="600" fill="#f5a524" text-anchor="middle" >Chain tx</text>
+<rect x="70" y="880" width="1780" height="150" rx="16" fill="#fff" stroke="#b7d3cf" stroke-width="2" filter="url(#sh)"/>
+<text x="100" y="920" font-size="22" font-weight="700" fill="#0a3d43" text-anchor="start" >Also in the system</text>
+<text x="100" y="958" font-size="18" font-weight="700" fill="#0f766e" text-anchor="start" >Inspections</text>
+<text x="100" y="986" font-size="15" font-weight="400" fill="#475569" text-anchor="start" >Officer schedules a visit, files a</text>
+<text x="100" y="1008" font-size="15" font-weight="400" fill="#475569" text-anchor="start" >graded report</text>
+<text x="450" y="958" font-size="18" font-weight="700" fill="#0f766e" text-anchor="start" >Closure</text>
+<text x="450" y="986" font-size="15" font-weight="400" fill="#475569" text-anchor="start" >Keeper or officer starts it; a</text>
+<text x="450" y="1008" font-size="15" font-weight="400" fill="#475569" text-anchor="start" >checklist ends it</text>
+<text x="800" y="958" font-size="18" font-weight="700" fill="#0f766e" text-anchor="start" >Notices and tickets</text>
+<text x="800" y="986" font-size="15" font-weight="400" fill="#475569" text-anchor="start" >Announcements down the hierarchy,</text>
+<text x="800" y="1008" font-size="15" font-weight="400" fill="#475569" text-anchor="start" >help desk</text>
+<text x="1150" y="958" font-size="18" font-weight="700" fill="#0f766e" text-anchor="start" >Audit</text>
+<text x="1150" y="986" font-size="15" font-weight="400" fill="#475569" text-anchor="start" >Every officer action recorded and</text>
+<text x="1150" y="1008" font-size="15" font-weight="400" fill="#475569" text-anchor="start" >chain-anchored</text>
+<text x="1500" y="958" font-size="18" font-weight="700" fill="#0f766e" text-anchor="start" >Reports</text>
+<text x="1500" y="986" font-size="15" font-weight="400" fill="#475569" text-anchor="start" >Monthly figures per region and</text>
+<text x="1500" y="1008" font-size="15" font-weight="400" fill="#475569" text-anchor="start" >state</text>
+<line x1="1685" y1="660" x2="1685" y2="698" stroke="#f97360" stroke-width="3" marker-end="url(#ahc)"/>
+</svg>

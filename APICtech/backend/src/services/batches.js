@@ -17,14 +17,19 @@ export async function getBatch(batchCode) {
   return await db.prepare('SELECT * FROM batches WHERE batch_code = ?').get(batchCode)
 }
 
-export async function nextBatchCode() {
-  const prefix = `HC-${new Date().getFullYear()}-`
-  const highest = (await db
-    .prepare('SELECT batch_code FROM batches WHERE batch_code LIKE ?')
-    .all(`${prefix}%`))
-    .reduce((max, row) => Math.max(max, Number(row.batch_code.slice(prefix.length)) || 0), 0)
+// Each company's own batch numbering, starting at 1, independent of every other company: whichever farm
+// registers first, its own first batch is still "1" for it. The company's short tag keeps the code globally
+// unique (the batch table's primary key) while the number right after it is purely that company's count.
+export async function nextBatchCode(organization) {
+  const seq = await nextOrgSeq(organization.id)
+  const tag = organization.organization_code.split('-').pop()
+  return { batchCode: `HC-${tag}-${new Date().getFullYear()}-${String(seq).padStart(4, '0')}`, orgSeq: seq }
+}
 
-  return `${prefix}${String(highest + 1).padStart(4, '0')}`
+async function nextOrgSeq(orgId) {
+  const highest = (await db.prepare('SELECT org_seq FROM batches WHERE org_id = ?').all(orgId))
+    .reduce((max, row) => Math.max(max, Number(row.org_seq) || 0), 0)
+  return highest + 1
 }
 
 // Bottle capacity of a batch. A jar is only allowed if honey is left for it,
@@ -93,20 +98,35 @@ export function maxBottlesFor(capacity, jarSizeGrams) {
   return Math.floor(capacity.remainingGrams / jarSizeGrams)
 }
 
-// Creates the harvest batch on the shared chain. The company's own harvest
-// record (with notes and location) is written to its private database by the caller.
-export async function createChainBatch({ organization, userId, hiveCode, quantityKg, honeyType, harvestDate }) {
+// Creates the harvest batch on the shared chain, uniquely numbered for this one company (see nextBatchCode).
+// The company's own harvest record (with notes and location) is written to its private database by the caller.
+//
+//   via          'APP' (the normal case) or 'OFFLINE_SYNC' (recorded on the phone with no signal,
+//                uploaded once one returned).
+//   offlineRecordedAt / clientId  the device's own timestamp and a client-made id, when via is 'OFFLINE_SYNC':
+//                the id makes a retried upload safe (the same offline entry is never created twice).
+//
+// None of this changes what the QR / public verify pages show: they read the batch by its columns, and these
+// are never among them. The admin portal alone can see it (routes/admin.js).
+export async function createChainBatch({ organization, userId, hiveCode, quantityKg, honeyType, harvestDate, via = 'APP', offlineRecordedAt = null, clientId = null }) {
+  if (clientId) {
+    const existing = await db.prepare('SELECT batch_code FROM batches WHERE client_id = ?').get(clientId)
+    if (existing) return existing.batch_code
+  }
+
   let batchCode = null
 
   await db.transaction(async () => {
-    await lockNamed('batch-code')
-    batchCode = await nextBatchCode()
+    await lockNamed(`batch-code:${organization.id}`)
+    const next = await nextBatchCode(organization)
+    batchCode = next.batchCode
 
     const result = await db.prepare(`
       INSERT INTO batches
-      (batch_code, hive_code, quantity_kg, honey_type, harvest_date, status, org_id)
-      VALUES (?, ?, ?, ?, ?, 'HARVESTED', ?)
-    `).run(batchCode, hiveCode, quantityKg, honeyType, harvestDate, organization.id)
+      (batch_code, hive_code, quantity_kg, honey_type, harvest_date, status, org_id, org_seq, recorded_via, offline_recorded_at, synced_at, client_id)
+      VALUES (?, ?, ?, ?, ?, 'HARVESTED', ?, ?, ?, ?, ?, ?)
+    `).run(batchCode, hiveCode, quantityKg, honeyType, harvestDate, organization.id, next.orgSeq, via,
+      offlineRecordedAt, via === 'OFFLINE_SYNC' ? new Date().toISOString() : null, clientId)
 
     await db.prepare(`
       INSERT INTO custody_balances (batch_id, party_type, party_id, quantity_kg)

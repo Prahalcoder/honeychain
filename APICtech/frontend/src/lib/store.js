@@ -3,7 +3,14 @@ import { apiRequest } from './api'
 
 // Company summary (organisation status, hive count, stock, month income).
 // MainLayout polls it, so an officer's approval appears without a reload.
-let state = { summary: null, error: '' }
+// Cached to this device's storage too: with no signal, a cold start of the app (not just a still-open tab)
+// would otherwise have no summary at all, and features gated on it (e.g. offline harvest recording needs to
+// know the organisation is approved) would wrongly look unavailable instead of just offline.
+const SUMMARY_CACHE_KEY = 'apictech_cached_summary'
+const readCachedSummary = () => { try { return JSON.parse(localStorage.getItem(SUMMARY_CACHE_KEY)) } catch { return null } }
+const writeCachedSummary = (summary) => { try { localStorage.setItem(SUMMARY_CACHE_KEY, JSON.stringify(summary)) } catch { /* storage full or blocked */ } }
+
+let state = { summary: readCachedSummary(), error: '' }
 const listeners = new Set()
 
 function publish(next) {
@@ -13,13 +20,18 @@ function publish(next) {
 
 export async function refreshSummary() {
   try {
-    publish({ summary: await apiRequest('/company/summary'), error: '' })
+    const summary = await apiRequest('/company/summary')
+    writeCachedSummary(summary)
+    publish({ summary, error: '' })
   } catch (error) {
+    // Offline or briefly unreachable: keep whatever summary is already loaded (live or cached) rather than
+    // blanking it out, so pages gated on it (e.g. "organisation approved") stay usable.
     publish({ ...state, error: error.message })
   }
 }
 
 export function resetSummary() {
+  try { localStorage.removeItem(SUMMARY_CACHE_KEY) } catch { /* ignore */ }
   publish({ summary: null, error: '' })
 }
 

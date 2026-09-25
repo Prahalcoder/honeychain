@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import {
   Boxes,
   CheckCircle2,
@@ -19,6 +19,7 @@ import {
 import MainLayout from '../layouts/MainLayout'
 import { apiRequest } from '../lib/api'
 import { formatDate, money, useApi } from '../lib/store'
+import WholesaleOffers from '../components/WholesaleOffers'
 
 const inputClass = 'mt-1 w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-[#F97360]'
 const today = () => new Date().toLocaleDateString('en-CA')
@@ -38,7 +39,12 @@ export default function SupplyChain() {
   const salesData = useApi('/company/sales')
   const buyerData = useApi('/company/buyers')
 
-  const [tab, setTab] = useState('sales')
+  const [searchParams] = useSearchParams()
+  const [tab, setTab] = useState(searchParams.get('tab') === 'offers' ? 'offers' : 'sales')
+  const offerData = useApi('/company/trade-requests')
+  const receiptData = useApi('/company/trade-requests/receipts')
+  const openOffers = (offerData.data || []).filter((offer) => offer.status === 'PENDING').length
+    + (receiptData.data || []).filter((receipt) => receipt.status === 'AWAITING_HARVEST').length
   const [creating, setCreating] = useState(null)
   const [action, setAction] = useState(null)
   const [banner, setBanner] = useState('')
@@ -55,7 +61,7 @@ export default function SupplyChain() {
     pending: live.filter((sale) => sale.paymentStatus === 'Pending').reduce((sum, sale) => sum + sale.totalInr, 0),
   }), [stock, live])
 
-  const reload = () => Promise.all([stockData.reload(), salesData.reload(), buyerData.reload()])
+  const reload = () => Promise.all([stockData.reload(), salesData.reload(), buyerData.reload(), offerData.reload(), receiptData.reload()])
 
   async function markPaid(sale) {
     try {
@@ -94,8 +100,11 @@ export default function SupplyChain() {
       </div>
 
       <div className="mt-6 flex gap-2 overflow-x-auto">
-        {[['sales', 'Sales'], ['stock', 'Honey available'], ['journey', 'Batch journey']].map(([id, label]) => (
-          <button key={id} onClick={() => setTab(id)} className={`rounded-xl px-4 py-2.5 text-sm font-bold ${tab === id ? 'bg-[#0F766E] text-white' : 'border border-[#c0dfdd] bg-white text-gray-600'}`}>{label}</button>
+        {[['sales', 'Sales'], ['offers', 'Wholesale offers'], ['stock', 'Honey available'], ['journey', 'Batch journey']].map(([id, label]) => (
+          <button key={id} onClick={() => setTab(id)} className={`flex shrink-0 items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold ${tab === id ? 'bg-[#0F766E] text-white' : 'border border-[#c0dfdd] bg-white text-gray-600'}`}>
+            {label}
+            {id === 'offers' && openOffers > 0 && <span className="rounded-full bg-[#F97360] px-2 py-0.5 text-[11px] text-[#14272e]">{openOffers}</span>}
+          </button>
         ))}
       </div>
 
@@ -148,6 +157,7 @@ export default function SupplyChain() {
       )}
 
       {tab === 'journey' && <BatchJourney batches={stock} />}
+      {tab === 'offers' && <WholesaleOffers offers={offerData.data} receipts={receiptData.data || []} stock={stock} error={offerData.error} onChanged={reload} onBanner={setBanner} />}
 
       {creating && (
         <SaleModal

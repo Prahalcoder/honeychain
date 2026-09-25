@@ -1,6 +1,6 @@
 import express from 'express'
 
-import { ShopError, cancelBySeller, createListing, markDelivered, markShipped, sellerOrderView, sellerOrders, sellerProducts, setPayment, updateListing } from '../services/shop.js'
+import { ShopError, backfillMissingInvoices, bookMissingIncome, cancelBySeller, createListing, markDelivered, markShipped, sellerOrderView, sellerOrders, sellerProducts, setPayment, updateListing } from '../services/shop.js'
 import { getCompanyDb } from '../services/companyDb.js'
 
 // The keeper's side of the shop: products for sale and the orders that come in. Mounted under /api/company/shop,
@@ -34,23 +34,28 @@ router.put('/products/:id', async (req, res) => {
 })
 
 router.get('/orders', async (req, res) => {
-  try { res.json(await sellerOrders(await privateDb(req))) } catch (error) { fail(error, res) }
+  try {
+    const db2 = await privateDb(req)
+    await bookMissingIncome(req.org, db2)
+    await backfillMissingInvoices(req.org, db2)
+    res.json(await sellerOrders(db2))
+  } catch (error) { fail(error, res) }
 })
 
 router.patch('/orders/:code/payment', async (req, res) => {
-  try { res.json(sellerOrderView(await setPayment(req.org, await privateDb(req), req.params.code, req.body?.status === 'PAID'))) } catch (error) { fail(error, res) }
+  try { res.json(await sellerOrderView(await setPayment(req.org, await privateDb(req), req.params.code, req.body?.status === 'PAID'))) } catch (error) { fail(error, res) }
 })
 
 router.patch('/orders/:code/ship', async (req, res) => {
-  try { res.json(sellerOrderView(await markShipped(req.org, await privateDb(req), req.params.code, req.body || {}))) } catch (error) { fail(error, res) }
+  try { res.json(await sellerOrderView(await markShipped(req.org, await privateDb(req), req.params.code, req.body || {}))) } catch (error) { fail(error, res) }
 })
 
 router.patch('/orders/:code/deliver', async (req, res) => {
-  try { res.json(sellerOrderView(await markDelivered(req.org, await privateDb(req), req.params.code))) } catch (error) { fail(error, res) }
+  try { res.json(await sellerOrderView(await markDelivered(req.org, await privateDb(req), req.params.code))) } catch (error) { fail(error, res) }
 })
 
 router.patch('/orders/:code/cancel', async (req, res) => {
-  try { res.json(sellerOrderView(await cancelBySeller(req.org, await privateDb(req), req.params.code, req.body?.reason))) } catch (error) { fail(error, res) }
+  try { res.json(await sellerOrderView(await cancelBySeller(req.org, await privateDb(req), req.params.code, req.body?.reason))) } catch (error) { fail(error, res) }
 })
 
 export default router

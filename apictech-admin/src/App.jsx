@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import {
   Blocks, Check, ClipboardCheck, History, IndianRupee, LayoutDashboard, LifeBuoy, Leaf,
-  LogOut, Megaphone, Menu, ScanSearch, Store, UserCog, X,
+  LogOut, Megaphone, Menu, Percent, QrCode, ScanSearch, Store, UserCog, X,
 } from 'lucide-react'
 
 import { session, useLive } from './api'
@@ -9,6 +9,8 @@ import { LanguageToggle } from './i18n'
 import NotificationMenu from './components/NotificationMenu'
 import { LiveBadge, ROLE_LABELS, initials, jurisdictionLabel } from './ui'
 import Login from './pages/Login'
+import SplashScreen from './pages/SplashScreen'
+import PwaUpdate from './PwaUpdate'
 import Dashboard from './pages/Dashboard'
 import Requests from './pages/Requests'
 import Organizations from './pages/Organizations'
@@ -19,6 +21,8 @@ import Notices from './pages/Notices'
 import Help from './pages/Help'
 import Officers from './pages/Officers'
 import Activity from './pages/Activity'
+import Pricing from './pages/Pricing'
+import JarAlerts from './pages/JarAlerts'
 
 const PAGE_TITLES = {
   dashboard: 'Control room',
@@ -31,9 +35,11 @@ const PAGE_TITLES = {
   chain: 'Blockchain',
   officers: 'Officers',
   activity: 'Activity & approvals',
+  pricing: 'Prices & GST',
+  'jar-alerts': 'Copied QR codes',
 }
 
-function navFor(user, pending, inspectionsDue, openSupport) {
+function navFor(user, pending, inspectionsDue, openSupport, jarAlerts) {
   const groups = [
     {
       label: 'Overview',
@@ -48,6 +54,7 @@ function navFor(user, pending, inspectionsDue, openSupport) {
       items: [
         { id: 'organizations', label: 'Organizations', icon: Store },
         { id: 'inspections', label: 'Inspections', icon: ScanSearch, count: inspectionsDue },
+        { id: 'jar-alerts', label: 'Copied QR codes', icon: QrCode, count: jarAlerts },
         { id: 'chain', label: 'Blockchain', icon: Blocks },
         ...(user.role !== 'REGIONAL_OFFICER' ? [{ id: 'reports', label: 'Income & production', icon: IndianRupee }] : []),
       ],
@@ -56,6 +63,7 @@ function navFor(user, pending, inspectionsDue, openSupport) {
       label: 'Governance',
       items: [
         ...(user.role !== 'REGIONAL_OFFICER' ? [{ id: 'officers', label: 'Officers', icon: UserCog }] : []),
+        { id: 'pricing', label: 'Prices & GST', icon: Percent },
         { id: 'activity', label: user.role === 'REGIONAL_OFFICER' ? 'My activity' : 'Activity & approvals', icon: History },
         { id: 'help', label: 'Help & roles', icon: LifeBuoy, count: openSupport },
       ],
@@ -67,6 +75,7 @@ function navFor(user, pending, inspectionsDue, openSupport) {
 
 export default function App() {
   const [user, setUser] = useState(session.user)
+  const [showSplash, setShowSplash] = useState(true)
 
   useEffect(() => {
     const ended = () => setUser(null)
@@ -74,9 +83,15 @@ export default function App() {
     return () => window.removeEventListener('admin-session-ended', ended)
   }, [])
 
-  if (!user || !session.token) return <Login onLogin={setUser} />
+  useEffect(() => {
+    const timer = setTimeout(() => setShowSplash(false), 2200)
+    return () => clearTimeout(timer)
+  }, [])
 
-  return <Shell user={user} onSignOut={() => { session.clear(); setUser(null) }} />
+  if (showSplash) return <SplashScreen />
+  if (!user || !session.token) return <><PwaUpdate /><Login onLogin={setUser} /></>
+
+  return <><PwaUpdate /><Shell user={user} onSignOut={() => { session.clear(); setUser(null) }} /></>
 }
 
 // The sidebar keeps its scroll position when you pick a page.
@@ -119,6 +134,8 @@ function Shell({ user, onSignOut }) {
     chain: <Chain {...shared} />,
     officers: <Officers {...shared} />,
     activity: <Activity {...shared} />,
+    pricing: <Pricing {...shared} />,
+    'jar-alerts': <JarAlerts {...shared} />,
   }
 
   return (
@@ -132,7 +149,7 @@ function Shell({ user, onSignOut }) {
         </div>
         <div className="workspace-switcher"><div className="workspace-dot" /><div><span>{ROLE_LABELS[user.role]}</span><strong>{jurisdictionLabel(user)}</strong></div></div>
         <nav>
-          {navFor(user, pending, overview.data?.inspectionsDue || 0, overview.data?.openSupport || 0).map((group) => (
+          {navFor(user, pending, overview.data?.inspectionsDue || 0, overview.data?.openSupport || 0, overview.data?.openJarAlerts || 0).map((group) => (
             <div className="nav-group" key={group.label}>
               <p>{group.label}</p>
               {group.items.map((item) => {

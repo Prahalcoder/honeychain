@@ -98,6 +98,17 @@ h2 { margin-top: 10px; font-size: clamp(30px, 4.6vw, 54px); line-height: 1.1; }
 .rcard { padding: 22px; border: 1px solid var(--line); border-radius: 18px; background: #fff; }
 .rcard.wide { grid-column: 1 / -1; }
 .rcard h4 { margin-bottom: 14px; color: var(--honey-deep); font-size: 14px; letter-spacing: .14em; text-transform: uppercase; }
+/* QR copy detection on the verify page */
+.scan-panel { margin-top: 18px; }
+.scan-panel.flagged { border: 2px solid #f0a5a5; background: #fff7f5; }
+.scan-panel .muted.small { margin-top: 10px; font-size: 14px; }
+.scan-alert-title { margin-top: 12px; font-weight: 700; color: #7f1d1d; }
+.scan-alerts { margin: 6px 0 0 20px; color: #7f1d1d; }
+.scan-alerts li { margin-top: 4px; list-style: disc; }
+.scan-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+.scan-report { display: grid; gap: 10px; margin-top: 12px; }
+.scan-report textarea { width: 100%; padding: 12px; border: 1px solid var(--line); border-radius: 12px; font: inherit; }
+.scan-report .btn-gold { justify-self: start; }
 .rrow { display: flex; justify-content: space-between; gap: 16px; padding: 9px 12px; margin-top: 6px; border-radius: 10px; background: var(--cream); }
 .rrow span { color: var(--muted); font-size: 15px; }
 .rrow b { text-align: right; font-size: 16px; }

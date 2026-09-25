@@ -11,7 +11,7 @@ cd "E:\vs\SIH"
 npm start
 ```
 
-That starts the local database, the local blockchain, the API, the Python IoT monitor, Honey Chain Keeper, Honey Chain Admin and the public website together (labelled output, Ctrl+C stops all). The first run installs any missing dependencies.
+That starts the local database, the local blockchain, the API, the Python IoT monitor, Honey Chain Keeper, Honey Chain Admin, and the public website together (labelled output, Ctrl+C stops all). The first run installs any missing dependencies.
 
 | App | URL |
 |---|---|
@@ -41,6 +41,36 @@ The three apps and the API listen on the network, and the apps talk to the API a
 4. Bottle QR codes point to the computer's Wi-Fi address (`http://192.168.1.8:5175/verify?...`) so that a phone can open them. Set `PUBLIC_VERIFY_PAGE_URL` in `APICtech/backend/.env` to use another address. Codes printed on one network stop working on another; if the address changes, reprint them.
 
 The layouts adapt to a phone: the sidebar becomes a menu that slides in, wide tables scroll sideways inside their own box, and the top bar drops its extra buttons.
+
+## Install Keeper or Admin as an app on a phone
+
+Honey Chain Keeper and Honey Chain Admin are installable Progressive Web Apps: "Add to Home screen" puts a real icon on the phone that opens full-screen, with no address bar, against the same local server started by `npm start` — no code changes, no separate build, every feature identical to the browser version.
+
+1. Open the Keeper or Admin link from the `On your phone (same Wi-Fi)` list (e.g. `http://192.168.1.8:5173`) in the phone's browser.
+2. **Android (Chrome):** menu (⋮) > **Add to Home screen** / **Install app**. **iPhone (Safari):** Share icon > **Add to Home Screen**.
+3. Open it from the home screen icon like any other app.
+
+That plain `http://<lan-ip>` address always works for the icon and full-screen launch. It does **not** register a service worker (browsers only allow that on `https://` or on `localhost` itself), so the installed app always talks to the live server — it just won't work if the server is off or the phone loses Wi-Fi, same as the browser version today.
+
+To also get offline caching and a "new version ready" prompt, run the frontend with a local HTTPS certificate instead:
+
+```bash
+cd APICtech/frontend && HTTPS=true npm run dev     # or apictech-admin, same flag
+```
+
+The first run installs a local certificate authority (`vite-plugin-mkcert`) so the phone gets a real padlock on `https://<lan-ip>:5173`. This is opt-in and off by default because the API itself still runs on plain HTTP; only turn it on if you've also put the API behind HTTPS, otherwise the app will load but its API calls will be blocked as mixed content.
+
+### Or: a real installable APK
+
+`mobile/keeper_app` and `mobile/admin_app` are minimal native Android apps (Flutter) that full-screen the exact same web app against your local server — same code, same features, just a native shell with a proper app icon, working Android back button, and file-picker support for uploads (FSSAI/lab documents). The server address can be changed in-app without a rebuild (long-press the thin strip at the very top of the screen); it defaults to the Wi-Fi address baked in at build time.
+
+Build one (needs the Android SDK — already set up on this machine via Flutter/Android Studio):
+
+```bash
+cd mobile/keeper_app && flutter build apk --release     # or mobile/admin_app
+```
+
+The APK lands at `mobile/keeper_app/build/app/outputs/flutter-apk/app-release.apk`. Copy it to the phone (e.g. AirDrop-style file share, USB, or `adb install -r <path>` with the phone plugged in and USB debugging on) and open it; Android will ask to allow installing from this source once. `npm start` must be running on the computer, same Wi-Fi, same as the browser/PWA setup above.
 
 ## Languages
 
@@ -75,7 +105,8 @@ The first backend start migrates an existing `apictech.db` in place and seals ex
 
 | App | Username | Password |
 |---|---|---|
-| Keeper | *(none seeded — register a new organisation in the keeper app)* | |
+| Keeper | *(register in the keeper app, or `npm run seed:farms`: `farm.<region>.1` / `.2`)* | `Farm@12345` |
+| Keeper, wholesaler (one per region, `npm run seed:traders`) | `trader.<region>`, e.g. `trader.madurai`, `trader.kochi` | `Trader@12345` |
 | Admin, Regional Officer (one per location) | `region.<location>`, e.g. `region.madurai`, `region.coimbatore`, `region.kochi` | `region@12345` |
 | Admin, State Officer (one per state) | `state.tn`, `state.kerala`, `state.karnataka`, `state.maharashtra`, `state.uttar-pradesh`, `state.punjab`, `state.uttarakhand`, `state.himachal-pradesh` | `state@12345` |
 | Admin, KVIC Head | `kvic.head` | `kvic@12345` |
@@ -97,7 +128,96 @@ Regional officers, state officers and the KVIC Head can schedule an inspection o
 - **Buying.** No account: the buyer chooses a product, enters name, mobile number and delivery address, and lands on an order page (`/order/ORD-...`) with the seller's **UPI QR code**, a box for the UPI reference number after paying, and the order steps. The buyer tracks the order with the order code and the mobile number. If the seller has not entered a UPI ID (Settings), the page shows a clearly marked demo QR.
 - **Fulfilment.** Keeper > Orders shows each order with the buyer's details, the payment status (not paid / buyer says paid / payment received) and the parcel status. The keeper confirms the payment, then marks it shipped (courier and tracking number), then delivered. Cancelling puts the jars back on sale.
 - **Privacy.** Products, prices and stock are public. Buyer names, phone numbers and delivery addresses stay in the seller's private schema (`shop_orders`); the common database only keeps the order code and the seller (`shop_order_index`).
+- **Farms without products.** Every approved farm is listed in its state and region, also when it has nothing on sale yet (the card says so). The state list shows the special honey of that state.
+- **Bottle stock is one number.** A packaging run's stock is what was packed minus the jars on bills and in shop orders (`jar_sales`). A bill line that is taken from a packaging run (Billing > Create invoice > "Take jars from ...") and every shop order reduce it at once; a cancelled bill or order (or an unpaid order that expired) puts the jars back. Inventory shows packed, sold on bills, sold in the shop and in stock per run, and the shop can never offer more jars than are left.
+- **Special honey by region.** `APICtech/backend/src/config/honeyCatalogue.js` holds the honey types and SFAC prices from the "Honey details" sheet (apple honey for Himachal Pradesh, litchi for Uttar Pradesh, coconut for Kerala, and so on). Tamil Nadu and Karnataka are placeholders (multi-floral) until their list is added. A keeper is offered their state's honey types first when recording a harvest.
+- **Demo farms.** `npm run seed:farms` registers two farms in each of the 22 regions (44 farms, logins `farm.<region>.1` / `.2`, password `Farm@12345`) exactly as a beekeeper would; they wait as pending in Admin > Organisations for the regional officer to approve. After approving, `npm run seed:farms -- --stock` gives the approved ones a harvest of their region's special honey, a lab result verified with the demo officer login, jars with QR codes and a listing on Sellers nearby. The addresses are made up (marked sample).
+- **GST and minimum prices (set by KVIC).** Admin > Governance > **Prices & GST**: the KVIC head office sets one standard GST for every keeper (default 5%) and a minimum price per kg for each honey type. A keeper's price is the price before GST and may be higher than the minimum, never lower; GST is added on top on every jar bill and on Sellers nearby (the buyer sees the final price, "incl. X% GST"). A jar bill always uses the standard GST. Raising a minimum lifts the keepers' listings that fall below it. Keeper > Settings > **Prices, bills & profit** shows the standard GST, the minimum and final price of each product (editable), the bills and the profit.
+- **Money.** A shop order confirmed as paid, and an invoice marked paid, book the amount before GST as income in Finance (GST is collected for the government, not income); undoing the payment or cancelling removes it. Profit = income minus expenses.
+- **Bills name the jars.** A bill line taken from stock names the specific jar QR codes (also printed on the invoice); shop orders name theirs when the payment is confirmed. No jar is named twice.
 - The website text for this page is in English and Hindi; other languages fall back to English. Payment is not checked automatically: the seller confirms it after seeing the UPI reference.
+
+## Registration, wholesalers and copied QR codes
+
+- **Registration like Madhukranti.** Keeper > **Register** (`/register`) is a step-by-step form modelled on the National Bee Board's Madhukranti portal. The applicant picks one of five categories: **individual beekeeper, firm, society / cooperative, company (incl. FPO / FPC)** or **wholesaler / trader / packer**. The form then asks what that category needs:
+  - Applicant details: father's / husband's name, date of birth, gender, education, social category, Aadhaar (the Verhoeff check digit is tested; only the last 4 digits are stored) and PAN.
+  - Organisation details: type, registration number and date, CIN, number of members, and the authorised person with their Aadhaar.
+  - Nominee and bank (IFSC checked; only the last 4 digits of the account are stored).
+  - For beekeepers: colonies (at least 10), species, experience, expansion plan, FPO membership, land and migration, training, last year's production (honey, colonies, beehives, pollen / propolis / wax / royal jelly / venom / comb honey), and medicines / antibiotics.
+  - For wholesalers: business type, trade licence, IEC / APEDA, storage and monthly purchase capacity, warehouse, states they buy from, and packaging.
+  - The documents the category needs (a PDF or a JPG / PNG photo, including the bee-colony photo).
+  - The registration charge from the NBB colony slabs (Rs 250 to Rs 2,00,000, plus SMS Rs 200 and convenience Rs 20). It is shown only; nothing is charged.
+  - Choices and rules live in `APICtech/backend/src/config/registration.js` and `services/registrationProfile.js`. The server checks everything again.
+- **Correcting details.** A keeper edits them in Settings > **Registration & documents**; a wholesaler in **Profile**. While pending, both can open their application and add a missing document. Aadhaar and account numbers left blank keep their stored last 4 digits.
+- **Existing companies.** Every company that registered before this form got made-up, category-appropriate details (`config/sampleProfiles.js`). They are marked **sample** everywhere, and a real save replaces them. The same goes for the demo farms and wholesalers.
+- **Officers.** Admin > Organisations shows the category and a filter for beekeepers / wholesalers. Each company page shows the full registration details, the category's documents (required ones flagged) and the wholesale offers. With `REQUIRE_REGISTRATION_DOCUMENTS=true`, approval waits until every required document is on file.
+- **Wholesalers.** A wholesaler signs in to the same Keeper app and gets its own workspace (`/trade`):
+  - **Honey market:** loose honey left in approved beekeepers' batches, nearest first, lab-verified badge, KVIC minimum price.
+  - **My offers:** quantity, price at or above the KVIC minimum, pickup date, note.
+  - **Profile.**
+  - The beekeeper answers in Supply Chain > **Wholesale offers**. Accepting records a normal loose sale: the wholesaler becomes a buyer, a GST bill is made in their name, the honey leaves the batch, and the hand-over is sealed on the chain. Then both sides see each other's phone number.
+- **Copied QR code detection.** Cloning a real jar's QR onto fake jars is the standard attack. Every scan on the public verify page is logged with time, a random per-browser ID, and a location only if the buyer allows it (rounded to about 1 km).
+  - A jar is flagged when:
+    - two phones scan it too far apart, too quickly (more than 800 km/h and at least 100 km apart);
+    - it turns up in 3 or more places 100 km apart;
+    - more than 6 phones scan it;
+    - a buyer reports it.
+  - The same phone reloading counts once (10 minutes).
+  - The buyer sees "Warning: this QR code may be copied", the scan count and whether they were the first to scan it.
+  - Officers decide in Admin > **Copied QR codes**. **Confirm** marks the code as copied (sealed on the chain; every later scan says "Fake jar"). **Clear** closes it; the same alert only returns on new evidence.
+  - The keeper is notified. Rules and limits: `APICtech/backend/src/services/qrGuard.js`.
+
+## Honey received, recorded by the wholesaler (keeper confirms by OTP)
+
+When a beekeeper sold honey but never recorded the sale, traceability would break at the first hand-over. The wholesaler can close that gap:
+
+1. The wholesaler records the receipt in **Received honey** (`/trade/receipts`): the keeper's registered mobile number and name, honey type, kg, price and date.
+2. The system finds the KVIC-approved keeper; the name must match. It enforces the KVIC minimum price and **texts the keeper an OTP**. The keeper gives the OTP only if the receipt is true.
+3. With the OTP entered:
+   - **If the harvest is on record:** the sale is booked in the keeper's records (bill, kilograms out of the oldest matching batch) and the hand-over goes on the blockchain, marked `initiatedBy: WHOLESALER, confirmedBy: KEEPER_OTP`. The public batch page reads "Received by the wholesaler (recorded by the wholesaler, confirmed by the keeper with an OTP)".
+   - **If the harvest isn't recorded yet:** the receipt waits (`AWAITING_HARVEST`) and the keeper is told by SMS and in the notification bell. The keeper records the harvest and attaches it under Supply Chain → Wholesale offers. Stock only ever goes down from honey actually recorded as harvested.
+4. The confirmation itself is logged on the ledger at once (`WHOLESALER_RECEIPT_CONFIRMED`), with identifiers only: no names or phone numbers.
+
+Code: `services/wholesaleReceipts.js`, `services/otp.js`. Tables: `wholesale_receipts`, `otp_codes` (codes stored hashed; 5 min validity, 5 tries, rate-limited).
+
+## Forgot password: sign in with an OTP
+
+Every beekeeper, firm, society, company and wholesaler login has **"Forgot password? Sign in with OTP"** on the login page:
+- It sends a 6-digit code to the registered mobile number (SMS) or email, and the account holder can set a new password at the same time. A new password ends all older sessions.
+- Unknown numbers get the same reply as real ones, so the form can't be used to find out who is registered.
+- Until an SMS or mail provider is connected, the demo shows the code on screen (never when `NODE_ENV=production`).
+
+## Hive-health SMS alerts (no GSM module)
+
+The hive hardware has no SIM card. Instead:
+
+1. The ESP32 sends readings to the hive monitor (`APICtech/beehive/python_app`, port 5001).
+2. Every minute, the monitor runs the AI hive-health check (`insights.py`) on the latest readings (`alerts.py`).
+3. When it finds a problem worth a text, it reports it to the Honey Chain API (`POST /api/iot/alerts`). A problem is worth a text if it is:
+   - any HIGH risk, or
+   - a MEDIUM risk while the hive is AT RISK.
+4. The API texts the keeper's mobile through an SMS API (`services/sms.js`: Fast2SMS or Twilio) and records the alert (`services/hiveAlerts.js`).
+
+- **Linking a monitor to a hive.**
+  - Keeper > My Hives > View Hive Monitoring > **SMS alerts** links the monitor to that hive. Connecting the ESP32 on that page does it too.
+  - The API gives the monitor a random token. Only the token's hash is stored; linking again replaces it.
+  - The same card turns SMS on or off, sends a test SMS and lists recent alerts. Alerts from the last day also appear in the notification bell.
+- **No repeat texts.**
+  - The same problem on the same hive is texted at most once every 6 hours (`HIVE_ALERT_COOLDOWN_HOURS`).
+  - The monitor never alerts on stale readings while the ESP32 is disconnected.
+- **Setting up SMS.** Set `SMS_PROVIDER` and its key in `APICtech/backend/.env` (see `.env.example`).
+  - Without one, each SMS is written to `APICtech/backend/data/outbox/sms-*.txt`. The whole flow can still be demonstrated.
+  - Real commercial SMS in India needs DLT registration (TRAI) with the provider. A provider's quick route is fine for a demo.
+- **Browser access.** The monitor now answers the Keeper app from other ports on this computer or the Wi-Fi (CORS limited to private-network addresses).
+
+## Batch numbering and offline entries
+
+- **One counter per company.** A batch code is `HC-<company tag>-<year>-<number>`: the number starts at 1 for every company on its own, so the tenth farm to register still sees its own first batch as "1", not a number that depends on who registered earlier. The company's own tag keeps the code unique across the whole chain.
+- **Recording a harvest with no signal.** The Keeper app watches the browser's own online/offline state. Offline, "Record Harvest" asks for an explicit second confirmation ("this cannot be edited once confirmed") before it locks the entry into this device's own storage with the phone's date and time. There is no edit or delete for it here. The moment the device is back online it uploads by itself and gets its permanent Batch ID and blockchain entry; a retried upload (the same entry sent twice) never creates the batch twice.
+- **What admin sees, what the QR never shows.** Every batch is tagged how it was recorded, the keeper themselves or offline-then-synced (with the original and the upload time), visible only in Admin > Organizations > a company's Batches table and at GET /admin/batches and GET /admin/batches/:code. None of it reaches the public verify page or the printed QR: those read the batch by its ordinary columns only.
+- **How a company sells honey.** At registration a keeper chooses **packaged jars with QR codes**, **loose wholesale only**, or **both**. Wholesale-only skips packaging and QR codes entirely (no printer or phone needed day to day: hives, harvests and loose invoiced sales still work); it is the answer for a keeper who genuinely cannot manage a QR-printing step themselves, until a senior officer (state or head, not a regional officer) switches the company to retail or both in Admin > Organizations. QR Management and "Products for sale" are hidden from a wholesale-only keeper's own menu; the API refuses packaging and shop-listing requests for one with a clear `WHOLESALE_ONLY` message.
+- **Registration documents.** A scanned FSSAI licence is attached at registration (Keeper Settings > Organisation & address > Documents also lets a keeper add a GST certificate or an ID/address proof, or replace any of them later); a regional officer sees them on the review screen. Set `REQUIRE_REGISTRATION_DOCUMENTS=true` to refuse approval until the FSSAI licence is on file (off by default, so the demo farms and the test suite need no changes).
+- **Order e-mails.** Placing an order sends the buyer a confirmation e-mail (when they gave one) with the order details and a link to the same live tracking page shown in the app, whether the seller has received payment and whether it has shipped. With SMTP_HOST / SMTP_USER / SMTP_PASS set in .env (a Gmail account needs an "app password", not the normal one) it sends for real; otherwise every e-mail is only logged and saved under APICtech/backend/data/outbox/ so the flow can be demonstrated with no mail account at all.
 
 ## Database and blockchain: everything runs on this computer
 
@@ -244,5 +364,6 @@ Details: `APICtech/backend/API.md`, `APICtech/backend/IMMUTABLE_LEDGER.md`, `API
 - The database is a single PostgreSQL server on this computer: no replica, no failover. Data from the earlier SQLite version is not migrated (`APICtech/backend/apictech.db` and `data/companies` are left untouched).
 - Honey stock checks (how much can still be sold or packed) are re-run under a lock inside the transaction, and the smart contract enforces the same limit on chain.
 - Lab certificates need an uploaded document only when `REQUIRE_LAB_DOCUMENT=true`; turn it on for real use. The failed-login counter lives in memory and resets when the API restarts.
-- Hive weight needs an HX711 load cell on the ESP32 (the firmware does not read one yet); the UI and analysis use it when `weight_kg` is reported.
+- Hive weight: the ESP32 firmware (`APICtech/beehive/firmware/Beehive_Monitor_ESP32`) reads an HX711 load-cell amplifier on pins 16 (DOUT) / 17 (SCK) and reports `weight_kg` once one is wired and calibrated (`HX711_CALIBRATION_FACTOR` in the firmware — tare empty, then adjust the factor against a known weight); the UI, database and hive-health/productivity insights already use it whenever it's present, and simply show "--" when it isn't. Requires the "HX711" Arduino library.
 - Internal identifiers (`APICTECH` party type, `apictech_*` storage keys) keep their old names on purpose; display text says Honey Chain.
+- Keeper and Admin are installable (Add to Home screen) over plain `http://<lan-ip>` already; the offline-cache/background-update layer (the service worker) only activates once the optional `HTTPS=true` local certificate is turned on, since browsers refuse to register one on a non-`localhost` `http://` origin.

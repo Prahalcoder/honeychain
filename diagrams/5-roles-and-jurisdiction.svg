@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif">
+<defs>
+<marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#0f766e"/></marker>
+<marker id="ahc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#f97360"/></marker>
+<pattern id="dots" width="28" height="28" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.4" fill="#d9e9e6"/></pattern>
+<filter id="sh" x="-5%" y="-5%" width="110%" height="120%"><feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#0a3d43" flood-opacity="0.12"/></filter>
+</defs>
+<rect width="1920" height="1080" fill="#f7fbfa"/><rect width="1920" height="1080" fill="url(#dots)"/>
+<rect x="0" y="0" width="1920" height="104" fill="#0a3d43"/>
+<rect x="0" y="100" width="1920" height="6" fill="#f5a524"/>
+<polygon points="90.0,37.0 90.0,67.0 64.0,82.0 38.0,67.0 38.0,37.0 64.0,22.0" fill="#f5a524"/>
+<polygon points="77.0,44.5 77.0,59.5 64.0,67.0 51.0,59.5 51.0,44.5 64.0,37.0" fill="#0a3d43"/>
+<text x="112" y="60" font-size="40" font-weight="700" fill="#ffffff" text-anchor="start" >Users, Roles and Jurisdiction</text>
+<text x="112" y="88" font-size="20" font-weight="400" fill="#b9dcd8" text-anchor="start" >Each person sees only their own area; the ledger records who did what</text>
+<text x="1864" y="62" font-size="28" font-weight="700" fill="#f5a524" text-anchor="end" >Honey Chain</text>
+<text x="1864" y="88" font-size="17" font-weight="400" fill="#b9dcd8" text-anchor="end" >SIH 2026 · Problem 26021 · KVIC / MSME</text>
+<rect x="690" y="140" width="540" height="150" rx="16" fill="#fff" stroke="#0a3d43" stroke-width="2.5" filter="url(#sh)"/>
+<rect x="690" y="140" width="540" height="46" rx="16" fill="#0a3d43"/><rect x="690" y="166" width="540" height="20" fill="#0a3d43"/>
+<text x="960.0" y="172" font-size="22" font-weight="700" fill="#fff" text-anchor="middle" >KVIC Head (central office)</text>
+<text x="1214" y="171" font-size="15" font-weight="600" fill="#d9f2ee" text-anchor="end" >1 office</text>
+<text x="960.0" y="218" font-size="17" font-weight="400" fill="#1f3b3f" text-anchor="middle" >Sees every state and region</text>
+<text x="960.0" y="243" font-size="17" font-weight="400" fill="#1f3b3f" text-anchor="middle" >Approves, inspects, closes, resets</text>
+<text x="960.0" y="268" font-size="17" font-weight="400" fill="#1f3b3f" text-anchor="middle" >passwords, sends national notices</text>
+<rect x="690" y="350" width="540" height="150" rx="16" fill="#fff" stroke="#2563eb" stroke-width="2.5" filter="url(#sh)"/>
+<rect x="690" y="350" width="540" height="46" rx="16" fill="#2563eb"/><rect x="690" y="376" width="540" height="20" fill="#2563eb"/>
+<text x="960.0" y="382" font-size="22" font-weight="700" fill="#fff" text-anchor="middle" >State officer</text>
+<text x="1214" y="381" font-size="15" font-weight="600" fill="#d9f2ee" text-anchor="end" >8 offices</text>
+<text x="960.0" y="428" font-size="17" font-weight="400" fill="#1f3b3f" text-anchor="middle" >One state, all its regions</text>
+<text x="960.0" y="453" font-size="17" font-weight="400" fill="#1f3b3f" text-anchor="middle" >Reviews, inspects, closes,</text>
+<text x="960.0" y="478" font-size="17" font-weight="400" fill="#1f3b3f" text-anchor="middle" >sends state notices</text>
+<rect x="690" y="560" width="540" height="150" rx="16" fill="#fff" stroke="#0f766e" stroke-width="2.5" filter="url(#sh)"/>
+<rect x="690" y="560" width="540" height="46" rx="16" fill="#0f766e"/><rect x="690" y="586" width="540" height="20" fill="#0f766e"/>
+<text x="960.0" y="592" font-size="22" font-weight="700" fill="#fff" text-anchor="middle" >Regional officer</text>
+<text x="1214" y="591" font-size="15" font-weight="600" fill="#d9f2ee" text-anchor="end" >22 offices</text>
+<text x="960.0" y="638" font-size="17" font-weight="400" fill="#1f3b3f" text-anchor="middle" >One region of one state</text>
+<text x="960.0" y="663" font-size="17" font-weight="400" fill="#1f3b3f" text-anchor="middle" >Approves keepers, verifies lab</text>
+<text x="960.0" y="688" font-size="17" font-weight="400" fill="#1f3b3f" text-anchor="middle" >certificates (signed), inspects</text>
+<rect x="690" y="770" width="540" height="200" rx="16" fill="#fff" stroke="#f5a524" stroke-width="2.5" filter="url(#sh)"/>
+<rect x="690" y="770" width="540" height="46" rx="16" fill="#f5a524"/><rect x="690" y="796" width="540" height="20" fill="#f5a524"/>
+<text x="960.0" y="802" font-size="22" font-weight="700" fill="#0a3d43" text-anchor="middle" >Beekeeper (company)</text>
+<text x="960.0" y="848" font-size="17" font-weight="400" fill="#1f3b3f" text-anchor="middle" >Own hives, harvests, lab, packaging</text>
+<text x="960.0" y="873" font-size="17" font-weight="400" fill="#1f3b3f" text-anchor="middle" >Loose sales, invoices, finance</text>
+<text x="960.0" y="898" font-size="17" font-weight="400" fill="#1f3b3f" text-anchor="middle" >Sellers nearby: products and orders</text>
+<text x="960.0" y="923" font-size="17" font-weight="400" fill="#1f3b3f" text-anchor="middle" >Sees only their own private schema</text>
+<line x1="960" y1="292" x2="960" y2="348" stroke="#0f766e" stroke-width="3" marker-end="url(#ah)" marker-start="url(#ah)"/>
+<line x1="960" y1="502" x2="960" y2="558" stroke="#0f766e" stroke-width="3" marker-end="url(#ah)" marker-start="url(#ah)"/>
+<line x1="960" y1="712" x2="960" y2="768" stroke="#0f766e" stroke-width="3" marker-end="url(#ah)" marker-start="url(#ah)"/>
+<line x1="960" y1="292" x2="960" y2="348" stroke="#0f766e" stroke-width="3" marker-end="url(#ah)" marker-start="url(#ah)"/>
+<rect x="70" y="200" width="480" height="300" rx="16" fill="#fff" stroke="#2563eb" stroke-width="2" filter="url(#sh)"/>
+<path d="M70,216 a16,16 0 0 1 16,-16 h448 a16,16 0 0 1 16,16 v24 h-480 z" fill="#2563eb"/>
+<text x="86" y="227" font-size="20" font-weight="700" fill="#fff" text-anchor="start" >What officers can do</text>
+<circle cx="92" cy="256" r="3.5" fill="#2563eb"/>
+<text x="104" y="262" font-size="21" font-weight="400" fill="#1f3b3f" text-anchor="start" >Approve or reject registrations</text>
+<circle cx="92" cy="286" r="3.5" fill="#2563eb"/>
+<text x="104" y="292" font-size="21" font-weight="400" fill="#1f3b3f" text-anchor="start" >Verify lab results (password + signature)</text>
+<circle cx="92" cy="316" r="3.5" fill="#2563eb"/>
+<text x="104" y="322" font-size="21" font-weight="400" fill="#1f3b3f" text-anchor="start" >Schedule inspections and grade them</text>
+<circle cx="92" cy="346" r="3.5" fill="#2563eb"/>
+<text x="104" y="352" font-size="21" font-weight="400" fill="#1f3b3f" text-anchor="start" >Start and complete closures</text>
+<circle cx="92" cy="376" r="3.5" fill="#2563eb"/>
+<text x="104" y="382" font-size="21" font-weight="400" fill="#1f3b3f" text-anchor="start" >Publish notices to a scope</text>
+<rect x="1370" y="200" width="480" height="300" rx="16" fill="#fff" stroke="#15803d" stroke-width="2" filter="url(#sh)"/>
+<path d="M1370,216 a16,16 0 0 1 16,-16 h448 a16,16 0 0 1 16,16 v24 h-480 z" fill="#15803d"/>
+<text x="1386" y="227" font-size="20" font-weight="700" fill="#fff" text-anchor="start" >What the public can do</text>
+<circle cx="1392" cy="256" r="3.5" fill="#15803d"/>
+<text x="1404" y="262" font-size="21" font-weight="400" fill="#1f3b3f" text-anchor="start" >Scan a QR and see the verified record</text>
+<circle cx="1392" cy="286" r="3.5" fill="#15803d"/>
+<text x="1404" y="292" font-size="21" font-weight="400" fill="#1f3b3f" text-anchor="start" >Browse sellers by state and region</text>
+<circle cx="1392" cy="316" r="3.5" fill="#15803d"/>
+<text x="1404" y="322" font-size="21" font-weight="400" fill="#1f3b3f" text-anchor="start" >Order without an account</text>
+<circle cx="1392" cy="346" r="3.5" fill="#15803d"/>
+<text x="1404" y="352" font-size="21" font-weight="400" fill="#1f3b3f" text-anchor="start" >Pay with the seller&#x27;s UPI QR</text>
+<circle cx="1392" cy="376" r="3.5" fill="#15803d"/>
+<text x="1404" y="382" font-size="21" font-weight="400" fill="#1f3b3f" text-anchor="start" >Track the order with code and phone</text>
+<rect x="70" y="580" width="480" height="340" rx="16" fill="#fff" stroke="#f97360" stroke-width="2" filter="url(#sh)"/>
+<path d="M70,596 a16,16 0 0 1 16,-16 h448 a16,16 0 0 1 16,16 v24 h-480 z" fill="#f97360"/>
+<text x="86" y="607" font-size="20" font-weight="700" fill="#fff" text-anchor="start" >Limits that protect people</text>
+<circle cx="92" cy="636" r="3.5" fill="#f97360"/>
+<text x="104" y="642" font-size="21" font-weight="400" fill="#1f3b3f" text-anchor="start" >Regional officers can not see income</text>
+<circle cx="92" cy="666" r="3.5" fill="#f97360"/>
+<text x="104" y="672" font-size="21" font-weight="400" fill="#1f3b3f" text-anchor="start" >Keepers can not read each other&#x27;s data</text>
+<circle cx="92" cy="696" r="3.5" fill="#f97360"/>
+<text x="104" y="702" font-size="21" font-weight="400" fill="#1f3b3f" text-anchor="start" >Buyers see only their own order</text>
+<circle cx="92" cy="726" r="3.5" fill="#f97360"/>
+<text x="104" y="732" font-size="21" font-weight="400" fill="#1f3b3f" text-anchor="start" >Old logins end when a password changes</text>
+<circle cx="92" cy="756" r="3.5" fill="#f97360"/>
+<text x="104" y="762" font-size="21" font-weight="400" fill="#1f3b3f" text-anchor="start" >A jury can inspect every record</text>
+<rect x="1370" y="580" width="480" height="340" rx="16" fill="#fff" stroke="#475569" stroke-width="2" filter="url(#sh)"/>
+<path d="M1370,596 a16,16 0 0 1 16,-16 h448 a16,16 0 0 1 16,16 v24 h-480 z" fill="#475569"/>
+<text x="1386" y="607" font-size="20" font-weight="700" fill="#fff" text-anchor="start" >Demo logins</text>
+<circle cx="1392" cy="636" r="3.5" fill="#475569"/>
+<text x="1404" y="642" font-size="21" font-weight="400" fill="#1f3b3f" text-anchor="start" >Head: kvic.head</text>
+<circle cx="1392" cy="666" r="3.5" fill="#475569"/>
+<text x="1404" y="672" font-size="21" font-weight="400" fill="#1f3b3f" text-anchor="start" >State: state.tn</text>
+<circle cx="1392" cy="696" r="3.5" fill="#475569"/>
+<text x="1404" y="702" font-size="21" font-weight="400" fill="#1f3b3f" text-anchor="start" >Regional: region.madurai</text>
+<circle cx="1392" cy="726" r="3.5" fill="#475569"/>
+<text x="1404" y="732" font-size="21" font-weight="400" fill="#1f3b3f" text-anchor="start" >Keeper: register on the Keeper app</text>
+</svg>

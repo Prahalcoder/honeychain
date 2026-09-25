@@ -109,7 +109,7 @@ export default function QRManagement() {
         <Stat title="Verification" value="Public" icon={ScanLine} />
       </div>
 
-      <div className="mt-6 grid gap-6 xl:grid-cols-[380px_minmax(0,1fr)]">
+      <div className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-[380px_minmax(0,1fr)]">
         <form onSubmit={createPackagingBatch} className="rounded-2xl border border-[#c6e2e0] bg-white p-6">
           <h2 className="font-bold">New packaging batch</h2>
           <p className="mt-1 text-xs text-gray-500">QR records are created and chained as part of this action.</p>

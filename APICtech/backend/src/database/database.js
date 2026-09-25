@@ -4,6 +4,9 @@ import { REGIONS, regionalUsername, stateUsername } from '../config/regions.js'
 import { createHandle, driver } from './connection.js'
 import { FORBID_CHANGE, immutable, lockDown, pgDdl } from './ddl.js'
 import { ensureDirectorySchema } from './directorySchema.js'
+import { ensureRegistrationSchema } from './registrationSchema.js'
+import { ensureAlertSchema } from './alertSchema.js'
+import { ensureOtpSchema } from './otpSchema.js'
 
 // Common secure database: identity, organisation registry, review queues, the audit trail and the
 // shared blockchain. Company production and finance records live in their own private schemas
@@ -178,8 +181,40 @@ await addColumn('organizations', 'private_db_file', 'TEXT')
 
 await addColumn('batches', 'org_id', 'INTEGER')
 
+// Where a batch came from, so a jury (and the admin portal) can tell apart a normal entry and one made offline
+// and uploaded once a connection came back. The public QR / verify pages never read these columns.
+await addColumn('batches', 'org_seq', 'INTEGER')
+await addColumn('batches', 'recorded_via', "TEXT NOT NULL DEFAULT 'APP'")
+await addColumn('batches', 'offline_recorded_at', 'TEXT')
+await addColumn('batches', 'synced_at', 'TEXT')
+await addColumn('batches', 'client_id', 'TEXT')
+
+// How this company sells honey: chosen at registration, changeable later by a senior officer.
+//   RETAIL     packaged jars with QR codes, sold on Sellers nearby or by hand
+//   WHOLESALE  loose honey only, no jars or QR codes (a company with no way to print/stick QR labels)
+//   BOTH       both
+await addColumn('organizations', 'selling_mode', "TEXT NOT NULL DEFAULT 'BOTH'")
+
 await db.exec(pgDdl(`
   CREATE INDEX IF NOT EXISTS idx_batches_org ON batches(org_id);
+  CREATE UNIQUE INDEX IF NOT EXISTS idx_batches_org_seq ON batches(org_id, org_seq);
+  CREATE UNIQUE INDEX IF NOT EXISTS idx_batches_client ON batches(client_id) WHERE client_id IS NOT NULL;
+
+  -- Registration paperwork (FSSAI licence and other certificates), one current file per type per company.
+  -- Content lives here, same as a lab certificate; the chain only ever records its SHA-256 fingerprint.
+  CREATE TABLE IF NOT EXISTS organization_documents (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    org_id INTEGER NOT NULL,
+    doc_type TEXT NOT NULL,
+    file_name TEXT NOT NULL,
+    size_bytes INTEGER NOT NULL,
+    sha256 TEXT NOT NULL,
+    content BYTEA NOT NULL,
+    uploaded_by INTEGER,
+    uploaded_at TEXT NOT NULL,
+    UNIQUE (org_id, doc_type)
+  );
+  CREATE INDEX IF NOT EXISTS idx_org_documents_org ON organization_documents(org_id);
   CREATE INDEX IF NOT EXISTS idx_organizations_scope ON organizations(state, region, status);
   CREATE INDEX IF NOT EXISTS idx_events_entity ON traceability_events(entity_type, entity_id);
 
@@ -469,7 +504,9 @@ await db.exec(`
 // Seed data: one officer for each admin level (no beekeeper accounts).
 // Change these passwords before any real deployment.
 // ---------------------------------------------------------------------------
-const seeds = [{ username: 'kvic.head', password: 'kvic@12345', name: 'KVIC Head Office', role: 'KVIC_HEAD' }]
+const seeds = [
+  { username: 'kvic.head', password: 'kvic@12345', name: 'KVIC Head Office', role: 'KVIC_HEAD' },
+]
 // One state officer for every state, so each state has someone above its regional officers.
 for (const state of Object.keys(REGIONS)) {
   seeds.push({ username: stateUsername(state), password: 'state@12345', name: `State Officer, ${state}`, role: 'STATE_OFFICER', state })
@@ -496,6 +533,9 @@ for (let start = 0; start < missing.length; start += 50) {
 // No demo beekeeper is seeded: every company registers through the keeper app.
 
 await ensureDirectorySchema(db, addColumn)
+await ensureRegistrationSchema(db, addColumn)
+await ensureAlertSchema(db, addColumn)
+await ensureOtpSchema(db)
 
 await db.refresh()
 await lockDown('public')

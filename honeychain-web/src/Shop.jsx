@@ -10,9 +10,10 @@ const inr = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR',
 const TEXT = {
   en: {
     kicker: 'Sellers nearby', title: 'Buy honey from registered beekeepers', lead: 'Every seller here is registered and approved by KVIC. Choose your state to see who sells near you.',
-    state: 'State', region: 'KVIC region', allRegions: 'All regions', choose: 'Choose a state', sellersIn: 'Sellers in', none: 'No seller has honey in stock here yet. Try another region or state.',
+    state: 'State', region: 'KVIC region', allRegions: 'All regions', choose: 'Choose a state', sellersIn: 'Sellers in', none: 'No registered farm here yet. Try another region or state.',
     products: 'products', from: 'from', jars: 'jars in stock', view: 'View products', back: 'All sellers', phone: 'Phone', address: 'Address', fssai: 'FSSAI licence',
     noProducts: 'This seller has nothing in stock right now.', labOk: 'Lab verified by KVIC', batch: 'Batch', harvested: 'Harvested', inStock: 'in stock', price: 'per jar', quantity: 'Jars', order: 'Place order',
+    perKg: 'per kg', kg: 'Kilograms', looseTag: 'Loose, by weight',
     yourDetails: 'Your details', name: 'Your name', mobile: 'Mobile number', email: 'E-mail (optional)', deliveryAddress: 'Delivery address', pin: 'PIN code', total: 'Total', confirm: 'Confirm order', cancel: 'Cancel',
     track: 'Track an order', trackText: 'Enter the order code and the mobile number you ordered with.', orderCode: 'Order code', go: 'Track',
     loading: 'Loading...', failed: 'Something went wrong. Please try again.',
@@ -20,14 +21,15 @@ const TEXT = {
     payTitle: 'Pay the seller', payText: 'Scan this QR code with any UPI app (Google Pay, PhonePe, Paytm) and pay the amount shown. Then enter the UPI reference number below.',
     payDemo: 'Demo QR: this seller has not added a UPI ID yet, so the code does not lead to a real account.', payTo: 'Pay to', amount: 'Amount', openUpi: 'Open in my UPI app',
     reference: 'UPI reference (UTR) number', paid: 'I have paid', waiting: 'Payment sent. The seller is checking it and will confirm shortly.', ref: 'Your reference',
-    steps: 'Order progress', seller: 'Seller', deliveryTo: 'Delivering to', cancelOrder: 'Cancel this order', payBy: 'Please pay before', needPhone: 'Enter the mobile number you ordered with to see this order.', show: 'Show order',
-    when: 'Placed on',
+    steps: 'Order progress', seller: 'Seller', deliveryTo: 'Delivering to', cancelOrder: 'Cancel this order', payBy: 'Please pay before', honeyTitle: 'The honey in your order', batchIs: 'Harvest batch', jarsTitle: 'Your jars', jarsText: 'Each jar has its own QR code. Scan it, or tap an ID, to see the harvest, the lab result and the KVIC officer who verified it.', jarsLater: 'The seller sets your jars aside once your payment is confirmed. Their IDs will appear here.', verifyBatch: 'Check this batch', verifyJar: 'Check jar', looseOrderNote: 'Sold loose by weight, straight from the harvest batch. No jars or QR codes involved.', inclGst: 'incl. GST', gstLine: 'GST', priceExGst: 'Price before GST', finalPriceNote: 'per jar, GST included', finalPriceNoteLoose: 'per kg, GST included', needPhone: 'Enter the mobile number you ordered with to see this order.', show: 'Show order',
+    when: 'Placed on', special: 'Known for', farmView: 'View farm', nothingYet: 'Nothing on sale yet, ask the farm directly', farms: 'registered farms',
   },
   hi: {
     kicker: 'आपके पास के विक्रेता', title: 'पंजीकृत मधुमक्खी पालकों से शहद खरीदें', lead: 'यहाँ हर विक्रेता KVIC द्वारा पंजीकृत और स्वीकृत है। अपना राज्य चुनें।',
-    state: 'राज्य', region: 'KVIC क्षेत्र', allRegions: 'सभी क्षेत्र', choose: 'राज्य चुनें', sellersIn: 'विक्रेता:', none: 'यहाँ अभी किसी विक्रेता के पास शहद उपलब्ध नहीं है। दूसरा क्षेत्र या राज्य चुनें।',
+    state: 'राज्य', region: 'KVIC क्षेत्र', allRegions: 'सभी क्षेत्र', choose: 'राज्य चुनें', sellersIn: 'विक्रेता:', none: 'यहाँ अभी कोई पंजीकृत फ़ार्म नहीं है। दूसरा क्षेत्र या राज्य चुनें।',
     products: 'उत्पाद', from: 'से शुरू', jars: 'जार उपलब्ध', view: 'उत्पाद देखें', back: 'सभी विक्रेता', phone: 'फ़ोन', address: 'पता', fssai: 'FSSAI लाइसेंस',
     noProducts: 'इस विक्रेता के पास अभी स्टॉक नहीं है।', labOk: 'KVIC लैब द्वारा सत्यापित', batch: 'बैच', harvested: 'निकाला गया', inStock: 'स्टॉक में', price: 'प्रति जार', quantity: 'जार', order: 'ऑर्डर करें',
+    perKg: 'प्रति किलो', kg: 'किलोग्राम', looseTag: 'खुला, वज़न के अनुसार',
     yourDetails: 'आपकी जानकारी', name: 'आपका नाम', mobile: 'मोबाइल नंबर', email: 'ईमेल (वैकल्पिक)', deliveryAddress: 'डिलीवरी का पता', pin: 'पिन कोड', total: 'कुल', confirm: 'ऑर्डर पक्का करें', cancel: 'रद्द करें',
     track: 'ऑर्डर ट्रैक करें', trackText: 'ऑर्डर कोड और वही मोबाइल नंबर डालें जिससे ऑर्डर किया था।', orderCode: 'ऑर्डर कोड', go: 'ट्रैक करें',
     loading: 'लोड हो रहा है...', failed: 'कुछ गड़बड़ हुई। कृपया फिर कोशिश करें।',
@@ -35,8 +37,8 @@ const TEXT = {
     payTitle: 'विक्रेता को भुगतान करें', payText: 'किसी भी UPI ऐप (Google Pay, PhonePe, Paytm) से यह QR कोड स्कैन करके राशि दें। फिर नीचे UPI रेफरेंस नंबर डालें।',
     payDemo: 'डेमो QR: इस विक्रेता ने अभी UPI ID नहीं जोड़ी है, इसलिए यह कोड किसी असली खाते तक नहीं जाता।', payTo: 'भुगतान किसे', amount: 'राशि', openUpi: 'मेरे UPI ऐप में खोलें',
     reference: 'UPI रेफरेंस (UTR) नंबर', paid: 'मैंने भुगतान कर दिया', waiting: 'भुगतान भेजा गया। विक्रेता जाँच रहा है और जल्द पुष्टि करेगा।', ref: 'आपका रेफरेंस',
-    steps: 'ऑर्डर की स्थिति', seller: 'विक्रेता', deliveryTo: 'डिलीवरी का पता', cancelOrder: 'यह ऑर्डर रद्द करें', payBy: 'भुगतान की अंतिम समय-सीमा', needPhone: 'ऑर्डर देखने के लिए वही मोबाइल नंबर डालें जिससे ऑर्डर किया था।', show: 'ऑर्डर दिखाएँ',
-    when: 'ऑर्डर की तारीख',
+    steps: 'ऑर्डर की स्थिति', seller: 'विक्रेता', deliveryTo: 'डिलीवरी का पता', cancelOrder: 'यह ऑर्डर रद्द करें', payBy: 'भुगतान की अंतिम समय-सीमा', honeyTitle: 'आपके ऑर्डर का शहद', batchIs: 'कटाई का बैच', jarsTitle: 'आपके जार', jarsText: 'हर जार का अपना QR कोड है। उसे स्कैन करें या ID दबाएँ, कटाई, लैब परिणाम और सत्यापित करने वाले KVIC अधिकारी की जानकारी दिखेगी।', jarsLater: 'भुगतान की पुष्टि के बाद विक्रेता आपके जार अलग रखता है। उनकी ID यहाँ दिखेंगी।', verifyBatch: 'बैच जाँचें', verifyJar: 'जार जाँचें', looseOrderNote: 'खुला शहद, वज़न के अनुसार, सीधे कटाई के बैच से। कोई जार या QR कोड शामिल नहीं है।', inclGst: 'GST सहित', gstLine: 'GST', priceExGst: 'GST से पहले की कीमत', finalPriceNote: 'प्रति जार, GST सहित', finalPriceNoteLoose: 'प्रति किलो, GST सहित', needPhone: 'ऑर्डर देखने के लिए वही मोबाइल नंबर डालें जिससे ऑर्डर किया था।', show: 'ऑर्डर दिखाएँ',
+    when: 'ऑर्डर की तारीख', special: 'प्रसिद्ध शहद', farmView: 'फ़ार्म देखें', nothingYet: 'अभी बिक्री पर कुछ नहीं, सीधे फ़ार्म से पूछें', farms: 'पंजीकृत फ़ार्म',
   },
 }
 
@@ -86,7 +88,7 @@ function SellerList() {
   useEffect(() => {
     api('/shop/states').then((list) => {
       setStates(list)
-      setState((current) => current || list.find((item) => item.sellers > 0)?.state || list[0]?.state || '')
+      setState((current) => current || list.find((item) => item.withStock > 0)?.state || list.find((item) => item.sellers > 0)?.state || list[0]?.state || '')
     }).catch(() => setError(x.failed))
   }, [x.failed])
 
@@ -98,7 +100,8 @@ function SellerList() {
     api(`/shop/sellers?${query}`).then(setSellers).catch(() => setError(x.failed))
   }, [state, region, x.failed])
 
-  const regions = states.find((item) => item.state === state)?.regions || []
+  const stateInfo = states.find((item) => item.state === state)
+  const regions = stateInfo?.regions || []
 
   return (
     <section className="section light verify-page">
@@ -122,6 +125,10 @@ function SellerList() {
           </label>
         </div>
 
+        {stateInfo?.specialties?.length > 0 && (
+          <p className="shop-special">{x.special} {stateInfo.state}: {stateInfo.specialties.map((item) => <span className="shop-chip" key={item.type} title={item.note}>{item.type}</span>)}</p>
+        )}
+
         {error && <p className="shop-error">{error}</p>}
         {sellers === null && !error && <p className="shop-muted">{x.loading}</p>}
         {sellers && sellers.length === 0 && <p className="shop-empty">{x.none}</p>}
@@ -131,8 +138,11 @@ function SellerList() {
             <article className="shop-card" key={item.code}>
               <h3>{item.name}</h3>
               <p className="shop-muted">{[item.place, item.region, item.state].filter(Boolean).join(', ')}{item.pincode ? ` - ${item.pincode}` : ''}</p>
-              <p className="shop-line"><b>{item.products}</b> {x.products} &middot; {x.from} <b>{inr.format(item.fromPrice)}</b> &middot; {item.jars} {x.jars}</p>
-              <a className="btn-gold" href={`/sellers?seller=${encodeURIComponent(item.code)}`}>{x.view}</a>
+              {item.honeyTypes?.length > 0 && <p className="shop-special">{item.honeyTypes.map((type) => <span className="shop-chip" key={type}>{type}</span>)}</p>}
+              {item.products > 0
+                ? <p className="shop-line"><b>{item.products}</b> {x.products} &middot; {x.from} <b>{inr.format(item.fromPrice)}</b> <small>({x.inclGst} {item.gstPercent}%)</small> &middot; {item.jars} {x.jars}</p>
+                : <p className="shop-line shop-muted">{x.nothingYet}</p>}
+              <a className={item.products > 0 ? 'btn-gold' : 'btn-ghost dark'} href={`/sellers?seller=${encodeURIComponent(item.code)}`}>{item.products > 0 ? x.view : x.farmView}</a>
             </article>
           ))}
         </div>
@@ -225,19 +235,21 @@ function ProductCard({ product, seller }) {
     }
   }
 
+  const loose = product.kind === 'LOOSE'
+
   return (
     <article className="shop-card">
-      <h3>{product.title}</h3>
+      <h3>{product.title}{loose && <span className="shop-chip">{x.looseTag}</span>}</h3>
       <p className="shop-muted">{product.honeyType} &middot; {x.batch} <a href={`/verify?batch=${encodeURIComponent(product.batchCode)}`}>{product.batchCode}</a> &middot; {x.harvested} {product.harvestDate}</p>
       {product.labVerified && <p className="shop-badge">&#10003; {x.labOk}</p>}
-      <p className="shop-price">{inr.format(product.price)} <small>{x.price}</small></p>
-      <p className="shop-line">{product.stock} {x.inStock}</p>
+      <p className="shop-price">{inr.format(product.finalPrice)} <small>{loose ? x.finalPriceNoteLoose : x.finalPriceNote} ({product.gstPercent}%)</small></p>
+      <p className="shop-line">{product.stock} {loose ? x.kg : x.quantity} {x.inStock}</p>
 
       {!open ? (
         <button className="btn-gold" onClick={() => setOpen(true)}>{x.order}</button>
       ) : (
         <form className="shop-form" onSubmit={submit}>
-          <label>{x.quantity}
+          <label>{loose ? x.kg : x.quantity}
             <input type="number" min="1" max={product.stock} value={quantity} onChange={(event) => setQuantity(Math.max(1, Math.min(product.stock, Number(event.target.value) || 1)))} />
           </label>
           <h4>{x.yourDetails}</h4>
@@ -246,7 +258,7 @@ function ProductCard({ product, seller }) {
           <input type="email" value={form.buyerEmail} onChange={set('buyerEmail')} placeholder={x.email} />
           <textarea value={form.deliveryAddress} onChange={set('deliveryAddress')} placeholder={x.deliveryAddress} rows={3} required />
           <input value={form.deliveryPincode} onChange={set('deliveryPincode')} placeholder={x.pin} inputMode="numeric" maxLength={6} required />
-          <p className="shop-line">{x.total}: <b>{inr.format(product.price * quantity)}</b></p>
+          <p className="shop-line">{x.total}: <b>{inr.format(Math.round(product.finalPrice * quantity * 100) / 100)}</b> <small>({x.inclGst} {product.gstPercent}%)</small></p>
           {error && <p className="shop-error">{error}</p>}
           <div className="shop-row">
             <button className="btn-gold" disabled={busy}>{x.confirm}</button>
@@ -318,8 +330,8 @@ export function OrderPage() {
           <>
             <div className="shop-card">
               <p className="shop-status" data-status={order.status}>{x.status[order.status]}</p>
-              <h3>{order.quantity} x {order.product}</h3>
-              <p className="shop-price">{inr.format(order.total)} <small>({inr.format(order.unitPrice)} {x.price})</small></p>
+              <h3>{order.kind === 'LOOSE' ? `${order.quantity} kg ${order.product}` : `${order.quantity} x ${order.product}`}</h3>
+              <p className="shop-price">{inr.format(order.total)} <small>({inr.format(order.unitPrice)} {x.priceExGst} + {order.gstPercent}% {x.gstLine} {inr.format(order.gst)})</small></p>
               <p className="shop-muted">{x.when} {dateOf(order.placedAt)}</p>
             </div>
 
@@ -358,6 +370,29 @@ export function OrderPage() {
                 ))}
               </ol>
             </div>
+
+            {order.honey?.batchCode && (
+              <div className="shop-card">
+                <h3>{x.honeyTitle}</h3>
+                <p className="shop-line">{order.honey.honeyType} &middot; {x.batchIs} <b className="mono">{order.honey.batchCode}</b> {order.honey.labVerified && <span className="shop-chip">{x.labOk}</span>}</p>
+                <a className="btn-ghost dark" href={`/verify?batch=${encodeURIComponent(order.honey.batchCode)}`}>{x.verifyBatch}</a>
+                {order.kind === 'LOOSE' ? (
+                  <p className="shop-muted" style={{ marginTop: 18 }}>{x.looseOrderNote}</p>
+                ) : (
+                <>
+                <h3 style={{ marginTop: 18 }}>{x.jarsTitle}</h3>
+                {order.honey.jarIds?.length > 0 ? (
+                  <>
+                    <p className="shop-muted">{x.jarsText}</p>
+                    <p className="shop-special">{order.honey.jarIds.map((id) => <a className="shop-chip mono" key={id} href={`/verify?pack_id=${encodeURIComponent(id)}`} title={x.verifyJar}>{id}</a>)}</p>
+                  </>
+                ) : (
+                  <p className="shop-muted">{x.jarsLater}</p>
+                )}
+                </>
+                )}
+              </div>
+            )}
 
             <div className="shop-facts">
               <div><span>{x.deliveryTo}</span><b>{order.delivery.name}, {order.delivery.address}, {order.delivery.pincode}</b></div>

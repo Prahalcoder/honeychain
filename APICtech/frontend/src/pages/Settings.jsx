@@ -8,11 +8,15 @@ import {
   KeyRound,
   Save,
   Power,
+  IndianRupee,
+  FileText,
 } from 'lucide-react'
 
 import MainLayout from '../layouts/MainLayout'
 import { apiRequest } from '../lib/api'
 import { refreshSummary, useSummary } from '../lib/store'
+import RegistrationDetails from '../components/registration/RegistrationDetails'
+import PricesAndBills from './PricesBills'
 
 const tabs = [
   {
@@ -24,6 +28,16 @@ const tabs = [
     id: 'organisation',
     name: 'Organisation & address',
     icon: Building2,
+  },
+  {
+    id: 'registration',
+    name: 'Registration & documents',
+    icon: FileText,
+  },
+  {
+    id: 'business',
+    name: 'Prices, bills & profit',
+    icon: IndianRupee,
   },
   {
     id: 'iot',
@@ -114,7 +128,7 @@ export default function Settings() {
         </p>
       </div>
 
-      <div className="mt-6 grid gap-6 lg:grid-cols-[240px_1fr]">
+      <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[240px_1fr]">
 
         <div className="rounded-2xl border border-[#c0dfdd] bg-white p-3">
 
@@ -144,6 +158,8 @@ export default function Settings() {
 
           {active === 'profile' && <Profile profile={profile} settings={settings} updateProfile={updateProfile} updateField={updateField} saveSettings={saveSettings} />}
           {active === 'organisation' && <Organisation organization={organization} offices={offices} settings={settings} updateField={updateField} saveSettings={saveSettings} />}
+          {active === 'registration' && <RegistrationDetails />}
+          {active === 'business' && <PricesAndBills />}
           {active === 'iot' && <IoT />}
           {active === 'security' && <Security />}
           {active === 'closure' && <Closure />}
@@ -211,9 +227,11 @@ function Organisation({ organization, offices, settings, updateField, saveSettin
             {info('KVIC region', organization.region)}
             {info('Registration number', organization.registrationId)}
             {info('FSSAI licence', organization.fssai)}
+            {info('How you sell honey', { RETAIL: 'Packaged jars with QR codes', WHOLESALE: 'Loose honey only, wholesale', BOTH: 'Both' }[organization.sellingMode] || organization.sellingMode)}
           </div>
         )}
       </Section>
+
 
       <div className="mt-8">
         <Section

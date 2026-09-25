@@ -310,26 +310,33 @@ input, select, textarea, button { font-family: inherit; }
 
 .app-shell > aside.hc-side { background: #0d3532 !important; border-right: 1px solid rgba(255, 255, 255, 0.06) !important; box-shadow: none !important; }
 .hc-backdrop { position: fixed; inset: 0; z-index: 45; background: rgba(6, 24, 22, 0.55); }
-.hc-brand { display: flex; align-items: center; gap: 0.8rem; padding: 1.25rem 1.25rem 1.1rem; border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
-.hc-brand img { width: 2.6rem; height: 2.6rem; border-radius: 0.6rem; object-fit: cover; flex: none; }
-.hc-brand b { display: block; font-family: 'Fraunces Variable', Georgia, serif; font-size: 1.3rem; font-weight: 600; line-height: 1.1; color: #fff; }
-.hc-brand span { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: #8fd3cb; }
+.hc-brand { display: flex; align-items: center; gap: 0.7rem; padding: 0.9rem 1.1rem 0.8rem; border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
+.hc-brand img { width: 2.25rem; height: 2.25rem; border-radius: 0.6rem; object-fit: cover; flex: none; }
+.hc-brand b { display: block; font-family: 'Fraunces Variable', Georgia, serif; font-size: 1.15rem; font-weight: 600; line-height: 1.1; color: #fff; }
+.hc-brand span { font-size: 0.66rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: #8fd3cb; }
 .hc-close { margin-left: auto; padding: 0.4rem; border-radius: 0.5rem; color: rgba(255, 255, 255, 0.75); }
-.hc-nav { flex: 1; overflow-y: auto; padding: 0.4rem 0.75rem 1rem; }
-.hc-navlabel { margin: 1.15rem 0.55rem 0.35rem; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255, 255, 255, 0.42) !important; }
-.hc-navitem { position: relative; display: flex; align-items: center; gap: 0.8rem; min-height: 2.75rem; padding: 0 0.85rem; margin-bottom: 2px; border-radius: 0.55rem; color: rgba(255, 255, 255, 0.76); font-size: 1rem; font-weight: 500; transition: background 0.15s, color 0.15s; }
-.hc-navitem svg { flex: none; stroke-width: 1.75; opacity: 0.85; transition: none !important; transform: none !important; }
+.hc-nav { flex: 1; overflow-y: auto; padding: 0.2rem 0.65rem 0.6rem; }
+.hc-navlabel { margin: clamp(0.25rem, 1vh, 0.7rem) 0.5rem 0.1rem; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255, 255, 255, 0.42) !important; }
+.hc-navitem { position: relative; display: flex; align-items: center; gap: 0.65rem; min-height: clamp(1.45rem, 3.3vh, 2.2rem); padding: 0 0.75rem; margin-bottom: 1px; border-radius: 0.5rem; color: rgba(255, 255, 255, 0.76); font-size: clamp(0.78rem, 1.75vh, 0.875rem); font-weight: 500; transition: background 0.15s, color 0.15s; }
+.hc-navitem svg { flex: none; width: 1.05rem; height: 1.05rem; stroke-width: 1.75; opacity: 0.85; transition: none !important; transform: none !important; }
 .hc-navitem:hover { background: rgba(255, 255, 255, 0.06); color: #fff; }
 .hc-navitem.is-active { background: rgba(255, 255, 255, 0.1); color: #fff; font-weight: 600; }
-.hc-navitem.is-active::before { content: ''; position: absolute; left: -0.75rem; top: 0.5rem; bottom: 0.5rem; width: 3px; border-radius: 0 3px 3px 0; background: #F97360; }
+.hc-navitem.is-active::before { content: ''; position: absolute; left: -0.65rem; top: 0.45rem; bottom: 0.45rem; width: 3px; border-radius: 0 3px 3px 0; background: #F97360; }
 .hc-navitem.is-active svg { color: #F97360; opacity: 1; }
-.hc-user { display: flex; align-items: center; gap: 0.7rem; padding: 0.85rem 1rem; border-top: 1px solid rgba(255, 255, 255, 0.08); }
-.hc-user .av { flex: none; display: grid; place-items: center; width: 2.35rem; height: 2.35rem; border-radius: 50%; background: #F97360; color: #2a0c07; font-weight: 700; }
+.hc-user { display: flex; align-items: center; gap: 0.6rem; padding: 0.6rem 0.9rem; border-top: 1px solid rgba(255, 255, 255, 0.08); }
+.hc-user .av { flex: none; display: grid; place-items: center; width: 2.05rem; height: 2.05rem; border-radius: 50%; background: #F97360; color: #2a0c07; font-weight: 700; }
 .hc-user .who { min-width: 0; flex: 1; }
-.hc-user .who b { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #fff; font-size: 0.95rem; font-weight: 600; }
-.hc-user .who small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: rgba(255, 255, 255, 0.55); font-size: 0.8rem; }
+.hc-user .who b { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #fff; font-size: 0.85rem; font-weight: 600; }
+.hc-user .who small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: rgba(255, 255, 255, 0.55); font-size: 0.72rem; }
 .hc-user button { flex: none; padding: 0.5rem; border-radius: 0.5rem; color: rgba(255, 255, 255, 0.7); }
 .hc-user button:hover { background: rgba(249, 115, 96, 0.18); color: #ffd2c9; }
+
+/* Short screens: the menu items shrink with the window height so every item fits without scrolling */
+@media (max-height: 800px) {
+  .hc-brand { padding: 0.6rem 1rem 0.5rem; }
+  .hc-navitem svg { width: 0.95rem; height: 0.95rem; }
+  .hc-user { padding: 0.45rem 0.9rem; }
+}
 
 /* ================= Phone layout ================= */
 html, body { max-width: 100%; overflow-x: hidden; }

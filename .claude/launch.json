@@ -9,6 +9,30 @@
         "start"
       ],
       "port": 3000
+    },
+    {
+      "name": "keeper",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "APICtech/frontend", "run", "dev"],
+      "port": 5173
+    },
+    {
+      "name": "admin",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "apictech-admin", "run", "dev"],
+      "port": 5174
+    },
+    {
+      "name": "hive-sim-web",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "8090", "--directory", "E:/unity projects/HoneychainSimulation/Builds/WebGL"],
+      "port": 8090
+    },
+    {
+      "name": "website",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "honeychain-web", "run", "dev"],
+      "port": 5175
     }
   ]
 }

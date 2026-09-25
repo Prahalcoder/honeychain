@@ -1,0 +1,157 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif">
+<defs>
+<marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#0f766e"/></marker>
+<marker id="ahc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#f97360"/></marker>
+<pattern id="dots" width="28" height="28" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.4" fill="#d9e9e6"/></pattern>
+<filter id="sh" x="-5%" y="-5%" width="110%" height="120%"><feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#0a3d43" flood-opacity="0.12"/></filter>
+</defs>
+<rect width="1920" height="1080" fill="#f7fbfa"/><rect width="1920" height="1080" fill="url(#dots)"/>
+<rect x="0" y="0" width="1920" height="104" fill="#0a3d43"/>
+<rect x="0" y="100" width="1920" height="6" fill="#f5a524"/>
+<polygon points="90.0,37.0 90.0,67.0 64.0,82.0 38.0,67.0 38.0,37.0 64.0,22.0" fill="#f5a524"/>
+<polygon points="77.0,44.5 77.0,59.5 64.0,67.0 51.0,59.5 51.0,44.5 64.0,37.0" fill="#0a3d43"/>
+<text x="112" y="60" font-size="40" font-weight="700" fill="#ffffff" text-anchor="start" >Data and Blockchain Architecture</text>
+<text x="112" y="88" font-size="20" font-weight="400" fill="#b9dcd8" text-anchor="start" >Private business data stays private; only proofs (hashes) are public and tamper-evident</text>
+<text x="1864" y="62" font-size="28" font-weight="700" fill="#f5a524" text-anchor="end" >Honey Chain</text>
+<text x="1864" y="88" font-size="17" font-weight="400" fill="#b9dcd8" text-anchor="end" >SIH 2026 · Problem 26021 · KVIC / MSME</text>
+<rect x="50" y="150" width="300" height="880" rx="16" fill="#fffdf5" stroke="#f5a524" stroke-width="3" filter="url(#sh)"/>
+<text x="200" y="190" font-size="23" font-weight="700" fill="#0a3d43" text-anchor="middle" >Honey Chain API</text>
+<rect x="72" y="220" width="256" height="72" rx="16" fill="#fff" stroke="#f5a524" stroke-width="1.8"/>
+<text x="200" y="263" font-size="17" font-weight="600" fill="#0a3d43" text-anchor="middle" >1 Validate + authorise</text>
+<line x1="200" y1="294" x2="200" y2="318" stroke="#f5a524" stroke-width="3" marker-end="url(#ah)"/>
+<rect x="72" y="320" width="256" height="72" rx="16" fill="#fff" stroke="#f5a524" stroke-width="1.8"/>
+<text x="200" y="363" font-size="17" font-weight="600" fill="#0a3d43" text-anchor="middle" >2 Write business rows</text>
+<line x1="200" y1="394" x2="200" y2="418" stroke="#f5a524" stroke-width="3" marker-end="url(#ah)"/>
+<rect x="72" y="420" width="256" height="72" rx="16" fill="#fff" stroke="#f5a524" stroke-width="1.8"/>
+<text x="200" y="463" font-size="17" font-weight="600" fill="#0a3d43" text-anchor="middle" >3 Append ledger event</text>
+<line x1="200" y1="494" x2="200" y2="518" stroke="#f5a524" stroke-width="3" marker-end="url(#ah)"/>
+<rect x="72" y="520" width="256" height="72" rx="16" fill="#fff" stroke="#f5a524" stroke-width="1.8"/>
+<text x="200" y="563" font-size="17" font-weight="600" fill="#0a3d43" text-anchor="middle" >4 Seal block (hash chain)</text>
+<line x1="200" y1="594" x2="200" y2="618" stroke="#f5a524" stroke-width="3" marker-end="url(#ah)"/>
+<rect x="72" y="620" width="256" height="72" rx="16" fill="#fff" stroke="#f5a524" stroke-width="1.8"/>
+<text x="200" y="663" font-size="17" font-weight="600" fill="#0a3d43" text-anchor="middle" >5 Queue chain job (outbox)</text>
+<text x="200" y="760" font-size="15" font-weight="400" fill="#475569" text-anchor="middle" >Steps 2 to 4 run in one</text>
+<text x="200" y="782" font-size="15" font-weight="400" fill="#475569" text-anchor="middle" >database transaction</text>
+<text x="200" y="830" font-size="18" font-weight="700" fill="#6d5bd0" text-anchor="middle" >Background relayer</text>
+<text x="200" y="856" font-size="15" font-weight="400" fill="#475569" text-anchor="middle" >retries failed chain jobs,</text>
+<text x="200" y="878" font-size="15" font-weight="400" fill="#475569" text-anchor="middle" >waits for dependencies,</text>
+<text x="200" y="900" font-size="15" font-weight="400" fill="#475569" text-anchor="middle" >resets nonces after restart</text>
+<rect x="420" y="150" width="780" height="880" rx="16" fill="#faf8ff" stroke="#6d5bd0" stroke-width="3" filter="url(#sh)"/>
+<text x="810" y="190" font-size="23" font-weight="700" fill="#6d5bd0" text-anchor="middle" >PostgreSQL: one database, separate schemas</text>
+<rect x="444" y="214" width="732" height="330" rx="16" fill="#fff" stroke="#6d5bd0" stroke-width="2" filter="url(#sh)"/>
+<path d="M444,230 a16,16 0 0 1 16,-16 h700 a16,16 0 0 1 16,16 v24 h-732 z" fill="#6d5bd0"/>
+<text x="460" y="241" font-size="20" font-weight="700" fill="#fff" text-anchor="start" >Schema  public  (shared, official records)</text>
+<rect x="464" y="268" width="68" height="34" rx="17" fill="#ffffff" stroke="#6d5bd0" stroke-width="1.6"/>
+<text x="498.0" y="291" font-size="15" font-weight="600" fill="#6d5bd0" text-anchor="middle" >users</text>
+<rect x="542.0" y="268" width="135" height="34" rx="17" fill="#ffffff" stroke="#6d5bd0" stroke-width="1.6"/>
+<text x="609.6" y="291" font-size="15" font-weight="600" fill="#6d5bd0" text-anchor="middle" >organizations</text>
+<rect x="687.2" y="268" width="127" height="34" rx="17" fill="#ffffff" stroke="#6d5bd0" stroke-width="1.6"/>
+<text x="750.6" y="291" font-size="15" font-weight="600" fill="#6d5bd0" text-anchor="middle" >offices (31)</text>
+<rect x="824.0" y="268" width="85" height="34" rx="17" fill="#ffffff" stroke="#6d5bd0" stroke-width="1.6"/>
+<text x="866.4" y="291" font-size="15" font-weight="600" fill="#6d5bd0" text-anchor="middle" >batches</text>
+<rect x="918.8" y="268" width="211" height="34" rx="17" fill="#ffffff" stroke="#6d5bd0" stroke-width="1.6"/>
+<text x="1024.2" y="291" font-size="15" font-weight="600" fill="#6d5bd0" text-anchor="middle" >lab_requests / reviews</text>
+<rect x="464" y="312" width="127" height="34" rx="17" fill="#ffffff" stroke="#6d5bd0" stroke-width="1.6"/>
+<text x="527.4" y="335" font-size="15" font-weight="600" fill="#6d5bd0" text-anchor="middle" >pack_batches</text>
+<rect x="600.8" y="312" width="110" height="34" rx="17" fill="#ffffff" stroke="#6d5bd0" stroke-width="1.6"/>
+<text x="655.8" y="335" font-size="15" font-weight="600" fill="#6d5bd0" text-anchor="middle" >packs (QR)</text>
+<rect x="720.8" y="312" width="160" height="34" rx="17" fill="#ffffff" stroke="#6d5bd0" stroke-width="1.6"/>
+<text x="801.0" y="335" font-size="15" font-weight="600" fill="#6d5bd0" text-anchor="middle" >custody_balances</text>
+<rect x="891.1999999999999" y="312" width="186" height="34" rx="17" fill="#ffffff" stroke="#6d5bd0" stroke-width="1.6"/>
+<text x="984.0" y="335" font-size="15" font-weight="600" fill="#6d5bd0" text-anchor="middle" >traceability_events</text>
+<rect x="464" y="356" width="236" height="34" rx="17" fill="#ffffff" stroke="#6d5bd0" stroke-width="1.6"/>
+<text x="582.0" y="379" font-size="15" font-weight="600" fill="#6d5bd0" text-anchor="middle" >ledger_blocks (immutable)</text>
+<rect x="710.0" y="356" width="135" height="34" rx="17" fill="#ffffff" stroke="#6d5bd0" stroke-width="1.6"/>
+<text x="777.6" y="379" font-size="15" font-weight="600" fill="#6d5bd0" text-anchor="middle" >shop_listings</text>
+<rect x="855.2" y="356" width="160" height="34" rx="17" fill="#ffffff" stroke="#6d5bd0" stroke-width="1.6"/>
+<text x="935.4000000000001" y="379" font-size="15" font-weight="600" fill="#6d5bd0" text-anchor="middle" >shop_order_index</text>
+<rect x="1025.6000000000001" y="356" width="127" height="34" rx="17" fill="#ffffff" stroke="#6d5bd0" stroke-width="1.6"/>
+<text x="1089.0000000000002" y="379" font-size="15" font-weight="600" fill="#6d5bd0" text-anchor="middle" >chain_outbox</text>
+<rect x="464" y="400" width="160" height="34" rx="17" fill="#ffffff" stroke="#6d5bd0" stroke-width="1.6"/>
+<text x="544.2" y="423" font-size="15" font-weight="600" fill="#6d5bd0" text-anchor="middle" >closure_requests</text>
+<rect x="634.4" y="400" width="118" height="34" rx="17" fill="#ffffff" stroke="#6d5bd0" stroke-width="1.6"/>
+<text x="693.6" y="423" font-size="15" font-weight="600" fill="#6d5bd0" text-anchor="middle" >inspections</text>
+<rect x="762.8" y="400" width="135" height="34" rx="17" fill="#ffffff" stroke="#6d5bd0" stroke-width="1.6"/>
+<text x="830.4" y="423" font-size="15" font-weight="600" fill="#6d5bd0" text-anchor="middle" >announcements</text>
+<rect x="908.0" y="400" width="102" height="34" rx="17" fill="#ffffff" stroke="#6d5bd0" stroke-width="1.6"/>
+<text x="958.8" y="423" font-size="15" font-weight="600" fill="#6d5bd0" text-anchor="middle" >audit_log</text>
+<rect x="1019.6" y="400" width="127" height="34" rx="17" fill="#ffffff" stroke="#6d5bd0" stroke-width="1.6"/>
+<text x="1083.0" y="423" font-size="15" font-weight="600" fill="#6d5bd0" text-anchor="middle" >ipfs_objects</text>
+<text x="464" y="512" font-size="16" font-weight="600" fill="#6d5bd0" text-anchor="start" >Only codes and hashes go on chain, never buyer or finance data.</text>
+<rect x="444" y="566" width="732" height="244" rx="16" fill="#fff" stroke="#0f766e" stroke-width="2" filter="url(#sh)"/>
+<path d="M444,582 a16,16 0 0 1 16,-16 h700 a16,16 0 0 1 16,16 v24 h-732 z" fill="#0f766e"/>
+<text x="460" y="593" font-size="20" font-weight="700" fill="#fff" text-anchor="start" >Schema  co_org_2026_xxxx  (one PRIVATE per company)</text>
+<rect x="464" y="622" width="68" height="34" rx="17" fill="#ffffff" stroke="#0f766e" stroke-width="1.6"/>
+<text x="498.0" y="645" font-size="15" font-weight="600" fill="#0f766e" text-anchor="middle" >hives</text>
+<rect x="542.0" y="622" width="93" height="34" rx="17" fill="#ffffff" stroke="#0f766e" stroke-width="1.6"/>
+<text x="588.6" y="645" font-size="15" font-weight="600" fill="#0f766e" text-anchor="middle" >harvests</text>
+<rect x="645.2" y="622" width="152" height="34" rx="17" fill="#ffffff" stroke="#0f766e" stroke-width="1.6"/>
+<text x="721.2" y="645" font-size="15" font-weight="600" fill="#0f766e" text-anchor="middle" >finance_entries</text>
+<rect x="807.2" y="622" width="76" height="34" rx="17" fill="#ffffff" stroke="#0f766e" stroke-width="1.6"/>
+<text x="845.4000000000001" y="645" font-size="15" font-weight="600" fill="#0f766e" text-anchor="middle" >buyers</text>
+<rect x="893.6" y="622" width="118" height="34" rx="17" fill="#ffffff" stroke="#0f766e" stroke-width="1.6"/>
+<text x="952.8000000000001" y="645" font-size="15" font-weight="600" fill="#0f766e" text-anchor="middle" >honey_sales</text>
+<rect x="1022.0" y="622" width="93" height="34" rx="17" fill="#ffffff" stroke="#0f766e" stroke-width="1.6"/>
+<text x="1068.6" y="645" font-size="15" font-weight="600" fill="#0f766e" text-anchor="middle" >invoices</text>
+<rect x="464" y="666" width="219" height="34" rx="17" fill="#ffffff" stroke="#0f766e" stroke-width="1.6"/>
+<text x="573.6" y="689" font-size="15" font-weight="600" fill="#0f766e" text-anchor="middle" >shop_orders (buyer PII)</text>
+<rect x="693.2" y="666" width="60" height="34" rx="17" fill="#ffffff" stroke="#0f766e" stroke-width="1.6"/>
+<text x="723.0" y="689" font-size="15" font-weight="600" fill="#0f766e" text-anchor="middle" >meta</text>
+<text x="464" y="745" font-size="16" font-weight="400" fill="#475569" text-anchor="start" >Created at approval. Officers and other keepers can not read it.</text>
+<text x="464" y="770" font-size="16" font-weight="400" fill="#475569" text-anchor="start" >Archived on closure, never deleted.</text>
+<rect x="444" y="832" width="732" height="178" rx="16" fill="#fff" stroke="#f97360" stroke-width="2" filter="url(#sh)"/>
+<path d="M444,848 a16,16 0 0 1 16,-16 h700 a16,16 0 0 1 16,16 v24 h-732 z" fill="#f97360"/>
+<text x="460" y="859" font-size="20" font-weight="700" fill="#fff" text-anchor="start" >Protection</text>
+<circle cx="466" cy="888" r="3.5" fill="#f97360"/>
+<text x="478" y="894" font-size="16" font-weight="400" fill="#1f3b3f" text-anchor="start" >Ledger tables refuse UPDATE, DELETE, TRUNCATE (database triggers)</text>
+<circle cx="466" cy="913" r="3.5" fill="#f97360"/>
+<text x="478" y="919" font-size="16" font-weight="400" fill="#1f3b3f" text-anchor="start" >Advisory locks: one ledger writer, one honey allocator per batch</text>
+<circle cx="466" cy="938" r="3.5" fill="#f97360"/>
+<text x="478" y="944" font-size="16" font-weight="400" fill="#1f3b3f" text-anchor="start" >Row-level security on; hourly verified backups</text>
+<rect x="1270" y="150" width="600" height="880" rx="16" fill="#eef4ff" stroke="#2563eb" stroke-width="3" filter="url(#sh)"/>
+<text x="1570" y="190" font-size="23" font-weight="700" fill="#2563eb" text-anchor="middle" >Ethereum chain: proof layer</text>
+<rect x="1294" y="214" width="552" height="330" rx="16" fill="#fff" stroke="#2563eb" stroke-width="2" filter="url(#sh)"/>
+<path d="M1294,230 a16,16 0 0 1 16,-16 h520 a16,16 0 0 1 16,16 v24 h-552 z" fill="#2563eb"/>
+<text x="1310" y="241" font-size="20" font-weight="700" fill="#fff" text-anchor="start" >HoneyChain.sol</text>
+<circle cx="1316" cy="270" r="3.5" fill="#2563eb"/>
+<text x="1328" y="276" font-size="18" font-weight="400" fill="#1f3b3f" text-anchor="start" >Batch registered (harvester, grams, ledger hash)</text>
+<circle cx="1316" cy="297" r="3.5" fill="#2563eb"/>
+<text x="1328" y="303" font-size="18" font-weight="400" fill="#1f3b3f" text-anchor="start" >Batch certified (officer, result, report hash, CID)</text>
+<circle cx="1316" cy="324" r="3.5" fill="#2563eb"/>
+<text x="1328" y="330" font-size="18" font-weight="400" fill="#1f3b3f" text-anchor="start" >Jars registered (Merkle root of every QR pack)</text>
+<circle cx="1316" cy="351" r="3.5" fill="#2563eb"/>
+<text x="1328" y="357" font-size="18" font-weight="400" fill="#1f3b3f" text-anchor="start" >Loose sale recorded or reversed</text>
+<circle cx="1316" cy="378" r="3.5" fill="#2563eb"/>
+<text x="1328" y="384" font-size="18" font-weight="400" fill="#1f3b3f" text-anchor="start" >Ledger anchored (height + head hash)</text>
+<circle cx="1316" cy="405" r="3.5" fill="#2563eb"/>
+<text x="1328" y="411" font-size="18" font-weight="400" fill="#1f3b3f" text-anchor="start" >Role changes: who may register or certify</text>
+<rect x="1294" y="566" width="552" height="200" rx="16" fill="#fff" stroke="#6d5bd0" stroke-width="2" filter="url(#sh)"/>
+<path d="M1294,582 a16,16 0 0 1 16,-16 h520 a16,16 0 0 1 16,16 v24 h-552 z" fill="#6d5bd0"/>
+<text x="1310" y="593" font-size="20" font-weight="700" fill="#fff" text-anchor="start" >Signing</text>
+<circle cx="1316" cy="622" r="3.5" fill="#6d5bd0"/>
+<text x="1328" y="628" font-size="17" font-weight="400" fill="#1f3b3f" text-anchor="start" >Each keeper and officer has a custodial wallet</text>
+<circle cx="1316" cy="648" r="3.5" fill="#6d5bd0"/>
+<text x="1328" y="654" font-size="17" font-weight="400" fill="#1f3b3f" text-anchor="start" >Keys encrypted with WALLET_MASTER_KEY</text>
+<circle cx="1316" cy="674" r="3.5" fill="#6d5bd0"/>
+<text x="1328" y="680" font-size="17" font-weight="400" fill="#1f3b3f" text-anchor="start" >EIP-712 typed signatures: who approved what</text>
+<circle cx="1316" cy="700" r="3.5" fill="#6d5bd0"/>
+<text x="1328" y="706" font-size="17" font-weight="400" fill="#1f3b3f" text-anchor="start" >A relayer pays the gas, it can not forge a signature</text>
+<rect x="1294" y="788" width="552" height="222" rx="16" fill="#fff" stroke="#15803d" stroke-width="2" filter="url(#sh)"/>
+<path d="M1294,804 a16,16 0 0 1 16,-16 h520 a16,16 0 0 1 16,16 v24 h-552 z" fill="#15803d"/>
+<text x="1310" y="815" font-size="20" font-weight="700" fill="#fff" text-anchor="start" >Documents</text>
+<circle cx="1316" cy="844" r="3.5" fill="#15803d"/>
+<text x="1328" y="850" font-size="17" font-weight="400" fill="#1f3b3f" text-anchor="start" >Lab report metadata becomes an IPFS CIDv1</text>
+<circle cx="1316" cy="870" r="3.5" fill="#15803d"/>
+<text x="1328" y="876" font-size="17" font-weight="400" fill="#1f3b3f" text-anchor="start" >Same bytes always give the same CID</text>
+<circle cx="1316" cy="896" r="3.5" fill="#15803d"/>
+<text x="1328" y="902" font-size="17" font-weight="400" fill="#1f3b3f" text-anchor="start" >The contract stores only the CID</text>
+<circle cx="1316" cy="922" r="3.5" fill="#15803d"/>
+<text x="1328" y="928" font-size="17" font-weight="400" fill="#1f3b3f" text-anchor="start" >Pin to a real IPFS node with IPFS_API_URL</text>
+<line x1="352" y1="380" x2="418" y2="380" stroke="#0f766e" stroke-width="3" marker-end="url(#ah)" marker-start="url(#ah)"/>
+<rect x="364" y="355" width="42" height="26" rx="13" fill="#f7fbfa" stroke="#0f766e" stroke-width="1.2"/>
+<text x="385.0" y="374.0" font-size="15" font-weight="600" fill="#0f766e" text-anchor="middle" >SQL</text>
+<line x1="352" y1="700" x2="418" y2="700" stroke="#6d5bd0" stroke-width="3" stroke-dasharray="9 6" marker-end="url(#ah)"/>
+<polyline points="200,1032 200,1056 1570,1056 1570,1034" fill="none" stroke="#6d5bd0" stroke-width="3" stroke-dasharray="9 6" marker-end="url(#ah)"/>
+<rect x="660" y="1040" width="300" height="26" rx="13" fill="#f7fbfa" stroke="#6d5bd0" stroke-width="1.2"/>
+<text x="810" y="1059" font-size="15" font-weight="600" fill="#6d5bd0" text-anchor="middle" >relayer sends signed transactions</text>
+</svg>

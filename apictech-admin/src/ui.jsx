@@ -11,6 +11,16 @@ export const ORG_TYPE_LABELS = {
   KVIC_BEEKEEPER: 'KVIC beekeeper',
   ORG_BEEKEEPER: 'Beekeeper via organisation',
   LOCAL_STARTUP: 'Local startup',
+  TRADER: 'Wholesaler / trader / packer',
+}
+
+// How a company registered (the Madhukranti categories), from its registration profile.
+export const CATEGORY_LABELS = {
+  INDIVIDUAL: 'Individual beekeeper',
+  FIRM: 'Firm',
+  SOCIETY: 'Society / cooperative',
+  COMPANY: 'Company / FPO',
+  WHOLESALER: 'Wholesaler',
 }
 
 export const STATUS_LABELS = {
@@ -30,6 +40,11 @@ export const STATUS_LABELS = {
   LAB_REVIEW: 'Lab review',
   IN_TRANSIT: 'In transit',
   CREATED: 'Created',
+  OPEN: 'Open',
+  CONFIRMED: 'Copy confirmed',
+  CLEARED: 'Cleared',
+  ACCEPTED: 'Accepted',
+  DECLINED: 'Declined',
 }
 
 const STATUS_TONES = {
@@ -37,6 +52,7 @@ const STATUS_TONES = {
   PENDING_APPROVAL: 'amber', PENDING: 'amber', HARVESTED: 'amber', LAB_REVIEW: 'amber',
   REJECTED: 'red', SUSPENDED: 'red', CLOSED: 'red', CLOSURE_PENDING: 'amber',
   IN_TRANSIT: 'blue', SCHEDULED: 'blue', COMPLETED: 'green', CANCELLED: 'red',
+  OPEN: 'amber', CONFIRMED: 'red', CLEARED: 'green', ACCEPTED: 'green', DECLINED: 'red',
 }
 
 // SQLite CURRENT_TIMESTAMP values are UTC without a zone marker.

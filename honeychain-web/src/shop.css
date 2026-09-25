@@ -43,3 +43,7 @@
   .shop-row input { min-width: 0; }
   .shop-payrow { justify-content: center; }
 }
+
+/* Special honey of a state, and the honey types a farm sells */
+.shop-special { margin: 10px 0; font-size: 0.95rem; color: var(--ink, #12403c); display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.shop-chip { display: inline-block; padding: 3px 11px; border-radius: 999px; background: #fff4d6; border: 1px solid #f5a524; color: #6b4300; font-weight: 600; font-size: 0.85rem; }

@@ -18,6 +18,7 @@ import { formatDate, money, refreshSummary, useApi } from '../lib/store'
 const today = () => new Date().toLocaleDateString('en-CA')
 const fieldClass = 'mt-1 w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm font-normal outline-none focus:border-[#F97360]'
 const TONES = { Paid: 'bg-teal-50 text-teal-600', Pending: 'bg-orange-50 text-orange-600', Cancelled: 'bg-gray-100 text-gray-500' }
+const SOURCES = [['ALL', 'All sales'], ['MANUAL', 'Sales in person'], ['PORTAL', 'Sales thru portal']]
 
 // Invoices live in the company's private database. Marking one paid books the
 // amount as income in Finance (and in the monthly total shared with KVIC).
@@ -25,13 +26,17 @@ export default function Billing() {
   const invoiceData = useApi('/company/invoices')
   const buyerData = useApi('/company/buyers')
   const batchData = useApi('/company/batches')
+  const stockData = useApi('/company/inventory')
+  const pricingData = useApi('/company/pricing')
   const navigate = useNavigate()
 
   const [showCreate, setShowCreate] = useState(false)
   const [preview, setPreview] = useState(null)
   const [error, setError] = useState('')
+  const [source, setSource] = useState('ALL')
 
-  const invoices = invoiceData.data?.invoices || []
+  const allInvoices = invoiceData.data?.invoices || []
+  const invoices = source === 'ALL' ? allInvoices : allInvoices.filter((invoice) => invoice.source === source)
   const seller = invoiceData.data?.seller
   const buyers = buyerData.data || []
   const sum = (status) => invoices.filter((invoice) => invoice.status === status).reduce((total, invoice) => total + invoice.total_inr, 0)
@@ -40,7 +45,7 @@ export default function Billing() {
     setError('')
     try {
       await apiRequest(`/company/invoices/${invoice.id}`, { method: 'PATCH', body: JSON.stringify({ status }) })
-      await Promise.all([invoiceData.reload(), buyerData.reload(), refreshSummary()])
+      await Promise.all([invoiceData.reload(), buyerData.reload(), stockData.reload(), refreshSummary()])
     } catch (statusError) {
       setError(statusError.message)
     }
@@ -78,8 +83,11 @@ export default function Billing() {
 
       <div className="mt-6 overflow-hidden rounded-2xl border border-[#c0dfdd] bg-white">
 
-        <div className="border-b border-gray-100 p-6">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 p-6">
           <h2 className="font-bold">Invoices</h2>
+          <select value={source} onChange={(event) => setSource(event.target.value)} className="rounded-xl border border-gray-200 px-3 py-2 text-sm font-semibold outline-none focus:border-[#F97360]">
+            {SOURCES.map(([id, label]) => <option key={id} value={id}>{label}</option>)}
+          </select>
         </div>
 
         <div className="overflow-x-auto">
@@ -101,7 +109,10 @@ export default function Billing() {
             <tbody>
               {invoices.map((invoice) => (
                 <tr key={invoice.id} className="border-t border-gray-100">
-                  <td className="px-6 py-4 font-bold">{invoice.invoice_number}</td>
+                  <td className="px-6 py-4 font-bold">
+                    {invoice.invoice_number}
+                    {invoice.source === 'PORTAL' && <span className="ml-2 rounded-full bg-[#f4fbfb] px-2 py-0.5 text-xs font-bold text-[#2b5b57]">Sellers nearby</span>}
+                  </td>
                   <td className="px-6 py-4 text-sm">{invoice.buyer_name}</td>
                   <td className="px-6 py-4 text-sm">{invoice.batch_code || '—'}</td>
                   <td className="px-6 py-4 text-sm">{formatDate(invoice.issue_date)}</td>
@@ -114,10 +125,14 @@ export default function Billing() {
                       <button onClick={() => setPreview(invoice)} title="View" className="rounded-lg border border-gray-200 p-2"><Eye size={15} /></button>
                       <button onClick={() => printInvoice(invoice, seller)} title="Download / print" className="rounded-lg border border-gray-200 p-2"><Download size={15} /></button>
                       {invoice.status === 'Pending' && (
-                        <>
-                          <button onClick={() => setStatus(invoice, 'Paid')} className="rounded-lg border border-teal-200 bg-teal-50 px-3 py-2 text-xs font-bold text-teal-700">Mark paid</button>
-                          <button onClick={() => setStatus(invoice, 'Cancelled')} className="rounded-lg border border-gray-200 px-3 py-2 text-xs font-bold text-gray-500">Cancel</button>
-                        </>
+                        invoice.source === 'PORTAL' ? (
+                          <a href="/orders" className="rounded-lg border border-gray-200 px-3 py-2 text-xs font-bold text-gray-500">Manage in Orders</a>
+                        ) : (
+                          <>
+                            <button onClick={() => setStatus(invoice, 'Paid')} className="rounded-lg border border-teal-200 bg-teal-50 px-3 py-2 text-xs font-bold text-teal-700">Mark paid</button>
+                            <button onClick={() => setStatus(invoice, 'Cancelled')} className="rounded-lg border border-gray-200 px-3 py-2 text-xs font-bold text-gray-500">Cancel</button>
+                          </>
+                        )
                       )}
                     </div>
                   </td>
@@ -141,10 +156,12 @@ export default function Billing() {
         <CreateInvoice
           buyers={buyers}
           batches={batchData.data || []}
+          lots={(stockData.data?.lots || []).filter((lot) => lot.inStock > 0)}
+          pricing={pricingData.data}
           onClose={() => setShowCreate(false)}
           onDone={async (created) => {
             setShowCreate(false)
-            await invoiceData.reload()
+            await Promise.all([invoiceData.reload(), stockData.reload()])
             const fresh = (await apiRequest('/company/invoices')).invoices.find((item) => item.id === created.id)
             if (fresh) setPreview(fresh)
           }}
@@ -157,16 +174,34 @@ export default function Billing() {
   )
 }
 
-function CreateInvoice({ buyers, batches, onClose, onDone }) {
-  const [form, setForm] = useState({ buyerId: buyers[0]?.id || '', batchCode: '', issueDate: today(), dueDate: '', gstPercent: 0 })
-  const [lines, setLines] = useState([{ description: '', quantity: 1, unitPrice: '' }])
+function CreateInvoice({ buyers, batches, lots = [], pricing, onClose, onDone }) {
+  const [form, setForm] = useState({ buyerId: buyers[0]?.id || '', batchCode: '', issueDate: today(), dueDate: '', gstPercent: '' })
+  const [lines, setLines] = useState([{ description: '', quantity: 1, unitPrice: '', packBatchCode: '' }])
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
   const set = (field) => (event) => setForm((current) => ({ ...current, [field]: event.target.value }))
 
   const setLine = (index, field, value) => setLines((current) => current.map((line, at) => (at === index ? { ...line, [field]: value } : line)))
+
+  // Choosing a packaging run fills in the description; the quantity is then a number of jars taken from the stock.
+  function chooseLot(index, code) {
+    const lot = lots.find((item) => item.packBatchCode === code)
+    setLines((current) => current.map((line, at) => (at === index
+      ? { ...line, packBatchCode: code, ...(lot ? { description: `${lot.honeyType} ${lot.jarSizeGrams} g jar (${lot.packBatchCode})`, quantity: Math.min(Number(line.quantity) || 1, lot.inStock), unitPrice: line.unitPrice || minFor(lot) || '' } : {}) }
+      : line)))
+  }
+  // GST: the standard percentage set by KVIC. It is fixed when the bill takes jars from stock.
+  const standardGst = pricing?.gstPercent ?? 0
+  const sellsJars = lines.some((line) => line.packBatchCode)
+  const gstPercent = sellsJars || form.gstPercent === '' ? standardGst : Number(form.gstPercent) || 0
   const subtotal = lines.reduce((total, line) => total + (Number(line.quantity) || 0) * (Number(line.unitPrice) || 0), 0)
-  const gst = (subtotal * (Number(form.gstPercent) || 0)) / 100
+  const gst = (subtotal * gstPercent) / 100
+
+  // The KVIC minimum for one jar of a packaging run, before GST.
+  const minFor = (lot) => {
+    const perKg = pricing?.guidance?.find((item) => item.honeyType === lot?.honeyType)?.minPricePerKg
+    return perKg ? Math.ceil((perKg * lot.jarSizeGrams) / 1000) : 0
+  }
 
   async function submit(event) {
     event.preventDefault()
@@ -180,8 +215,8 @@ function CreateInvoice({ buyers, batches, onClose, onDone }) {
           ...form,
           buyerId: Number(form.buyerId),
           dueDate: form.dueDate || null,
-          gstPercent: Number(form.gstPercent) || 0,
-          lines: lines.map((line) => ({ description: line.description, quantity: Number(line.quantity), unitPrice: Number(line.unitPrice) })),
+          gstPercent,
+          lines: lines.map((line) => ({ description: line.description, quantity: Number(line.quantity), unitPrice: Number(line.unitPrice), ...(line.packBatchCode ? { packBatchCode: line.packBatchCode } : {}) })),
         }),
       })
       await onDone(created)
@@ -226,19 +261,26 @@ function CreateInvoice({ buyers, batches, onClose, onDone }) {
         <p className="mt-6 text-xs font-bold uppercase tracking-wide text-gray-400">Items</p>
         <div className="mt-2 space-y-3">
           {lines.map((line, index) => (
-            <div key={index} className="grid gap-2 sm:grid-cols-[1fr_90px_120px_36px]">
+            <div key={index} className="grid grid-cols-1 gap-2 sm:grid-cols-[1fr_90px_120px_36px]">
+              {lots.length > 0 && (
+                <select value={line.packBatchCode} onChange={(event) => chooseLot(index, event.target.value)} className={`${fieldClass.replace('mt-1 ', '')} sm:col-span-4`}>
+                  <option value="">Not from stock (service, loose honey, other)</option>
+                  {lots.map((lot) => <option key={lot.packBatchCode} value={lot.packBatchCode}>Take jars from {lot.packBatchCode} · {lot.honeyType} {lot.jarSizeGrams} g · {lot.inStock} in stock</option>)}
+                </select>
+              )}
               <input value={line.description} onChange={(event) => setLine(index, 'description', event.target.value)} placeholder="e.g. Natural Honey 500 g jar" className={fieldClass.replace('mt-1 ', '')} required />
-              <input type="number" min="0.01" step="0.01" value={line.quantity} onChange={(event) => setLine(index, 'quantity', event.target.value)} placeholder="Qty" className={fieldClass.replace('mt-1 ', '')} required />
-              <input type="number" min="0" step="0.01" value={line.unitPrice} onChange={(event) => setLine(index, 'unitPrice', event.target.value)} placeholder="Price (₹)" className={fieldClass.replace('mt-1 ', '')} required />
+              <input type="number" min={line.packBatchCode ? 1 : 0.01} step={line.packBatchCode ? 1 : 0.01} max={line.packBatchCode ? lots.find((lot) => lot.packBatchCode === line.packBatchCode)?.inStock : undefined} value={line.quantity} onChange={(event) => setLine(index, 'quantity', event.target.value)} placeholder="Qty" className={fieldClass.replace('mt-1 ', '')} required />
+              <input type="number" min={line.packBatchCode ? minFor(lots.find((lot) => lot.packBatchCode === line.packBatchCode)) : 0} step="0.01" value={line.unitPrice} onChange={(event) => setLine(index, 'unitPrice', event.target.value)} placeholder="Price (₹)" title={line.packBatchCode ? `KVIC minimum ₹${minFor(lots.find((lot) => lot.packBatchCode === line.packBatchCode))} per jar` : ''} className={fieldClass.replace('mt-1 ', '')} required />
               <button type="button" disabled={lines.length === 1} onClick={() => setLines((current) => current.filter((_, at) => at !== index))} className="text-gray-400 hover:text-red-500 disabled:opacity-30"><Trash2 size={16} /></button>
             </div>
           ))}
         </div>
-        <button type="button" onClick={() => setLines((current) => [...current, { description: '', quantity: 1, unitPrice: '' }])} className="mt-3 text-sm font-bold text-[#168481]">+ Add another item</button>
+        <button type="button" onClick={() => setLines((current) => [...current, { description: '', quantity: 1, unitPrice: '', packBatchCode: '' }])} className="mt-3 text-sm font-bold text-[#168481]">+ Add another item</button>
 
         <div className="mt-5 grid items-end gap-4 sm:grid-cols-2">
-          <label className="block text-sm font-semibold">GST (%)
-            <input type="number" min="0" max="28" step="0.1" value={form.gstPercent} onChange={set('gstPercent')} className={fieldClass} />
+          <label className="block text-sm font-semibold">GST (%) {sellsJars && <span className="font-normal text-gray-400">standard, set by KVIC</span>}
+            <input type="number" min="0" max="28" step="0.1" value={sellsJars || form.gstPercent === '' ? standardGst : form.gstPercent} onChange={set('gstPercent')} readOnly={sellsJars} className={`${fieldClass} ${sellsJars ? 'bg-gray-50 text-gray-500' : ''}`} />
+            {sellsJars && <span className="mt-1 block text-xs font-normal text-gray-500">Jars are billed with {standardGst}% GST for every keeper. Your price is before GST; the buyer pays the total below. Prices can not go under the KVIC minimum.</span>}
           </label>
           <div className="rounded-xl bg-[#f4fbfb] p-4 text-sm">
             <div className="flex justify-between"><span>Subtotal</span><span>{money.format(subtotal)}</span></div>
@@ -293,9 +335,12 @@ function InvoiceBody({ invoice, seller }) {
 
       <div className="mt-6 rounded-xl bg-[#f4fbfb] p-4 text-sm">
         {invoice.lines.map((line, index) => (
-          <div key={index} className="flex justify-between gap-4 py-1">
-            <span>{line.description} <span className="text-gray-400">× {line.quantity} @ {money.format(line.unitPrice)}</span></span>
-            <span>{money.format(line.quantity * line.unitPrice)}</span>
+          <div key={index} className="py-1">
+            <div className="flex justify-between gap-4">
+              <span>{line.description} <span className="text-gray-400">× {line.quantity} @ {money.format(line.unitPrice)}</span></span>
+              <span>{money.format(line.quantity * line.unitPrice)}</span>
+            </div>
+            {line.jarIds?.length > 0 && <p className="mt-0.5 break-all font-mono text-[11px] text-gray-500">Jar QR codes: {line.jarIds.join(', ')}</p>}
           </div>
         ))}
         <div className="mt-2 flex justify-between border-t border-[#c0dfdd] pt-2"><span>Subtotal</span><span>{money.format(invoice.subtotal_inr)}</span></div>
@@ -332,7 +377,7 @@ function InvoiceModal({ invoice, seller, onClose }) {
 // Opens a clean printable copy; "Save as PDF" in the print dialog downloads it.
 function printInvoice(invoice, seller) {
   const escape = (value) => String(value ?? '').replace(/[&<>"]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[char]))
-  const rows = invoice.lines.map((line) => `<tr><td>${escape(line.description)}</td><td>${line.quantity}</td><td>${money.format(line.unitPrice)}</td><td>${money.format(line.quantity * line.unitPrice)}</td></tr>`).join('')
+  const rows = invoice.lines.map((line) => `<tr><td>${escape(line.description)}${line.jarIds?.length ? `<br><small>Jar QR codes: ${escape(line.jarIds.join(', '))}</small>` : ''}</td><td>${line.quantity}</td><td>${money.format(line.unitPrice)}</td><td>${money.format(line.quantity * line.unitPrice)}</td></tr>`).join('')
   const page = window.open('', '_blank')
   if (!page) return
 

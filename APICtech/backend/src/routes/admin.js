@@ -26,6 +26,10 @@ import { SigningError, signAsOfficer } from '../services/signing.js'
 import { REQUIRE_LAB_DOCUMENT, sendDocument } from '../services/labDocuments.js'
 import { onLabVerified, chainStatus, recentOutbox } from '../services/chain.js'
 import { allOffices } from '../services/offices.js'
+import { PricingError, getGstPercent, guidance, setGstPercent, setMinimum } from '../services/pricing.js'
+import { REQUIRE_REGISTRATION_DOCUMENTS, checkDocType, listOrgDocuments, missingRequiredDocuments, sendOrgDocument } from '../services/orgDocuments.js'
+import { getProfile } from '../services/profiles.js'
+import { GuardError, alertRows, decideJar } from '../services/qrGuard.js'
 import { BACKUP_DIR, backupNow, listBackups, verifyDatabases } from '../services/backup.js'
 import {
   TicketError, decideCentral, escalate, getTicket, officerMessage, officerThread, officerTickets, returnTicket, setStatus, ticketAlerts,
@@ -62,11 +66,13 @@ async function scopedOrganizations(user, { status, query } = {}) {
       o.fssai_license AS fssai, o.gstin, o.state, o.region, o.status,
       o.created_at AS createdAt, o.reviewed_at AS reviewedAt, o.review_note AS reviewNote,
       rb.name AS reviewedBy, u.name AS ownerName, s.phone, s.email,
-      o.address_line AS addressLine, o.locality, o.district, o.pincode, o.address_sample AS addressSample
+      o.address_line AS addressLine, o.locality, o.district, o.pincode, o.address_sample AS addressSample,
+      o.selling_mode AS "sellingMode", p.applicant_category AS category, p.is_sample AS "profileSample"
     FROM organizations o
     JOIN users u ON u.id = o.owner_user_id
     LEFT JOIN user_settings s ON s.user_id = u.id
     LEFT JOIN users rb ON rb.id = o.reviewed_by
+    LEFT JOIN organization_profiles p ON p.org_id = o.id
     WHERE 1 = 1 ${scope.sql} ${conditions.length ? `AND ${conditions.join(' AND ')}` : ''}
     ORDER BY o.created_at DESC, o.id DESC
   `).all(...params)
@@ -167,6 +173,11 @@ async function pendingCounts(officer) {
       JOIN organizations o ON o.id = r.org_id
       WHERE r.status = 'PENDING' ${scope.sql}
     `).get(...scope.params)).count,
+    openJarAlerts: Number((await db.prepare(`
+      SELECT COUNT(DISTINCT a.pack_id) AS count FROM jar_alerts a
+      JOIN organizations o ON o.id = a.org_id
+      WHERE a.status = 'OPEN' ${scope.sql}
+    `).get(...scope.params)).count),
   }
 }
 
@@ -236,6 +247,25 @@ router.get('/overview', async (req, res) => {
   res.json(overview)
 })
 
+// Wholesale offers a company made (a wholesaler) or received (a beekeeper), for the officer's company page.
+async function tradeActivity(organization) {
+  const column = organization.type === 'TRADER' ? 'trader_org_id' : 'keeper_org_id'
+  const other = organization.type === 'TRADER' ? 'keeper_org_id' : 'trader_org_id'
+  const rows = await db.prepare(`
+    SELECT pr.request_code AS code, pr.status, pr.quantity_kg AS "quantityKg", pr.offer_price_per_kg AS "offerPricePerKg",
+      pr.created_at AS "createdAt", pr.decided_at AS "decidedAt", b.batch_code AS "batchCode", b.honey_type AS "honeyType", o.legal_name AS "otherParty"
+    FROM purchase_requests pr JOIN batches b ON b.id = pr.batch_id JOIN organizations o ON o.id = pr.${other}
+    WHERE pr.${column} = ? ORDER BY pr.id DESC LIMIT 50
+  `).all(organization.id)
+  const accepted = rows.filter((row) => row.status === 'ACCEPTED')
+  return {
+    role: organization.type === 'TRADER' ? 'BUYER' : 'SELLER',
+    offers: rows,
+    acceptedKg: Math.round(accepted.reduce((sum, row) => sum + Number(row.quantityKg), 0) * 100) / 100,
+    acceptedValueInr: Math.round(accepted.reduce((sum, row) => sum + Number(row.quantityKg) * Number(row.offerPricePerKg), 0)),
+  }
+}
+
 // ---------------------------------------------------------- organisations
 router.get('/organizations', async (req, res) => {
   const organizations = await scopedOrganizations(req.user, {
@@ -253,8 +283,9 @@ router.get('/organizations/:id', async (req, res) => {
   const [withDetails] = await withMetrics(req.user, [organization])
 
   const batches = await db.prepare(`
-    SELECT b.id, b.batch_code AS code, b.quantity_kg AS quantityKg, b.honey_type AS honeyType,
-      b.harvest_date AS harvestDate, b.status,
+    SELECT b.id, b.batch_code AS code, b.org_seq AS orgSeq, b.quantity_kg AS quantityKg, b.honey_type AS honeyType,
+      b.harvest_date AS harvestDate, b.status, b.recorded_via AS recordedVia, b.offline_recorded_at AS offlineRecordedAt,
+      b.synced_at AS syncedAt,
       (SELECT r.status FROM lab_reviews r WHERE r.batch_id = b.id ORDER BY r.id DESC LIMIT 1) AS labStatus,
       (SELECT COUNT(*) FROM packs p JOIN pack_batches pb ON pb.id = p.pack_batch_id WHERE pb.batch_id = b.id) AS bottles
     FROM batches b WHERE b.org_id = ? ORDER BY b.id DESC
@@ -272,6 +303,10 @@ router.get('/organizations/:id', async (req, res) => {
     organization: withDetails,
     batches,
     decisions,
+    documents: await listOrgDocuments(organization.id),
+    documentsRequired: REQUIRE_REGISTRATION_DOCUMENTS,
+    profile: await getProfile(organization.id),
+    trade: await tradeActivity(organization),
     closure: closureRow ? { ...closureView(closureRow), items: applicableItems({ gstin: organization.gstin }) } : null,
     ...(canSeeIncome(req.user)
       ? {
@@ -282,6 +317,32 @@ router.get('/organizations/:id', async (req, res) => {
         }
       : {}),
   })
+})
+
+// The scanned FSSAI licence and other registration paperwork, for the officer reviewing a company.
+router.get('/organizations/:id/documents/:type', async (req, res) => {
+  const organization = await getScopedOrganization(req.user, req.params.id)
+  if (!organization) return res.status(404).json({ message: 'Organisation not found in your jurisdiction' })
+  try {
+    checkDocType(req.params.type)
+  } catch (error) { return res.status(error.status).json({ message: error.message }) }
+  return sendOrgDocument(res, organization.id, req.params.type)
+})
+
+// How a company sells honey (packaged jars with QR codes, loose wholesale only, or both). Chosen by the
+// keeper at registration; a senior officer can change it later, for example once a wholesale-only keeper
+// gets a printer.
+router.put('/organizations/:id/selling-mode', async (req, res) => {
+  if (req.user.role === ROLES.REGIONAL) return res.status(403).json({ message: 'Only state officers and the KVIC head can change this' })
+  const organization = await getScopedOrganization(req.user, req.params.id)
+  if (!organization) return res.status(404).json({ message: 'Organisation not found in your jurisdiction' })
+
+  const mode = String(req.body.sellingMode || '')
+  if (!['RETAIL', 'WHOLESALE', 'BOTH'].includes(mode)) return res.status(400).json({ message: 'Choose RETAIL, WHOLESALE or BOTH' })
+
+  await db.prepare('UPDATE organizations SET selling_mode = ? WHERE id = ?').run(mode, organization.id)
+  await recordAudit(req.user, 'SELLING_MODE_CHANGED', 'ORGANIZATION', organization.code, { sellingMode: mode })
+  res.json({ sellingMode: mode })
 })
 
 const ORG_TRANSITIONS = {
@@ -309,6 +370,11 @@ router.post('/organizations/:id/decision', async (req, res) => {
 
   if (['REJECTED', 'SUSPENDED'].includes(decision) && note.length < 5) {
     return res.status(400).json({ message: 'Add a short reason (at least 5 characters) for the organisation to see' })
+  }
+
+  if (decision === 'APPROVED' && REQUIRE_REGISTRATION_DOCUMENTS) {
+    const missing = await missingRequiredDocuments(organization.id)
+    if (missing.length) return res.status(409).json({ code: 'DOCUMENTS_MISSING', message: `These documents must be on file before approval: ${missing.join('; ')}.` })
   }
 
   await db.transaction(async () => {
@@ -382,6 +448,38 @@ async function closureRows(user, status) {
     readiness: row.status === 'REQUESTED' ? await readiness({ id: row.org_id }) : null,
   })))
 }
+
+// ------------------------------------------------------------- prices and GST
+// The head office sets the standard GST on jars and the minimum price of each honey type for every keeper.
+// Everyone in the portal can read them.
+router.get('/pricing', async (req, res) => {
+  res.json({ gstPercent: await getGstPercent(), guidance: await guidance(), canEdit: req.user.role === ROLES.HEAD })
+})
+
+router.put('/pricing/gst', async (req, res) => {
+  if (req.user.role !== ROLES.HEAD) return res.status(403).json({ message: 'Only the KVIC head office sets the standard GST' })
+  try {
+    const before = await getGstPercent()
+    const gstPercent = await setGstPercent(req.body.gstPercent, req.user.id)
+    await recordAudit(req.user, 'GST_STANDARD_SET', 'PLATFORM', 'jar_gst_percent', { from: before, to: gstPercent })
+    res.json({ gstPercent })
+  } catch (error) {
+    if (error instanceof PricingError) return res.status(error.status).json({ message: error.message })
+    throw error
+  }
+})
+
+router.put('/pricing/guidance', async (req, res) => {
+  if (req.user.role !== ROLES.HEAD) return res.status(403).json({ message: 'Only the KVIC head office sets minimum prices' })
+  try {
+    const raised = await setMinimum(req.body.honeyType, req.body.minPricePerKg, req.user.id)
+    await recordAudit(req.user, 'MIN_PRICE_SET', 'PLATFORM', String(req.body.honeyType), { minPricePerKg: Number(req.body.minPricePerKg), listingsRaised: raised })
+    res.json({ guidance: await guidance(), listingsRaised: raised })
+  } catch (error) {
+    if (error instanceof PricingError) return res.status(error.status).json({ message: error.message })
+    throw error
+  }
+})
 
 router.get('/closures', async (req, res) => {
   res.json(await closureRows(req.user, String(req.query.status || 'ALL')))
@@ -963,8 +1061,9 @@ router.get('/batches', async (req, res) => {
   }
 
   res.json(await db.prepare(`
-    SELECT b.batch_code AS code, b.quantity_kg AS quantityKg, b.honey_type AS honeyType,
-      b.harvest_date AS harvestDate, b.status, b.created_at AS createdAt,
+    SELECT b.batch_code AS code, b.org_seq AS orgSeq, b.quantity_kg AS quantityKg, b.honey_type AS honeyType,
+      b.harvest_date AS harvestDate, b.status, b.created_at AS createdAt, b.recorded_via AS recordedVia,
+      b.offline_recorded_at AS offlineRecordedAt, b.synced_at AS syncedAt,
       o.id AS orgId, o.legal_name AS orgName, o.organization_code AS orgCode,
       (SELECT r.status FROM lab_reviews r WHERE r.batch_id = b.id ORDER BY r.id DESC LIMIT 1) AS labStatus,
       (SELECT COUNT(*) FROM packs p JOIN pack_batches pb ON pb.id = p.pack_batch_id WHERE pb.batch_id = b.id) AS bottles
@@ -999,6 +1098,7 @@ router.get('/batches/:code', async (req, res) => {
   res.json({
     batch: {
       code: batch.batch_code,
+      orgSeq: batch.org_seq,
       quantityKg: batch.quantity_kg,
       honeyType: batch.honey_type,
       harvestDate: batch.harvest_date,
@@ -1007,11 +1107,33 @@ router.get('/batches/:code', async (req, res) => {
       orgId: batch.org_id,
       orgName: batch.org_name,
       orgCode: batch.org_code,
+      // Only this portal shows how a batch reached the ledger: never the QR or the public verify page.
+      recordedVia: batch.recorded_via,
+      offlineRecordedAt: batch.offline_recorded_at,
+      syncedAt: batch.synced_at,
     },
     capacity: await batchCapacity(batch),
     packBatches,
     events,
   })
+})
+
+// ------------------------------------------------------ cloned QR codes
+// Jars whose QR code looks copied onto fake jars (services/qrGuard.js), in the officer's jurisdiction.
+router.get('/jar-alerts', async (req, res) => {
+  const status = ['OPEN', 'CONFIRMED', 'CLEARED', 'ALL'].includes(String(req.query.status)) ? String(req.query.status) : 'OPEN'
+  res.json(await alertRows(orgScope(req.user), status))
+})
+
+router.post('/jar-alerts/:packId/decision', async (req, res) => {
+  try {
+    const result = await decideJar({ packId: req.params.packId, decision: String(req.body?.decision || ''), note: req.body?.note, officer: req.user, scope: orgScope(req.user) })
+    await recordAudit(req.user, result.status === 'CONFIRMED' ? 'JAR_CLONE_CONFIRMED' : 'JAR_ALERT_CLEARED', 'PACK', req.params.packId, { note: String(req.body?.note || '').slice(0, 300) })
+    res.json(result)
+  } catch (error) {
+    if (error instanceof GuardError) return res.status(error.status).json({ message: error.message })
+    throw error
+  }
 })
 
 // ------------------------------------------------------ regional performance

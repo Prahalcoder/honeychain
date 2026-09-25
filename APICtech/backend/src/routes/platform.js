@@ -1,13 +1,14 @@
 import express from 'express'
 
 import db from '../database/database.js'
-import { authenticateToken, loadOrganization, requireApprovedOrg, requireRole } from '../middleware/auth.js'
+import { authenticateToken, loadOrganization, requireApprovedOrg, requireRetailSelling, requireRole } from '../middleware/auth.js'
 import { sealPendingBlock, validateBlockchain } from '../services/blockchain.js'
 import { batchCapacity, getBatch, maxBottlesFor, packagingStatus } from '../services/batches.js'
 import { getBatchConsumerRecord, getConsumerRecord } from '../services/consumer.js'
 import { nextCode } from '../services/codes.js'
 import { onJarsCreated, proofFor } from '../services/chain.js'
 import { appendTraceabilityEvent } from '../services/traceabilityLog.js'
+import { GuardError, recordScan, reportJar } from '../services/qrGuard.js'
 
 import { lanAddress } from '../config/network.js'
 import { lockNamed } from '../services/ledgerLock.js'
@@ -54,7 +55,7 @@ router.get('/pack-batches', ...keeperOnly, async (req, res) => {
   res.json(rows)
 })
 
-router.post('/pack-batches', ...keeperOnly, requireApprovedOrg, async (req, res) => {
+router.post('/pack-batches', ...keeperOnly, requireApprovedOrg, requireRetailSelling, async (req, res) => {
   const {
     batchCode,
     productName = 'Natural Honey',
@@ -154,7 +155,7 @@ router.post('/pack-batches', ...keeperOnly, requireApprovedOrg, async (req, res)
   })
 })
 
-router.post('/pack-batches/:packBatchCode/packs', ...keeperOnly, requireApprovedOrg, async (req, res) => {
+router.post('/pack-batches/:packBatchCode/packs', ...keeperOnly, requireApprovedOrg, requireRetailSelling, async (req, res) => {
   const packBatch = await ownedPackBatch(req)
 
   if (!packBatch) return res.status(404).json({ message: 'Pack batch not found' })
@@ -227,6 +228,27 @@ router.get('/traceability/validate', authenticateToken, async (req, res) => {
 })
 
 export const verificationRouter = express.Router()
+
+const guardFail = (error, res) => {
+  if (error instanceof GuardError) return res.status(error.status).json({ message: error.message })
+  throw error
+}
+
+// The public verify page logs each scan of a jar (services/qrGuard.js) to spot a QR code copied onto fake jars.
+verificationRouter.post('/scan', async (req, res) => {
+  try {
+    res.json(await recordScan({
+      packId: req.body?.packId, deviceId: req.body?.deviceId, ip: req.ip,
+      location: { latitude: req.body?.latitude, longitude: req.body?.longitude, accuracyM: req.body?.accuracyM },
+    }))
+  } catch (error) { guardFail(error, res) }
+})
+
+verificationRouter.post('/report', async (req, res) => {
+  try {
+    res.json(await reportJar({ packId: req.body?.packId, deviceId: req.body?.deviceId, reason: req.body?.reason }))
+  } catch (error) { guardFail(error, res) }
+})
 
 // Public endpoint behind every bottle QR code and the consumer verification page.
 verificationRouter.get('/', async (req, res) => {

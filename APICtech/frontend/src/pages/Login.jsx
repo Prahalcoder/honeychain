@@ -1,56 +1,32 @@
-import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import { Lock, User, Eye, EyeOff } from 'lucide-react'
 import { apiRequest } from '../lib/api'
 import { resetSummary } from '../lib/store'
 import { LanguageToggle } from '../i18n'
-
-const ORGANIZATION_TYPES = [
-  { value: 'KVIC_BEEKEEPER', label: 'Beekeeper registered with KVIC (Honey Mission)' },
-  { value: 'ORG_BEEKEEPER', label: 'Beekeeper registered through another organisation (SHG / FPO / NGO)' },
-  { value: 'LOCAL_STARTUP', label: 'Local honey startup / food business' },
-]
-
-const inputClass = 'w-full rounded-xl border border-[#c6e2e0] bg-[#f7fbfb] px-4 py-3 outline-none focus:border-[#F97360]'
+import OtpSignIn from '../components/OtpSignIn'
 
 export default function Login() {
   const navigate = useNavigate()
 
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
-  const [form, setForm] = useState({
-    name: '',
-    organizationName: '',
-    organizationType: 'KVIC_BEEKEEPER',
-    registrationBody: '',
-    registrationId: '',
-    fssaiLicense: '',
-    gstin: '',
-    state: '',
-    region: '',
-    addressLine: '',
-    locality: '',
-    district: '',
-    pincode: '',
-    phone: '',
-    email: '',
-  })
-  const [regions, setRegions] = useState({})
-  const [isRegistering, setIsRegistering] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [otpMode, setOtpMode] = useState(false)
 
-  useEffect(() => {
-    apiRequest('/regions').then(setRegions).catch(() => {})
-  }, [])
-
-  const setField = (field) => (event) => {
-    const value = field === 'gstin' ? event.target.value.toUpperCase() : event.target.value
-    setForm((current) => ({ ...current, [field]: value, ...(field === 'state' ? { region: '' } : {}) }))
+  // Beekeepers and wholesalers use this app (each their own workspace); officers use Honey Chain Admin.
+  function finishSignIn(token, user) {
+    if (!['BEEKEEPER', 'WHOLESALER'].includes(user.role)) {
+      setError('Officer accounts sign in to the KVIC control room, not the beekeeper app.')
+      return
+    }
+    resetSummary()
+    localStorage.setItem('apictech_token', token)
+    localStorage.setItem('apictech_user', JSON.stringify(user))
+    navigate(user.role === 'WHOLESALER' ? '/trade' : '/dashboard')
   }
-
-  const isKvic = form.organizationType === 'KVIC_BEEKEEPER'
 
   const handleLogin = async (e) => {
     e.preventDefault()
@@ -58,22 +34,12 @@ export default function Login() {
     setIsLoading(true)
 
     try {
-      const { token, user } = await apiRequest(isRegistering ? '/auth/register' : '/auth/login', {
+      const { token, user } = await apiRequest('/auth/login', {
         method: 'POST',
-        body: JSON.stringify(isRegistering
-          ? { ...form, username, password }
-          : { username, password }),
+        body: JSON.stringify({ username, password }),
       })
 
-      if (user.role !== 'BEEKEEPER') {
-        setError('Officer accounts sign in to the KVIC control room, not the beekeeper app.')
-        return
-      }
-
-      resetSummary()
-      localStorage.setItem('apictech_token', token)
-      localStorage.setItem('apictech_user', JSON.stringify(user))
-      navigate('/dashboard')
+      finishSignIn(token, user)
     } catch (loginError) {
       setError(loginError.message)
     } finally {
@@ -118,7 +84,7 @@ export default function Login() {
 
       <div className="flex w-full items-center justify-center p-6 lg:w-[48%]">
 
-        <div className={`w-full ${isRegistering ? 'max-w-xl' : 'max-w-md'}`}>
+        <div className="w-full max-w-md">
 
           <div className="mb-8 text-center lg:text-left">
             <img
@@ -128,107 +94,24 @@ export default function Login() {
             />
 
             <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#199995]">
-              {isRegistering ? 'Join the KVIC monitoring chain' : 'Secure workspace'}
+              Secure workspace
             </p>
             <h2 className="mt-3 text-3xl font-black">
-              {isRegistering ? 'Register your organisation.' : 'Welcome back.'}
+              Welcome back.
             </h2>
 
             <p className="mt-2 text-gray-500">
-              {isRegistering
-                ? 'Your regional KVIC officer reviews these details before your honey can be recorded on the chain.'
-                : 'Sign in to your beekeeper dashboard.'}
+              Sign in to your beekeeper or wholesaler workspace.
             </p>
           </div>
 
+          {otpMode ? (
+            <OtpSignIn onSignedIn={finishSignIn} onBack={() => { setOtpMode(false); setError('') }} />
+          ) : (
           <form
             onSubmit={handleLogin}
             className="rounded-3xl border border-[#c6e2e0] bg-white p-7 shadow-[0_20px_60px_rgba(21,49,55,0.08)]"
           >
-
-            {isRegistering && <>
-              <div className="mb-5">
-                <label className="mb-2 block text-sm font-semibold">Full Name</label>
-                <input value={form.name} onChange={setField('name')} placeholder="Your full name" className={inputClass} required />
-              </div>
-              <div className="mb-5">
-                <label className="mb-2 block text-sm font-semibold">Organisation / Farm Name</label>
-                <input value={form.organizationName} onChange={setField('organizationName')} placeholder="Name as registered" className={inputClass} required />
-              </div>
-              <div className="mb-5">
-                <label className="mb-2 block text-sm font-semibold">How are you registered?</label>
-                <select value={form.organizationType} onChange={setField('organizationType')} className={inputClass}>
-                  {ORGANIZATION_TYPES.map((type) => <option key={type.value} value={type.value}>{type.label}</option>)}
-                </select>
-              </div>
-              <div className="mb-5 grid gap-5 sm:grid-cols-2">
-                <div>
-                  <label className="mb-2 block text-sm font-semibold">{isKvic ? 'KVIC Madhukranti ID' : 'Registration number'}</label>
-                  <input value={form.registrationId} onChange={setField('registrationId')} placeholder={isKvic ? 'e.g. MK-TN-000123' : 'Issued by your organisation'} className={inputClass} required />
-                </div>
-                {!isKvic && (
-                  <div>
-                    <label className="mb-2 block text-sm font-semibold">Issuing organisation</label>
-                    <input value={form.registrationBody} onChange={setField('registrationBody')} placeholder="e.g. Madurai Beekeepers FPO" className={inputClass} required />
-                  </div>
-                )}
-              </div>
-              <div className="mb-5 grid gap-5 sm:grid-cols-2">
-                <div>
-                  <label className="mb-2 block text-sm font-semibold">FSSAI licence number</label>
-                  <input value={form.fssaiLicense} onChange={setField('fssaiLicense')} inputMode="numeric" maxLength={14} pattern="\d{14}" title="14 digits" placeholder="14-digit food safety number" className={inputClass} required />
-                </div>
-                <div>
-                  <label className="mb-2 block text-sm font-semibold">GSTIN <span className="font-normal text-gray-400">(optional)</span></label>
-                  <input value={form.gstin} onChange={setField('gstin')} maxLength={15} placeholder="If GST registered" className={inputClass} />
-                </div>
-              </div>
-              <div className="mb-5 grid gap-5 sm:grid-cols-2">
-                <div>
-                  <label className="mb-2 block text-sm font-semibold">State</label>
-                  <select value={form.state} onChange={setField('state')} className={inputClass} required>
-                    <option value="">Select state</option>
-                    {Object.keys(regions).map((state) => <option key={state}>{state}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label className="mb-2 block text-sm font-semibold">KVIC region</label>
-                  <select value={form.region} onChange={setField('region')} className={inputClass} required disabled={!form.state}>
-                    <option value="">Select region</option>
-                    {(regions[form.state] || []).map((region) => <option key={region}>{region}</option>)}
-                  </select>
-                </div>
-              </div>
-              <div className="mb-5">
-                <label className="mb-2 block text-sm font-semibold">Apiary / business address</label>
-                <input value={form.addressLine} onChange={setField('addressLine')} placeholder="House or plot number, street" className={inputClass} required />
-              </div>
-              <div className="mb-5 grid gap-5 sm:grid-cols-3">
-                <div>
-                  <label className="mb-2 block text-sm font-semibold">Village / town</label>
-                  <input value={form.locality} onChange={setField('locality')} placeholder="Thirumangalam" className={inputClass} required />
-                </div>
-                <div>
-                  <label className="mb-2 block text-sm font-semibold">District</label>
-                  <input value={form.district} onChange={setField('district')} placeholder="Madurai" className={inputClass} />
-                </div>
-                <div>
-                  <label className="mb-2 block text-sm font-semibold">PIN code</label>
-                  <input value={form.pincode} onChange={setField('pincode')} placeholder="625706" inputMode="numeric" maxLength={6} className={inputClass} required />
-                </div>
-              </div>
-              <div className="mb-5 grid gap-5 sm:grid-cols-2">
-                <div>
-                  <label className="mb-2 block text-sm font-semibold">Mobile number</label>
-                  <input value={form.phone} onChange={setField('phone')} placeholder="9876543210" inputMode="numeric" className={inputClass} />
-                </div>
-                <div>
-                  <label className="mb-2 block text-sm font-semibold">Business Email</label>
-                  <input type="email" value={form.email} onChange={setField('email')} placeholder="business@example.com" className={inputClass} />
-                </div>
-              </div>
-            </>}
-
             <div className="mb-5">
               <label className="mb-2 block text-sm font-semibold">
                 Username
@@ -265,9 +148,8 @@ export default function Login() {
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder={isRegistering ? 'At least 8 characters' : 'Enter password'}
+                  placeholder="Enter password"
                   className="w-full rounded-xl border border-[#c6e2e0] bg-[#f7fbfb] py-3 pl-10 pr-12 outline-none transition focus:border-[#F97360] focus:ring-4 focus:ring-[#F97360]/15"
-                  minLength={isRegistering ? 8 : undefined}
                   required
                 />
 
@@ -292,18 +174,26 @@ export default function Login() {
               disabled={isLoading}
               className="w-full rounded-xl bg-[#0F766E] py-3 font-bold text-white transition hover:bg-[#115e59] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {isLoading ? 'Please wait...' : isRegistering ? 'Submit for approval' : 'Sign In'}
+              {isLoading ? 'Please wait...' : 'Sign In'}
             </button>
 
-            <button type="button" onClick={() => { setIsRegistering(!isRegistering); setError('') }} className="mt-4 w-full text-sm font-bold text-[#168481] hover:underline">
-              {isRegistering ? 'Already registered? Sign in' : 'Register a new organisation'}
+            <button type="button" onClick={() => { setOtpMode(true); setError('') }} className="mt-3 block w-full text-center text-sm font-semibold text-gray-500 hover:text-[#168481] hover:underline">
+              Forgot password? Sign in with OTP
             </button>
 
-            {!isRegistering && (
-              <div className="mt-6 rounded-xl border border-[#d4e9e8] bg-[#eff7f6] p-4 text-sm">
+            <Link to="/register" className="mt-4 block w-full text-center text-sm font-bold text-[#168481] hover:underline">
+              Register: beekeeper, firm, society, company or wholesaler
+            </Link>
+
+            <div className="mt-6 rounded-xl border border-[#d4e9e8] bg-[#eff7f6] p-4 text-sm">
                 <p className="font-bold">Login details <span className="font-normal text-gray-400">(demo)</span></p>
 
-                <p className="mt-2 text-xs text-gray-500">New here? Register your organisation above. A regional officer approves it before you can start.</p>
+                <p className="mt-2 text-xs text-gray-500">New here? Register above. A regional officer approves it before you can start.</p>
+
+                <p className="mt-4 text-xs font-bold uppercase tracking-wide text-gray-400">Wholesalers (one per region)</p>
+                <ul className="mt-2 space-y-1 font-mono text-xs text-gray-600">
+                  <li><span className="font-sans font-semibold">Wholesaler</span> trader.madurai / Trader@12345</li>
+                </ul>
 
                 <p className="mt-4 text-xs font-bold uppercase tracking-wide text-gray-400">KVIC officers use Honey Chain Admin ({window.location.hostname}:5174)</p>
                 <ul className="mt-2 space-y-1 font-mono text-xs text-gray-600">
@@ -311,10 +201,9 @@ export default function Login() {
                   <li><span className="font-sans font-semibold">State Officer</span> state.tn / state@12345</li>
                   <li><span className="font-sans font-semibold">Regional Officer</span> region.madurai / region@12345</li>
                 </ul>
-              </div>
-            )}
-
+            </div>
           </form>
+          )}
 
           <p className="mt-6 text-center text-xs text-gray-400">
             Honey Chain Keeper • Smart Beekeeping Platform
