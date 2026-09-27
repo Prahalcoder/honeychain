@@ -13,15 +13,15 @@
   .top { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 0.6mm solid var(--teal); padding-bottom: 2mm; margin-bottom: 5mm }
   .top b { font-size: 10pt; color: var(--teal); letter-spacing: .08em; text-transform: uppercase }
   .top span { font-size: 8.5pt; color: var(--muted) }
-  h2 { font-size: 13.5pt; margin: 6mm 0 2mm; color: var(--deep); display: flex; align-items: center; gap: 2.5mm; break-after: avoid }
+  h2 { font-size: 13.5pt; margin: 4.5mm 0 2mm; color: var(--deep); display: flex; align-items: center; gap: 2.5mm; break-after: avoid }
   h2 .n { display: inline-flex; width: 7mm; height: 7mm; border-radius: 50%; background: var(--teal); color: #fff; font-size: 9.5pt; align-items: center; justify-content: center }
   h2:first-of-type { margin-top: 0 }
   p.note { margin: 0 0 2.5mm; font-size: 9pt; color: var(--muted) }
-  table { width: 100%; border-collapse: collapse; font-size: 8.6pt; break-inside: auto; margin-bottom: 1mm }
+  table { width: 100%; border-collapse: collapse; font-size: 8.3pt; break-inside: auto; margin-bottom: 1mm }
   thead { display: table-header-group }
   tr { break-inside: avoid }
   th { background: var(--deep); color: #fff; text-align: left; font-weight: 600; padding: 1.6mm 2.2mm; font-size: 8.2pt }
-  td { padding: 1.5mm 2.2mm; border-bottom: 0.25mm solid var(--line); vertical-align: top; line-height: 1.32 }
+  td { padding: 1.2mm 2.2mm; border-bottom: 0.25mm solid var(--line); vertical-align: top; line-height: 1.32 }
   tr:nth-child(even) td { background: var(--soft) }
   td:first-child { font-weight: 600 }
   .st { white-space: nowrap; width: 1% }
@@ -67,7 +67,7 @@
     <li>Edge processing and the hive that listens</li>
     <li>IoT gateway</li>
     <li>AI / ML models and datasets</li>
-    <li>AI voice assistant: Madhu Mitra</li>
+    <li>AI assistant (text and voice)</li>
     <li>Weather and alerts (software GSM)</li>
     <li>Blockchain and traceability</li>
     <li>Software platform</li>
@@ -97,7 +97,6 @@
       <tr><td>Relay + 12 V fan</td><td>Cooling for heat only. High CO₂ raises an alert; the fan stays off</td><td class="st"><span class="b built">BUILT</span></td></tr>
       <tr><td>Relay + heater bulb</td><td>Keeps the brood warm on cold nights</td><td class="st"><span class="b built">BUILT</span></td></tr>
       <tr><td>SSD1306 OLED (0.96")</td><td>Live readings shown at the hive</td><td class="st"><span class="b built">BUILT</span></td></tr>
-      <tr><td>USB camera / ESP32-CAM</td><td>Entrance video: varroa mites, bee activity</td><td class="st"><span class="b part">PARTLY</span></td></tr>
       <tr><td>Solar panel + Li-ion battery, LoRa</td><td>Rural sites with no mains power or Wi-Fi</td><td class="st"><span class="b plan">PLANNED</span></td></tr>
     </tbody>
   </table>
@@ -122,7 +121,6 @@
     <thead><tr><th>Technology</th><th>Purpose</th><th class="st">Status</th></tr></thead>
     <tbody>
       <tr><td>Python Flask</td><td>Receives hive data, runs the health check, serves live readings to the Keeper app</td><td class="st"><span class="b built">BUILT</span></td></tr>
-      <tr><td>OpenCV</td><td>Camera capture and streaming</td><td class="st"><span class="b built">BUILT</span></td></tr>
       <tr><td>Alert worker</td><td>Checks hive health every 60 s and reports problems to the main server</td><td class="st"><span class="b built">BUILT</span></td></tr>
     </tbody>
   </table>
@@ -134,7 +132,7 @@
   <div class="top"><b>Honey Chain · Tech stack</b><span>Artificial intelligence</span></div>
 
   <h2><span class="n">4</span>AI / ML models and datasets</h2>
-  <p class="note">Key colony-health signal: a healthy colony holds its brood at 34–35 °C whatever the weather. When the inside temperature starts following the outside temperature, the colony is weak or queenless.</p>
+  <p class="note">Key signal: a healthy colony holds its brood at 34–35 °C whatever the weather; when inside follows outside, the colony is weak or queenless.</p>
   <table>
     <thead><tr><th>Model</th><th>Used for</th><th>Dataset</th><th class="st">Status</th></tr></thead>
     <tbody>
@@ -145,26 +143,27 @@
       <tr><td>Isolation Forest</td><td>Unusual hive behaviour</td><td>HOBOS (Univ. of Würzburg), MSPB 2024</td><td class="st"><span class="b plan">PLANNED</span></td></tr>
       <tr><td>XGBoost</td><td>Healthy / Weak / Queenless / Swarm risk</td><td>MSPB (53 hives, inspection labels)</td><td class="st"><span class="b plan">PLANNED</span></td></tr>
       <tr><td>MFCC + CNN</td><td>Queen status from hive sound</td><td>Kaggle "Smart Bee Colony Monitor"</td><td class="st"><span class="b plan">PLANNED</span></td></tr>
-      <tr><td>YOLOv8-nano</td><td>Varroa mite detection at the entrance</td><td>Roboflow Varroa, Bilik et al. 2021</td><td class="st"><span class="b plan">PLANNED</span></td></tr>
-      <tr><td>MobileNetV2</td><td>Bee-health check from a frame photo</td><td>Kaggle BeeImage (5,000+ images)</td><td class="st"><span class="b plan">PLANNED</span></td></tr>
+      <tr><td>MobileNetV2</td><td>Bee-health check from a frame photo taken on the keeper's phone</td><td>Kaggle BeeImage (5,000+ images)</td><td class="st"><span class="b plan">PLANNED</span></td></tr>
+      <tr><td>Lab certificate RAG</td><td>OCR of the uploaded lab certificate, matched against FSSAI / AGMARK / NBB standards, cited review for the KVIC officer</td><td>FSSAI, AGMARK, NBB documents (pgvector + bge-m3)</td><td class="st"><span class="b plan">PLANNED</span></td></tr>
       <tr><td>Regression model</td><td>Predicts next hour's inside temperature, so heating or cooling starts early</td><td>HOBOS + Open-Meteo history</td><td class="st"><span class="b plan">PLANNED</span></td></tr>
     </tbody>
   </table>
-  <p class="note" style="margin-top:1.5mm">Tools: Python · scikit-learn · XGBoost · TensorFlow / Keras · Ultralytics YOLO · Jupyter</p>
+  <p class="note" style="margin-top:1.5mm">Tools: Python · scikit-learn · XGBoost · TensorFlow / Keras · Jupyter</p>
 
-  <h2><span class="n">5</span>AI voice assistant: "Madhu Mitra"</h2>
-  <p class="note">The keeper asks any beekeeping doubt by voice, in their own language, and hears the answer.</p>
+  <h2><span class="n">5</span>AI assistant (text and voice)</h2>
+  <p class="note">A button at the bottom right of the Keeper app: type or speak a doubt in any of the 12 languages.</p>
   <table>
     <thead><tr><th>Layer</th><th>Technology</th><th class="st">Status</th></tr></thead>
     <tbody>
+      <tr><td>In-app assistant</td><td>Offline knowledge (17 topics), answers in the language of the question</td><td class="st"><span class="b built">BUILT</span></td></tr>
+      <tr><td>Voice in the browser</td><td>Web Speech API: speech recognition and read-aloud</td><td class="st"><span class="b built">BUILT</span></td></tr>
       <tr><td>Speech → text</td><td>Bhashini ASR (MeitY) · OpenAI Whisper · AI4Bharat IndicConformer</td><td class="st"><span class="b plan">PLANNED</span></td></tr>
-      <tr><td>AI brain</td><td>LLM: Claude / Gemini API, or Llama 3 offline via Ollama</td><td class="st"><span class="b plan">PLANNED</span></td></tr>
+      <tr><td>AI brain</td><td>LLM (hosted API, or Llama 3 offline via Ollama)</td><td class="st"><span class="b plan">PLANNED</span></td></tr>
       <tr><td>Trusted knowledge (RAG)</td><td>pgvector + bge-m3 embeddings over NBB, KVIC, ICAR and FSSAI manuals</td><td class="st"><span class="b plan">PLANNED</span></td></tr>
       <tr><td>Live hive answers</td><td>LLM function calling into the Honey Chain API (hive status, alerts, batches, weather)</td><td class="st"><span class="b plan">PLANNED</span></td></tr>
       <tr><td>Text → speech</td><td>Bhashini TTS · AI4Bharat Indic-Parler-TTS</td><td class="st"><span class="b plan">PLANNED</span></td></tr>
-      <tr><td>In the app</td><td>Web Speech API (browser) · Flutter speech_to_text + flutter_tts (Android)</td><td class="st"><span class="b plan">PLANNED</span></td></tr>
       <tr><td>Phone line for basic phones</td><td>Exotel / Twilio Voice IVR: missed call → the bot calls back</td><td class="st"><span class="b plan">PLANNED</span></td></tr>
-      <tr><td>Safety</td><td>Answers cite their source; no antibiotic doses; "Talk to officer" opens a help-desk ticket</td><td class="st"><span class="b plan">PLANNED</span></td></tr>
+      <tr><td>Safety</td><td>Cited answers, no antibiotic doses, hand-over to the officer</td><td class="st"><span class="b plan">PLANNED</span></td></tr>
     </tbody>
   </table>
   <div class="flow"><b>Flow:</b> Keeper speaks (Tamil / Hindi / …) → Bhashini speech-to-text → trusted manuals (RAG) + the keeper's live hive data → LLM answer → Bhashini text-to-speech → keeper hears the answer</div>
@@ -181,7 +180,8 @@
     <thead><tr><th>Technology</th><th>Purpose</th><th class="st">Status</th></tr></thead>
     <tbody>
       <tr><td>SMS gateway API (Fast2SMS / Twilio)</td><td>Critical hive alerts and OTPs by SMS, with TRAI DLT-registered templates</td><td class="st"><span class="b built">BUILT</span></td></tr>
-      <tr><td>In-app notifications</td><td>Every alert is also saved in the Keeper app (My Hives)</td><td class="st"><span class="b built">BUILT</span></td></tr>
+      <tr><td>In-app notifications</td><td>Every alert is saved in the Keeper app and pops up automatically while the app is open</td><td class="st"><span class="b built">BUILT</span></td></tr>
+      <tr><td>Colony health &amp; health log</td><td>8-component colony score per hive and a 7-day log with the automatic action taken for each critical event</td><td class="st"><span class="b built">BUILT</span></td></tr>
       <tr><td>Open-Meteo Forecast API</td><td>Storm, wind, rain and heatwave alerts for each apiary's location</td><td class="st"><span class="b plan">PLANNED</span></td></tr>
       <tr><td>BME280 pressure-drop rule</td><td>A fall of 3 hPa or more in 3 hours means a storm is coming, even offline</td><td class="st"><span class="b plan">PLANNED</span></td></tr>
       <tr><td>Firebase Cloud Messaging</td><td>Free push notifications on the phone</td><td class="st"><span class="b plan">PLANNED</span></td></tr>
@@ -234,7 +234,7 @@
   <div class="summary">
     <div>Hardware</div><div>ESP32 · temperature, humidity, CO₂, weight and pressure sensors · INMP441 mic · fan and heater · solar</div>
     <div>Edge</div><div>Arduino C++ · I²S · ESP-DSP (filters + FFT) · TensorFlow Lite Micro</div>
-    <div>AI</div><div>Expert system · Isolation Forest · XGBoost · audio CNN · YOLOv8 · MobileNetV2 · LLM + RAG voice assistant</div>
+    <div>AI</div><div>Expert system · Isolation Forest · XGBoost · audio CNN · MobileNetV2 · lab-certificate RAG · text &amp; voice assistant</div>
     <div>Voice &amp; language</div><div>Bhashini (speech, translation) · 12 Indian languages</div>
     <div>Alerts</div><div>SMS gateway API (no GSM module) · Firebase push · voice call · Open-Meteo weather</div>
     <div>Blockchain</div><div>Solidity · Hardhat / Polygon · EIP-712 · Merkle tree · IPFS</div>

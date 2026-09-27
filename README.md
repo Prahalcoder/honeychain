@@ -4,6 +4,24 @@ A blockchain-based system for honey traceability and smart beekeeping (SIH probl
 
 > **AI assists. KVIC authorizes. Blockchain records. QR verifies.**
 
+Team **Say My Name** · Smart India Hackathon 2026 · Problem Statement **26021**
+
+## What it does
+
+| Asked for in the problem statement | What Honey Chain provides |
+|---|---|
+| Blockchain traceability and QR verification | Harvest → lab certificate → the KVIC officer's digital signature → packaging → a QR code on every jar. Each step is recorded in a Solidity smart contract. The number of jar QR codes is capped by the honey actually harvested. Anyone can verify a jar on the public website, with no app. |
+| IoT hive monitoring and AI for disease, colony health and productivity | ESP32 smart hive with temperature, humidity, CO₂ and weight sensors (a hive microphone is planned). The fan runs for heat; CO₂ raises an alert only. Each hive has an 8-component colony health score and a 7-day health log. Critical problems alert the keeper automatically by SMS (an SMS gateway, no GSM module) and in the app. |
+| A deployment framework for KVIC clusters | Madhukranti-style registration (individual, firm, society, company, wholesaler), each approved by a regional officer. The KVIC hierarchy is Head → State → 22 regional offices. Also: inspections, notices, help desk, 12 Indian languages, offline harvest entry, and installable phone apps. |
+
+**What we added beyond the problem statement:**
+- detection of copied jar QR codes;
+- honey a wholesaler receives, confirmed by the keeper with an OTP;
+- a KVIC minimum price per kg;
+- "Sellers nearby", so buyers can order direct from farms;
+- an offline assistant that answers by text or voice in all 12 languages;
+- a 3D digital twin of the smart hive.
+
 ## Run everything with one command
 
 ```bash
