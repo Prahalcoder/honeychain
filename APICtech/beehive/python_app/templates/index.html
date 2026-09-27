@@ -193,9 +193,9 @@
                                     <div class="actuator-title-row">
                                         <div>
                                             <h4>Warmer</h4>
-                                            <span class="actuator-meta"><i class="fa-solid fa-microchip"></i> Relay Pin 14 (<span id="lblBulbSource">Average Temp</span> Controlled)</span>
+                                            <span class="actuator-meta"><i class="fa-solid fa-microchip"></i> GPIO 14 (<span id="lblBulbSource">Average Temp</span> Controlled)</span>
                                         </div>
-                                        <span class="relay-state-badge badge-off" id="bulbStateBadge">
+                                        <span class="actuator-state-badge badge-off" id="bulbStateBadge">
                                             <i class="fa-solid fa-power-off"></i> WARMER OFF
                                         </span>
                                     </div>
@@ -223,9 +223,9 @@
                                     <div class="actuator-title-row">
                                         <div>
                                             <h4>Cooler</h4>
-                                            <span class="actuator-meta"><i class="fa-solid fa-microchip"></i> Relay Pin 23 (<span id="lblFanSource">Average Temp</span> Controlled)</span>
+                                            <span class="actuator-meta"><i class="fa-solid fa-microchip"></i> GPIO 23 (<span id="lblFanSource">Average Temp</span> Controlled)</span>
                                         </div>
-                                        <span class="relay-state-badge badge-off" id="fanStateBadge">
+                                        <span class="actuator-state-badge badge-off" id="fanStateBadge">
                                             <i class="fa-solid fa-power-off"></i> COOLER OFF
                                         </span>
                                     </div>
@@ -698,12 +698,12 @@
                                     <option value="1">DHT11 Sensor #1 Only (Pin 32)</option>
                                     <option value="2">DHT11 Sensor #2 Only (Pin 33)</option>
                                 </select>
-                                <span class="field-hint">Relay climate thresholds will be evaluated against the chosen sensor source.</span>
+                                <span class="field-hint">Climate thresholds are evaluated against the chosen sensor source.</span>
                             </div>
 
                             <div class="threshold-group-header">
                                 <i class="fa-solid fa-fire text-amber"></i>
-                                <h4>Warmer Setpoints (Relay GPIO 14)</h4>
+                                <h4>Warmer Setpoints (GPIO 14)</h4>
                             </div>
                             <div class="form-dual-row">
                                 <div class="form-group">
@@ -720,7 +720,7 @@
 
                             <div class="threshold-group-header mt-4">
                                 <i class="fa-solid fa-wind text-cyan"></i>
-                                <h4>Cooler Setpoints (Relay GPIO 23)</h4>
+                                <h4>Cooler Setpoints (GPIO 23)</h4>
                             </div>
                             <div class="form-dual-row">
                                 <div class="form-group">

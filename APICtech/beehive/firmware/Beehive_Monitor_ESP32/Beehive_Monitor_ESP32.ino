@@ -33,8 +33,8 @@
 #define MQ811_PIN        GAS_PIN
 #define DHT1_PIN         32
 #define DHT2_PIN         33
-#define BULB_RELAY_PIN   14
-#define FAN_RELAY_PIN    23
+#define HEATER_PIN   14
+#define FAN_PIN    23
 
 // A load cell (e.g. a bathroom-scale strain gauge) under the hive stand, read through an HX711 amplifier.
 #define HX711_DOUT_PIN   16
@@ -183,15 +183,15 @@ void setup() {
     Serial.println("   Beehive Monitor - ESP32 Booting up...  ");
     Serial.println("==========================================");
 
-    pinMode(BULB_RELAY_PIN, OUTPUT);
-    pinMode(FAN_RELAY_PIN, OUTPUT);
+    pinMode(HEATER_PIN, OUTPUT);
+    pinMode(FAN_PIN, OUTPUT);
     pinMode(GAS_PIN, INPUT);
     pinMode(CO2_PIN, INPUT);
     analogSetPinAttenuation(GAS_PIN, ADC_11db);
     analogSetPinAttenuation(CO2_PIN, ADC_11db);
 
-    digitalWrite(BULB_RELAY_PIN, LOW);
-    digitalWrite(FAN_RELAY_PIN, HIGH);
+    digitalWrite(HEATER_PIN, LOW);
+    digitalWrite(FAN_PIN, HIGH);
 
     dht1.begin();
     dht2.begin();
@@ -532,18 +532,18 @@ void readSensorsAndUpdateControl() {
     static bool currentFanState = false;
 
     if (controlTemp < bOn) {
-        digitalWrite(BULB_RELAY_PIN, HIGH);
+        digitalWrite(HEATER_PIN, HIGH);
         currentBulbState = true;
     } else if (controlTemp > bOff) {
-        digitalWrite(BULB_RELAY_PIN, LOW);
+        digitalWrite(HEATER_PIN, LOW);
         currentBulbState = false;
     }
 
     if (controlTemp > fOn) {
-        digitalWrite(FAN_RELAY_PIN, LOW);
+        digitalWrite(FAN_PIN, LOW);
         currentFanState = true;
     } else if (controlTemp < fOff) {
-        digitalWrite(FAN_RELAY_PIN, HIGH);
+        digitalWrite(FAN_PIN, HIGH);
         currentFanState = false;
     }
 

@@ -108,11 +108,11 @@
 <rect x="1563" y="331" width="314" height="50" rx="12" fill="#f9736018" stroke="#f9736055"/>
 <text x="1720.0" y="363" font-size="19" font-weight="600" fill="#1f3b3f" text-anchor="middle" >SSD1306 OLED</text>
 <rect x="1563" y="392" width="314" height="50" rx="12" fill="#f9736018" stroke="#f9736055"/>
-<text x="1720.0" y="424" font-size="19" font-weight="600" fill="#1f3b3f" text-anchor="middle" >Relays: fan, heater</text>
+<text x="1720.0" y="424" font-size="19" font-weight="600" fill="#1f3b3f" text-anchor="middle" >Fan and heater control</text>
 <rect x="1563" y="453" width="314" height="50" rx="12" fill="#f9736018" stroke="#f9736055"/>
 <text x="1720.0" y="485" font-size="19" font-weight="600" fill="#1f3b3f" text-anchor="middle" >Python 3 + Flask</text>
 <rect x="1563" y="514" width="314" height="50" rx="12" fill="#f9736018" stroke="#f9736055"/>
-<text x="1720.0" y="546" font-size="19" font-weight="600" fill="#1f3b3f" text-anchor="middle" >OpenCV camera</text>
+<text x="1720.0" y="546" font-size="19" font-weight="600" fill="#1f3b3f" text-anchor="middle" >SMS gateway alerts</text>
 <rect x="1563" y="575" width="314" height="50" rx="12" fill="#f9736018" stroke="#f9736055"/>
 <text x="1720.0" y="607" font-size="19" font-weight="600" fill="#1f3b3f" text-anchor="middle" >SQLite hive log</text>
 <rect x="1563" y="636" width="314" height="50" rx="12" fill="#f9736018" stroke="#f9736055"/>

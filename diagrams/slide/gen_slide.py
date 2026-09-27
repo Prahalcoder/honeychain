@@ -82,7 +82,7 @@ def architecture():
     s.panel(3, 121, 112, 116, 'EDGE DEVICE', sub='hive')
     s.card(8, 138, 102, 30, ['ESP32 node', '~Wi-Fi, Arduino C++'], icon='📡')
     s.card(8, 172, 102, 25, ['DHT11 ×2 · MQ gas'], icon='🌡️', size=6.9)
-    s.card(8, 201, 102, 30, ['Camera + OLED', '~fan / heater relays'], icon='📷')
+    s.card(8, 201, 102, 30, ['OLED display', '~fan / heater control'], icon='📟')
 
     # ---- column 2: web apps (top) and the IoT service (bottom)
     s.panel(133, 3, 118, 112, 'WEB APPS', sub='React 19')
@@ -90,7 +90,7 @@ def architecture():
         s.card(138, 20 + i * 31, 108, 27, [a, '~' + b])
 
     s.panel(133, 121, 118, 116, 'IoT SERVICE', sub='Python · Flask')
-    s.card(138, 138, 108, 30, ['Flask + OpenCV', '~live stream, snapshots'], icon='📹')
+    s.card(138, 138, 108, 30, ['Flask gateway', '~health check, alerts'], icon='🔔')
     s.card(138, 172, 108, 25, ['Hive data log'], icon='🗂️', size=6.9)
     s.card(138, 201, 108, 30, ['HiveSense AI', '~planned model'], icon='🧠', stroke='#c47f00', dash=True, fill='#fff7e0')
 
@@ -128,7 +128,7 @@ def techstack():
         ('BACKEND', TEAL, '⚙️', [('Node.js + Express 5', 'REST API'), ('JWT + bcrypt', 'sign-in and roles'), ('ethers.js v6', 'blockchain client')]),
         ('DATABASE', PURPLE, '🗄️', [('PostgreSQL 18', 'records, schema per company'), ('Row-level security', 'data isolation'), ('SHA-256 ledger', 'tamper-evident log')]),
         ('BLOCKCHAIN', NAVY, '⛓️', [('Solidity 0.8', 'smart contract'), ('EVM-compatible chain', 'Polygon Amoy ready'), ('IPFS CID + Merkle proof', 'documents, jar proofs')]),
-        ('IoT / EDGE', CORAL, '📡', [('ESP32', 'Arduino C++ firmware'), ('DHT11 + MQ gas', 'temperature, humidity, gas'), ('Flask + OpenCV', 'data API, camera')]),
+        ('IoT / EDGE', CORAL, '📡', [('ESP32', 'Arduino C++ firmware'), ('DHT11 + MQ gas', 'temperature, humidity, gas'), ('Flask gateway', 'data API, alerts')]),
         ('AI  ·  HiveSense', '#c47f00', '🧠', [('scikit-learn', 'Python ML pipeline'), ('XGBoost + Isolation Forest', 'health score, anomalies'), ('ONNX Runtime', 'model serving')]),
     ]
     cw, ch = 226, 178

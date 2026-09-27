@@ -30,9 +30,9 @@
 <text x="16" y="188.5" font-size="11" font-weight="400" fill="#14213d" text-anchor="middle" >🌡️</text>
 <text x="23" y="186.915" font-size="6.9" font-weight="600" fill="#14213d" text-anchor="start" >DHT11 ×2 · MQ gas</text>
 <rect x="8" y="201" width="102" height="30" rx="2" fill="#ffffff" stroke="#0b1f5c" stroke-width="0.9"/>
-<text x="16" y="220.0" font-size="11" font-weight="400" fill="#14213d" text-anchor="middle" >📷</text>
-<text x="23" y="214.09" font-size="7.4" font-weight="600" fill="#14213d" text-anchor="start" >Camera + OLED</text>
-<text x="23" y="223.09" font-size="6.5" font-weight="400" fill="#4a5878" text-anchor="start" >fan / heater relays</text>
+<text x="16" y="220.0" font-size="11" font-weight="400" fill="#14213d" text-anchor="middle" >📟</text>
+<text x="23" y="214.09" font-size="7.4" font-weight="600" fill="#14213d" text-anchor="start" >OLED display</text>
+<text x="23" y="223.09" font-size="6.5" font-weight="400" fill="#4a5878" text-anchor="start" >fan / heater control</text>
 <rect x="133" y="3" width="118" height="112" rx="2" fill="#e3ebf8" stroke="#0a3fc9" stroke-width="1"/>
 <rect x="133" y="3" width="118" height="14" fill="#0a3fc9"/>
 <text x="138" y="13" font-size="8.6" font-weight="800" fill="#fff" text-anchor="start" letter-spacing="0.3">WEB APPS</text>
@@ -51,9 +51,9 @@
 <text x="138" y="131" font-size="8.6" font-weight="800" fill="#fff" text-anchor="start" letter-spacing="0.3">IoT SERVICE</text>
 <text x="246" y="130.8" font-size="6.6" font-weight="600" fill="#dbe6ff" text-anchor="end" >Python · Flask</text>
 <rect x="138" y="138" width="108" height="30" rx="2" fill="#ffffff" stroke="#0b1f5c" stroke-width="0.9"/>
-<text x="146" y="157.0" font-size="11" font-weight="400" fill="#14213d" text-anchor="middle" >📹</text>
-<text x="153" y="151.09" font-size="7.4" font-weight="600" fill="#14213d" text-anchor="start" >Flask + OpenCV</text>
-<text x="153" y="160.09" font-size="6.5" font-weight="400" fill="#4a5878" text-anchor="start" >live stream, snapshots</text>
+<text x="146" y="157.0" font-size="11" font-weight="400" fill="#14213d" text-anchor="middle" >🔔</text>
+<text x="153" y="151.09" font-size="7.4" font-weight="600" fill="#14213d" text-anchor="start" >Flask gateway</text>
+<text x="153" y="160.09" font-size="6.5" font-weight="400" fill="#4a5878" text-anchor="start" >health check, alerts</text>
 <rect x="138" y="172" width="108" height="25" rx="2" fill="#ffffff" stroke="#0b1f5c" stroke-width="0.9"/>
 <text x="146" y="188.5" font-size="11" font-weight="400" fill="#14213d" text-anchor="middle" >🗂️</text>
 <text x="153" y="186.915" font-size="6.9" font-weight="600" fill="#14213d" text-anchor="start" >Hive data log</text>

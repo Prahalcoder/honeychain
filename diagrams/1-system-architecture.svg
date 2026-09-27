@@ -39,8 +39,8 @@
 <text x="1030" y="260" font-size="15" font-weight="600" fill="#7aa7d1" text-anchor="start" >Phone, no account</text>
 <rect x="1455" y="138" width="420" height="138" rx="16" fill="#fff" stroke="#7aa7d1" stroke-width="2" filter="url(#sh)"/>
 <text x="1475" y="176" font-size="24" font-weight="700" fill="#1e4e79" text-anchor="start" >ESP32 hive device</text>
-<text x="1475" y="208" font-size="17" font-weight="400" fill="#475569" text-anchor="start" >Temp ×2, humidity, gas, camera;</text>
-<text x="1475" y="232" font-size="17" font-weight="400" fill="#475569" text-anchor="start" >fan and heater relays</text>
+<text x="1475" y="208" font-size="17" font-weight="400" fill="#475569" text-anchor="start" >Temp ×2, humidity, gas, weight;</text>
+<text x="1475" y="232" font-size="17" font-weight="400" fill="#475569" text-anchor="start" >fan and heater control</text>
 <text x="1475" y="260" font-size="15" font-weight="600" fill="#7aa7d1" text-anchor="start" >Wi-Fi, HTTP JSON</text>
 <rect x="120" y="312" width="370" height="150" rx="16" fill="#fff" stroke="#0f766e" stroke-width="2.5" filter="url(#sh)"/>
 <rect x="120" y="312" width="370" height="44" rx="16" fill="#0f766e"/><rect x="120" y="336" width="370" height="20" fill="#0f766e"/>
@@ -109,7 +109,7 @@
 <circle cx="1336" cy="624" r="4" fill="#f97360"/>
 <text x="1350" y="630" font-size="18" font-weight="400" fill="#1f3b3f" text-anchor="start" >SQLite log per day, JSON export</text>
 <circle cx="1336" cy="658" r="4" fill="#f97360"/>
-<text x="1350" y="664" font-size="18" font-weight="400" fill="#1f3b3f" text-anchor="start" >OpenCV camera stream and snapshots</text>
+<text x="1350" y="664" font-size="18" font-weight="400" fill="#1f3b3f" text-anchor="start" >Hive health check and automatic alerts</text>
 <circle cx="1336" cy="692" r="4" fill="#f97360"/>
 <text x="1350" y="698" font-size="18" font-weight="400" fill="#1f3b3f" text-anchor="start" >Hive-health analysis (rule based)</text>
 <circle cx="1336" cy="726" r="4" fill="#f97360"/>

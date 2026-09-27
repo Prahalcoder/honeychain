@@ -373,13 +373,13 @@ function updateDashboardGaugesAndActuators(payload) {
     if (tel.bulb_status === "ON") {
         if (bulbIconWrapper) bulbIconWrapper.classList.add("active");
         if (bulbStateBadge) {
-            bulbStateBadge.className = "relay-state-badge badge-on bulb";
+            bulbStateBadge.className = "actuator-state-badge badge-on bulb";
             bulbStateBadge.innerHTML = '<i class="fa-solid fa-fire"></i> WARMER ON';
         }
     } else {
         if (bulbIconWrapper) bulbIconWrapper.classList.remove("active");
         if (bulbStateBadge) {
-            bulbStateBadge.className = "relay-state-badge badge-off";
+            bulbStateBadge.className = "actuator-state-badge badge-off";
             bulbStateBadge.innerHTML = '<i class="fa-solid fa-power-off"></i> WARMER OFF';
         }
     }
@@ -389,13 +389,13 @@ function updateDashboardGaugesAndActuators(payload) {
     if (tel.fan_status === "ON") {
         if (fanIconWrapper) fanIconWrapper.classList.add("active");
         if (fanStateBadge) {
-            fanStateBadge.className = "relay-state-badge badge-on fan";
+            fanStateBadge.className = "actuator-state-badge badge-on fan";
             fanStateBadge.innerHTML = '<i class="fa-solid fa-wind"></i> COOLER ON';
         }
     } else {
         if (fanIconWrapper) fanIconWrapper.classList.remove("active");
         if (fanStateBadge) {
-            fanStateBadge.className = "relay-state-badge badge-off";
+            fanStateBadge.className = "actuator-state-badge badge-off";
             fanStateBadge.innerHTML = '<i class="fa-solid fa-power-off"></i> COOLER OFF';
         }
     }

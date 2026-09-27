@@ -674,7 +674,7 @@ body.light-theme {
     margin-top: 1px;
 }
 
-.relay-state-badge {
+.actuator-state-badge {
     display: inline-flex;
     align-items: center;
     gap: 5px;
@@ -685,19 +685,19 @@ body.light-theme {
     white-space: nowrap;
 }
 
-.relay-state-badge.badge-off {
+.actuator-state-badge.badge-off {
     background: #f1f5f9;
     color: var(--text-secondary);
     border: 1px solid var(--border-light);
 }
 
-.relay-state-badge.badge-on.bulb {
+.actuator-state-badge.badge-on.bulb {
     background: #fef3c7;
     color: #b45309;
     border: 1px solid #fde68a;
 }
 
-.relay-state-badge.badge-on.fan {
+.actuator-state-badge.badge-on.fan {
     background: #e0f2fe;
     color: #0369a1;
     border: 1px solid #bae6fd;
