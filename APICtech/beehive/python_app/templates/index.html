@@ -47,7 +47,7 @@
                         <h1>Beehive Environmental Monitor</h1>
                         <span class="system-badge"><i class="fa-solid fa-microchip"></i> ESP32 Station</span>
                     </div>
-                    <p class="subtitle">Real-time Biometric Probes, Climate Gauges, Python OpenCV Live Camera Feed & Automated Control</p>
+                    <p class="subtitle">Real-time Biometric Probes, Climate Gauges & Automated Control</p>
                 </div>
             </div>
 
@@ -249,16 +249,16 @@
                 </div>
 
                 <!-- ------------------------------ -->
-                <!-- ------- Middle Section: Gauges & OpenCV Live Camera ----------- -->
+                <!-- ------- Middle Section: Gauges ----------- -->
                 <!-- ------------------------------ -->
                 <div class="section-title-bar mt-6">
                     <div class="title-with-icon">
                         <i class="fa-solid fa-chart-pie icon-primary"></i>
-                        <h2>Environmental Analysis & Python OpenCV Live Camera</h2>
+                        <h2>Environmental Analysis</h2>
                     </div>
                 </div>
 
-                <div class="climate-camera-composite-layout">
+                <div class="climate-composite-layout">
 
                     <div class="gauges-left-column">
 
@@ -408,83 +408,6 @@
 
                     </div>
 
-                    <!-- ------------------------------ -->
-                    <!-- ------- Right Column: Python OpenCV Live Camera View ----------- -->
-                    <!-- ------------------------------ -->
-                    <div class="camera-right-column">
-                        <div class="card camera-feed-card">
-                            <div class="camera-card-header">
-                                <div class="camera-select-area">
-                                    <label for="cameraSelectDropdown"><i class="fa-solid fa-camera"></i> Camera Device:</label>
-                                    <div class="camera-select-with-refresh">
-                                        <select id="cameraSelectDropdown" onchange="onCameraDeviceChanged()">
-                                            <option value="0">Detecting connected cameras...</option>
-                                        </select>
-                                        <button class="btn btn-secondary btn-sm" onclick="fetchCameraDevices()"
-                                            title="Rescan Connected Cameras">
-                                            <i class="fa-solid fa-arrows-rotate"></i>
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <div class="camera-controls-area">
-                                    <button class="btn btn-primary btn-sm" id="btnToggleCamera"
-                                        onclick="toggleCameraStream()">
-                                        <i class="fa-solid fa-video"></i> <span id="cameraBtnText">Enable Camera Preview</span>
-                                    </button>
-                                    <button class="btn btn-secondary btn-sm" id="btnSnapshot"
-                                        onclick="takeCameraSnapshot()" disabled title="Capture Snapshot Still Frame">
-                                        <i class="fa-solid fa-camera-retro"></i> <span>Snapshot</span>
-                                    </button>
-                                    <button class="btn btn-secondary btn-sm" id="btnFullscreen"
-                                        onclick="toggleCameraFullscreen()" disabled title="Fullscreen View">
-                                        <i class="fa-solid fa-expand"></i>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div class="camera-viewport-box" id="cameraViewportBox">
-
-                                <div class="camera-standby-placeholder" id="cameraPlaceholder">
-                                    <div class="cam-standby-icon">
-                                        <i class="fa-solid fa-video-slash"></i>
-                                    </div>
-                                    <h4>OpenCV Camera Preview Inactive</h4>
-                                    <p>Select camera device and click <strong>Enable Camera Preview</strong> to start OpenCV live stream.</p>
-                                </div>
-
-                                <!-- ------------------------------ -->
-                                <!-- ------- OpenCV Stream Image Element ----------- -->
-                                <!-- ------------------------------ -->
-                                <img id="cameraStreamImg" class="camera-stream-feed" src="" alt="Live OpenCV Video Feed" style="display: none;">
-
-                                <div class="camera-hud-badge" id="cameraHudBadge" style="display: none;">
-                                    <span class="hud-rec-dot"></span>
-                                    <span>OPENCV LIVE STREAM</span>
-                                    <span class="hud-separator">|</span>
-                                    <span id="hudResolution">--</span>
-                                </div>
-                            </div>
-
-                            <div class="snapshot-preview-drawer" id="snapshotDrawer" style="display: none;">
-                                <div class="snapshot-header">
-                                    <span><i class="fa-solid fa-image"></i> Captured Frame</span>
-                                    <button class="btn-close-snap" onclick="closeSnapshotDrawer()"><i
-                                            class="fa-solid fa-xmark"></i></button>
-                                </div>
-                                <div class="snapshot-body">
-                                    <img id="snapshotImgPreview" src="" alt="Snapshot Preview">
-                                    <div class="snapshot-actions">
-                                        <a id="snapshotDownloadLink" class="btn btn-outline btn-sm"
-                                            download="beehive_snapshot.jpg">
-                                            <i class="fa-solid fa-download"></i> Save Image
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-
-                        </div>
-                    </div>
 
                 </div>
 

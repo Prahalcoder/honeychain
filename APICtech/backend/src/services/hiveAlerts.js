@@ -74,7 +74,11 @@ export async function receiveReport(token, payload = {}) {
   const hive = await hiveOf(org, link.hive_code)
   if (!hive) throw new AlertError('The linked hive no longer exists', 404)
   await db.prepare('UPDATE monitor_links SET last_seen_at = ? WHERE id = ?').run(now(), link.id)
+  return await recordReport(org, hive, payload)
+}
 
+// Decides which risks are worth a text, sends the SMS and records every risk for the app.
+async function recordReport(org, hive, payload) {
   const status = STATUSES.includes(payload.status) ? payload.status : 'WATCH'
   const score = Number.isFinite(Number(payload.score)) ? Math.max(0, Math.min(100, Math.round(Number(payload.score)))) : null
   const risks = (Array.isArray(payload.risks) ? payload.risks : []).slice(0, 12)
@@ -116,7 +120,10 @@ export async function receiveReport(token, payload = {}) {
       isFresh ? message : null, isFresh ? result.error : null, isFresh ? result.ref : null, created)
   }
 
-  return { alerted: worth.length, texted: fresh.length, repeated: repeated.length, sms: fresh.length ? result.status : 'COOLDOWN' }
+  return {
+    alerted: worth.length, texted: fresh.length, repeated: repeated.length, sms: fresh.length ? result.status : 'COOLDOWN',
+    smsTo: fresh.length && contact.mobile ? maskMobile(contact.mobile) : null, smsError: fresh.length ? result.error : null, at: created,
+  }
 }
 
 // What the keeper's app shows: recent alerts, the SMS set-up, and whether each hive has a monitor linked.

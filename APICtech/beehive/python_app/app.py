@@ -4,9 +4,8 @@ import requests
 import os
 import re
 import json
-from flask import Flask, render_template, request, jsonify, send_file, Response
+from flask import Flask, render_template, request, jsonify, send_file
 from database import BeehiveDatabase
-from camera_manager import CameraManager
 from insights import analyze as analyze_hive
 from alerts import AlertWorker
 
@@ -32,7 +31,6 @@ db = BeehiveDatabase(
     logs_dir=os.path.join(BASE_DIR, "data_logs")
 )
 
-camera = CameraManager()
 
 # ------------------------------
 # ------- Global Configuration & State Persistence -----------
@@ -258,92 +256,6 @@ def update_wifi():
         return jsonify({"status": "error", "message": f"Failed to send WiFi credentials to ESP32: {str(e)}"}), 500
 
 # ------------------------------
-# ------- Python OpenCV Camera Endpoints -----------
-# ------------------------------
-@app.route("/api/camera/devices", methods=["GET"])
-def get_camera_devices():
-    devices = camera.detect_devices()
-    status = camera.get_status()
-    return jsonify({
-        "status": "success",
-        "devices": devices,
-        "current_device": status["device_id"],
-        "active": status["active"],
-        "resolution": status["resolution"]
-    })
-
-@app.route("/api/camera/toggle", methods=["POST"])
-def toggle_camera():
-    payload = request.get_json() or {}
-    action = payload.get("action", "toggle")
-    device_id = int(payload.get("device_id", camera.current_device_id))
-
-    if action == "start":
-        success = camera.start(device_id)
-    elif action == "stop":
-        camera.stop()
-        success = True
-    elif action == "toggle":
-        if camera.is_running:
-            camera.stop()
-            success = True
-        else:
-            success = camera.start(device_id)
-    else:
-        success = False
-
-    status = camera.get_status()
-    return jsonify({
-        "status": "success" if success else "error",
-        "active": status["active"],
-        "device_id": status["device_id"],
-        "resolution": status["resolution"]
-    })
-
-@app.route("/api/camera/select", methods=["POST"])
-def select_camera_device():
-    payload = request.get_json() or {}
-    device_id = int(payload.get("device_id", 0))
-    was_running = camera.is_running
-    
-    success = camera.start(device_id) if was_running else True
-    camera.current_device_id = device_id
-    
-    status = camera.get_status()
-    return jsonify({
-        "status": "success" if success else "error",
-        "active": status["active"],
-        "device_id": status["device_id"],
-        "resolution": status["resolution"]
-    })
-
-@app.route("/api/camera/status", methods=["GET"])
-def get_camera_status():
-    status = camera.get_status()
-    return jsonify({"status": "success", **status})
-
-@app.route("/api/camera/stream")
-def get_camera_stream():
-    if not camera.is_running:
-        camera.start(camera.current_device_id)
-    return Response(
-        camera.generate_stream(),
-        mimetype="multipart/x-mixed-replace; boundary=frame"
-    )
-
-@app.route("/api/camera/snapshot", methods=["GET"])
-def get_camera_snapshot():
-    if not camera.is_running:
-        camera.start(camera.current_device_id)
-        time.sleep(0.3)
-        
-    jpeg_bytes = camera.get_jpeg_frame(quality=95)
-    if jpeg_bytes is not None:
-        return Response(jpeg_bytes, mimetype="image/jpeg")
-    else:
-        return jsonify({"status": "error", "message": "Could not capture camera frame"}), 500
-
-# ------------------------------
 # ------- Date-Partitioned Data Logs Endpoints -----------
 # ------------------------------
 @app.route("/api/logs", methods=["GET"])
@@ -430,7 +342,6 @@ if __name__ == "__main__":
     print("==================================================")
     print(" Beehive Monitoring Flask Server Starting...     ")
     print(" Access Web Dashboard at: http://127.0.0.1:5001   ")
-    print(" OpenCV Python Camera Server Active              ")
     print(" Data Logs stored at: python_app/data_logs/      ")
     print("==================================================")
     # The ESP32 posts its readings over Wi-Fi, so the server listens on the network. The interactive debugger would let

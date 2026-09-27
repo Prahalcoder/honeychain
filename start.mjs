@@ -35,7 +35,9 @@ const remoteChain = Boolean(settings.CHAIN_RPC_URL) && !/127\.0\.0\.1|localhost/
 const services = [
   ...(settings.DATABASE_URL ? [] : [{ name: 'db', color: 36, dir: 'APICtech/backend', command: 'node scripts/local-postgres.mjs', needsInstall: true }]),
   ...(remoteChain ? [] : [{ name: 'chain', color: 31, dir: 'blockchain', command: 'node scripts/serve.mjs', needsInstall: true }]),
-  { name: 'api', color: 36, dir: 'APICtech/backend', command: 'node src/server.js', needsInstall: true },
+  // The apps call the API on port 5000, so a PORT variable set for the whole shell (by a hosting or preview tool)
+  // must not move it: only the PORT in APICtech/backend/.env counts.
+  { name: 'api', color: 36, dir: 'APICtech/backend', command: 'node src/server.js', needsInstall: true, env: { PORT: settings.PORT || '5000' } },
   { name: 'iot', color: 33, dir: 'APICtech/beehive/python_app', command: isWindows ? 'python app.py' : 'python3 app.py' },
   { name: 'keeper', color: 32, dir: 'APICtech/frontend', command: 'npm run dev', needsInstall: true },
   { name: 'admin', color: 35, dir: 'apictech-admin', command: 'npm run dev', needsInstall: true },
@@ -85,7 +87,7 @@ for (const service of services) {
   const child = spawn(service.command, {
     cwd: path.join(root, service.dir),
     shell: true,
-    env: { ...process.env, PYTHONIOENCODING: 'utf-8', FORCE_COLOR: '0' },
+    env: { ...process.env, PYTHONIOENCODING: 'utf-8', FORCE_COLOR: '0', ...service.env },
   })
 
   pipe(child.stdout, service)

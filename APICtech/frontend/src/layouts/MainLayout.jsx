@@ -30,6 +30,8 @@ import { apiRequest } from '../lib/api'
 import { refreshSummary, resetSummary, useSummary } from '../lib/store'
 import { LanguageToggle } from '../i18n'
 import NotificationBell from '../components/NotificationBell'
+import AlertWatcher from '../components/AlertWatcher'
+import Assistant from '../components/Assistant'
 import QuickSearch from '../components/QuickSearch'
 import RegistrationDetails from '../components/registration/RegistrationDetails'
 
@@ -292,30 +294,28 @@ export default function MainLayout({ children, title }) {
       </aside>
 
       <div className="lg:pl-68">
-        <header className="sticky top-0 z-40 flex min-h-20 items-center justify-between border-b border-[#c6e2e0] bg-[#fafdfd]/90 px-4 shadow-[0_4px_20px_rgba(29,70,78,0.05)] backdrop-blur-xl lg:px-9">
+        <header className="sticky top-0 z-40 flex min-h-16 items-center justify-between gap-3 border-b border-[#c6e2e0] bg-[#fafdfd]/90 px-4 shadow-[0_4px_20px_rgba(29,70,78,0.05)] backdrop-blur-xl lg:px-9">
 
-          <div className="flex items-center gap-3">
+          <div className="flex min-w-0 items-center gap-3">
             <button
               className="lg:hidden"
               onClick={() => setMobileOpen(true)}
+              aria-label="Open menu"
             >
               <Menu size={22} />
             </button>
 
-            <div>
-              <div className="flex items-center gap-2 text-xs font-semibold text-[#929083]">
+            <div className="min-w-0">
+              <div className="hidden items-center gap-2 text-xs font-semibold text-[#929083] sm:flex">
                 <span>Workspace</span>
                 <ChevronRight size={13} />
-                <span className="text-[#122c31]">{title}</span>
+                <span className="truncate text-[#122c31]">{title}</span>
               </div>
-              <h2 className="mt-1 text-2xl font-black tracking-tight">{title}</h2>
-              <p className="hidden text-xs text-[#929083] sm:block">
-                Live operations console
-              </p>
+              <h2 className="truncate text-lg font-black tracking-tight sm:mt-0.5 sm:text-2xl">{title}</h2>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-4">
+          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2 xl:gap-4">
             <LanguageToggle />
             <QuickSearch sections={menuSections} />
 
@@ -325,12 +325,12 @@ export default function MainLayout({ children, title }) {
               <CircleHelp size={20} />
             </Link>
 
-            <div className="flex items-center gap-2 border-l border-[#c6e2e0] pl-3 sm:pl-4">
+            <div className="hidden items-center gap-2 border-l border-[#c6e2e0] pl-3 sm:flex xl:pl-4">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#F97360] font-black text-[#14272e] shadow-sm">
                 {(user.name || '?').charAt(0).toUpperCase()}
               </div>
 
-              <div className="hidden sm:block">
+              <div className="hidden xl:block">
                 <p className="text-sm font-bold">{user.name || 'Beekeeper'}</p>
                 <p className="text-[11px] font-semibold text-[#929083]">{organization?.name || 'Beekeeper'}</p>
               </div>
@@ -342,6 +342,8 @@ export default function MainLayout({ children, title }) {
           {children}
         </main>
       </div>
+      <AlertWatcher />
+      <Assistant />
     </div>
   )
 }

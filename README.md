@@ -210,6 +210,49 @@ The hive hardware has no SIM card. Instead:
   - Real commercial SMS in India needs DLT registration (TRAI) with the provider. A provider's quick route is fine for a demo.
 - **Browser access.** The monitor now answers the Keeper app from other ports on this computer or the Wi-Fi (CORS limited to private-network addresses).
 
+## Colony health and the hive health log
+
+Every hive page (My Hives > a hive, including hives added later) has two more tabs. My Hives also has **Colony health** and **Health log** buttons on each hive card, and the hive page has a **Health log** button at the top.
+
+- **Colony Health.** One score out of 100 for the colony, built from 8 weighted components:
+  - brood temperature, thermoregulation (inside vs outside temperature) and brood humidity;
+  - CO₂ (alert only; the fan runs for heat, never for CO₂) and hive weight / stores;
+  - hive sound, queen status and swarm risk, all from the planned INMP441 microphone (100-600 Hz band, FFT).
+  - The tab also shows the sound spectrum and the last 24 hours of scores.
+- **Health Log.** A reading every 3 hours for the last 7 days, with a score chart, filters (critical / watch / healthy), CSV download, and the notification each reading caused:
+  - a critical reading is sent to the keeper by SMS and as an in-app alert;
+  - the same problem within 6 hours is not texted again;
+  - a warning is only shown in the app.
+  - Above the table, **Alerts sent from this hive** lists the real alert records.
+- **Demo data.** The history and the sound values are demo data (`APICtech/frontend/src/lib/colonyDemo.js`) until the microphone and the extra sensors are installed.
+  - Each hive gets its own stable sample, generated from its hive code.
+  - When the ESP32 is connected, the live brood temperature, humidity, CO₂ and weight replace the demo values for "now".
+- **Alerts are automatic; there is no send button.** When a component turns critical, the hive monitor reports it and the keeper is alerted without anyone pressing anything:
+  - an SMS to the registered mobile (`services/hiveAlerts.js`);
+  - an in-app notification;
+  - while the Keeper app is open, a pop-up and a system notification (`components/AlertWatcher.jsx`, checks every 20 s; only alerts newer than the last one seen on that device pop up).
+  - The Colony Health tab explains these steps and lists the latest automatic alerts. The Health Log shows each critical event's alert under **"Action taken (automatic)"**.
+  - The dashboard's **Attention Required** lists critical alerts from the last day.
+- **Camera removed.** The OpenCV camera preview is gone from the Keeper app and the hive monitor (Flask). Colony health comes from sensors and sound.
+
+## Assistant (text and voice, no API)
+
+A small round button at the bottom right of the Keeper app opens the assistant (`components/Assistant.jsx`).
+
+- **How it works.** It answers from built-in knowledge (`lib/assistantKnowledge.js`):
+  - hive and colony problems: queenless colony, swarming, mites, wax moth, temperature, CO₂;
+  - beekeeping practice: feeding, when to harvest;
+  - using the app: recording a harvest, lab tests, QR codes, selling, alerts, the colony score, forgotten passwords, schemes, contacting an officer.
+  - No API and no internet are needed.
+- **Languages.** All 12 app languages.
+  - It follows the app's language, and it has its own picker.
+  - A question typed in another script (for example Tamil) is answered in that language.
+  - The translations are a first draft for native speakers to check.
+- **Voice.** The mic button uses the browser's own speech recognition; answers are read aloud when the device has a voice for the language (a speaker button turns this off).
+  - Voice input works in Chrome and Edge; typing always works.
+  - The Android WebView app does not support browser speech recognition, so it uses text there.
+  - Topic chips give one-tap answers.
+
 ## Batch numbering and offline entries
 
 - **One counter per company.** A batch code is `HC-<company tag>-<year>-<number>`: the number starts at 1 for every company on its own, so the tenth farm to register still sees its own first batch as "1", not a number that depends on who registered earlier. The company's own tag keeps the code unique across the whole chain.

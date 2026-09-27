@@ -32,10 +32,10 @@ export default function QuickSearch({ sections }) {
 
   return (
     <>
-      <button onClick={() => setOpen(true)} className="hidden items-center gap-2 rounded-xl border border-[#c0dedc] bg-white px-3 py-2 text-xs font-semibold text-[#43696c] shadow-sm transition hover:border-[#f76049] sm:flex">
+      <button onClick={() => setOpen(true)} aria-label="Search workspace" title="Search workspace (Ctrl K)" className="flex items-center gap-2 rounded-xl border border-[#c0dedc] bg-white p-2.5 text-xs font-semibold text-[#43696c] shadow-sm transition hover:border-[#f76049] xl:px-3 xl:py-2">
         <Search size={15} />
-        <span>Search workspace</span>
-        <kbd className="rounded-md bg-[#d7eae9] px-1.5 py-0.5 text-[10px]">Ctrl K</kbd>
+        <span className="hidden xl:inline">Search workspace</span>
+        <kbd className="hidden rounded-md bg-[#d7eae9] px-1.5 py-0.5 text-[10px] xl:inline">Ctrl K</kbd>
       </button>
 
       {open && (

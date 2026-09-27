@@ -21,8 +21,6 @@ let trendCharts = {
     co2: null
 };
 
-let isCameraActive = false;
-let selectedCameraDeviceId = 0;
 
 document.addEventListener("DOMContentLoaded", function () {
     const savedIp = localStorage.getItem("beehive_esp32_ip");
@@ -47,9 +45,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     fetchAvailableLogDates();
     loadDateLogs();
-
-    fetchCameraDevices();
-    checkCameraStatus();
 
     fetchLiveData();
     setInterval(fetchLiveData, 2500);
@@ -155,177 +150,6 @@ function updateConnectButtonUI(active) {
         if (streamBadge) streamBadge.className = "live-pulse-badge paused";
         if (pulseRing) pulseRing.className = "pulse-ring paused";
         if (streamText) streamText.innerText = "Polling Paused (Disconnected)";
-    }
-}
-
-// ------------------------------
-// ------- Python OpenCV Live Camera Controller -----------
-// ------------------------------
-function fetchCameraDevices() {
-    const selectEl = document.getElementById("cameraSelectDropdown");
-    if (!selectEl) return;
-
-    fetch("/api/camera/devices")
-        .then(res => res.json())
-        .then(data => {
-            if (data.status === "success" && data.devices) {
-                selectEl.innerHTML = "";
-                data.devices.forEach(dev => {
-                    const opt = document.createElement("option");
-                    opt.value = dev.id;
-                    opt.innerText = `${dev.name} (${dev.resolution})`;
-                    if (dev.id === data.current_device) {
-                        opt.selected = true;
-                        selectedCameraDeviceId = dev.id;
-                    }
-                    selectEl.appendChild(opt);
-                });
-
-                if (data.active) {
-                    setCameraActiveUI(true, data.resolution);
-                }
-            }
-        })
-        .catch(err => {
-            console.warn("Could not fetch camera devices from Flask OpenCV:", err);
-        });
-}
-
-function checkCameraStatus() {
-    fetch("/api/camera/status")
-        .then(res => res.json())
-        .then(data => {
-            if (data.active) {
-                setCameraActiveUI(true, data.resolution);
-            }
-        })
-        .catch(() => {});
-}
-
-function onCameraDeviceChanged() {
-    const selectEl = document.getElementById("cameraSelectDropdown");
-    if (!selectEl) return;
-
-    const newDeviceId = parseInt(selectEl.value || "0");
-    selectedCameraDeviceId = newDeviceId;
-
-    fetch("/api/camera/select", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ device_id: newDeviceId })
-    })
-        .then(res => res.json())
-        .then(data => {
-            if (data.status === "success") {
-                if (isCameraActive) {
-                    const imgEl = document.getElementById("cameraStreamImg");
-                    if (imgEl) {
-                        imgEl.src = `/api/camera/stream?t=${Date.now()}`;
-                    }
-                    setCameraActiveUI(true, data.resolution);
-                }
-            }
-        })
-        .catch(err => console.error("Error changing camera device:", err));
-}
-
-function toggleCameraStream() {
-    const targetAction = isCameraActive ? "stop" : "start";
-    const selectEl = document.getElementById("cameraSelectDropdown");
-    const deviceId = selectEl ? parseInt(selectEl.value || "0") : selectedCameraDeviceId;
-
-    fetch("/api/camera/toggle", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: targetAction, device_id: deviceId })
-    })
-        .then(res => res.json())
-        .then(data => {
-            if (data.status === "success") {
-                setCameraActiveUI(data.active, data.resolution);
-            } else {
-                alert("Failed to start Python OpenCV camera. Please check if webcam is connected.");
-                setCameraActiveUI(false);
-            }
-        })
-        .catch(err => {
-            console.error("Error toggling OpenCV camera:", err);
-            alert("Error communicating with Python OpenCV server.");
-        });
-}
-
-function setCameraActiveUI(active, resolution) {
-    isCameraActive = active;
-
-    const imgEl = document.getElementById("cameraStreamImg");
-    const placeholderEl = document.getElementById("cameraPlaceholder");
-    const btnToggle = document.getElementById("btnToggleCamera");
-    const btnSnapshot = document.getElementById("btnSnapshot");
-    const btnFullscreen = document.getElementById("btnFullscreen");
-    const hudBadge = document.getElementById("cameraHudBadge");
-    const hudResolution = document.getElementById("hudResolution");
-
-    if (active) {
-        if (imgEl) {
-            imgEl.src = `/api/camera/stream?t=${Date.now()}`;
-            imgEl.style.display = "block";
-        }
-        if (placeholderEl) placeholderEl.style.display = "none";
-        if (hudBadge) hudBadge.style.display = "flex";
-        if (hudResolution) hudResolution.innerText = resolution || "Active";
-
-        if (btnToggle) {
-            btnToggle.className = "btn btn-secondary btn-sm";
-            btnToggle.innerHTML = '<i class="fa-solid fa-video-slash text-rose"></i> <span>Stop Camera</span>';
-        }
-        if (btnSnapshot) btnSnapshot.disabled = false;
-        if (btnFullscreen) btnFullscreen.disabled = false;
-    } else {
-        if (imgEl) {
-            imgEl.src = "";
-            imgEl.style.display = "none";
-        }
-        if (placeholderEl) placeholderEl.style.display = "flex";
-        if (hudBadge) hudBadge.style.display = "none";
-
-        if (btnToggle) {
-            btnToggle.className = "btn btn-primary btn-sm";
-            btnToggle.innerHTML = '<i class="fa-solid fa-video"></i> <span>Enable Camera Preview</span>';
-        }
-        if (btnSnapshot) btnSnapshot.disabled = true;
-        if (btnFullscreen) btnFullscreen.disabled = true;
-    }
-}
-
-function takeCameraSnapshot() {
-    const drawerEl = document.getElementById("snapshotDrawer");
-    const imgEl = document.getElementById("snapshotImgPreview");
-    const linkEl = document.getElementById("snapshotDownloadLink");
-
-    const snapshotUrl = `/api/camera/snapshot?t=${Date.now()}`;
-    if (imgEl) imgEl.src = snapshotUrl;
-    if (linkEl) {
-        const timestampStr = new Date().toISOString().replace(/[:.]/g, "-");
-        linkEl.href = snapshotUrl;
-        linkEl.download = `beehive_snap_${timestampStr}.jpg`;
-    }
-
-    if (drawerEl) drawerEl.style.display = "block";
-}
-
-function closeSnapshotDrawer() {
-    const drawerEl = document.getElementById("snapshotDrawer");
-    if (drawerEl) drawerEl.style.display = "none";
-}
-
-function toggleCameraFullscreen() {
-    const box = document.getElementById("cameraViewportBox");
-    if (!box) return;
-
-    if (!document.fullscreenElement) {
-        box.requestFullscreen().catch(err => console.warn(err));
-    } else {
-        document.exitFullscreen();
     }
 }
 

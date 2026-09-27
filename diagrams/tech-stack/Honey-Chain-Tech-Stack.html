@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Honey Chain Tech Stack</title>
+<style>
+  @page { size: A4; margin: 0 }
+  :root { --teal: #0F766E; --deep: #0a3d43; --blue: #2563EB; --coral: #F97360; --line: #c6e2e0; --soft: #eef7f6; --ink: #122c31; --muted: #5d7f80 }
+  * { box-sizing: border-box }
+  html, body { margin: 0; background: #fff; color: var(--ink); font-family: "Segoe UI", Arial, sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact }
+  .page { width: 210mm; min-height: 297mm; padding: 14mm 13mm 16mm; position: relative; page-break-after: always }
+  .page:last-child { page-break-after: auto }
+  .top { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 0.6mm solid var(--teal); padding-bottom: 2mm; margin-bottom: 5mm }
+  .top b { font-size: 10pt; color: var(--teal); letter-spacing: .08em; text-transform: uppercase }
+  .top span { font-size: 8.5pt; color: var(--muted) }
+  h2 { font-size: 13.5pt; margin: 6mm 0 2mm; color: var(--deep); display: flex; align-items: center; gap: 2.5mm; break-after: avoid }
+  h2 .n { display: inline-flex; width: 7mm; height: 7mm; border-radius: 50%; background: var(--teal); color: #fff; font-size: 9.5pt; align-items: center; justify-content: center }
+  h2:first-of-type { margin-top: 0 }
+  p.note { margin: 0 0 2.5mm; font-size: 9pt; color: var(--muted) }
+  table { width: 100%; border-collapse: collapse; font-size: 8.6pt; break-inside: auto; margin-bottom: 1mm }
+  thead { display: table-header-group }
+  tr { break-inside: avoid }
+  th { background: var(--deep); color: #fff; text-align: left; font-weight: 600; padding: 1.6mm 2.2mm; font-size: 8.2pt }
+  td { padding: 1.5mm 2.2mm; border-bottom: 0.25mm solid var(--line); vertical-align: top; line-height: 1.32 }
+  tr:nth-child(even) td { background: var(--soft) }
+  td:first-child { font-weight: 600 }
+  .st { white-space: nowrap; width: 1% }
+  .b { display: inline-block; font-size: 7.4pt; font-weight: 700; padding: .5mm 2mm; border-radius: 3mm; letter-spacing: .02em }
+  .built { background: var(--teal); color: #fff }
+  .plan { border: 0.3mm solid var(--coral); color: #c2412d; background: #fff4f1 }
+  .part { background: var(--blue); color: #fff }
+  .foot { position: absolute; bottom: 6mm; left: 13mm; right: 13mm; font-size: 7.5pt; color: var(--muted); display: flex; justify-content: space-between; border-top: 0.25mm solid var(--line); padding-top: 1.5mm }
+  .flow { background: var(--soft); border-left: 1mm solid var(--coral); padding: 2mm 3mm; font-size: 8.8pt; margin: 2mm 0 1mm; line-height: 1.45 }
+
+  .cover { background: var(--deep); color: #fff; display: flex; flex-direction: column; justify-content: center; padding: 0 22mm }
+  .cover .kick { color: var(--coral); font-weight: 700; letter-spacing: .2em; font-size: 10pt; text-transform: uppercase }
+  .cover h1 { font-size: 44pt; margin: 3mm 0 2mm; line-height: 1 }
+  .cover h3 { font-size: 18pt; font-weight: 400; margin: 0 0 10mm; color: #bfe6e2 }
+  .cover .meta { font-size: 11pt; line-height: 1.7; border-left: 1mm solid var(--coral); padding-left: 5mm; margin-bottom: 12mm }
+  .cover .principle { font-size: 13pt; font-weight: 600; color: #fff; margin-bottom: 12mm }
+  .cover .toc { columns: 2; font-size: 10.5pt; line-height: 1.9; color: #d9f0ee; padding-left: 5mm; margin: 0 }
+  .legend { display: flex; gap: 4mm; align-items: center; font-size: 9.5pt; margin-top: 10mm }
+
+  .summary { display: grid; grid-template-columns: 34mm 1fr; border: 0.3mm solid var(--line); border-radius: 2mm; overflow: hidden; font-size: 9.6pt }
+  .summary div { padding: 2.6mm 3mm; border-bottom: 0.25mm solid var(--line); line-height: 1.4 }
+  .summary div:nth-child(odd) { background: var(--deep); color: #fff; font-weight: 700 }
+  .summary div:nth-last-child(-n+2) { border-bottom: 0 }
+  .idea { margin-top: 6mm; background: #fff4f1; border: 0.3mm solid var(--coral); border-radius: 2mm; padding: 3mm 4mm; font-size: 9.2pt; line-height: 1.45 }
+  .idea b { color: #c2412d }
+</style>
+</head>
+<body>
+
+<!-- Cover -->
+<div class="page cover">
+  <div class="kick">Smart India Hackathon 2026</div>
+  <h1>Honey Chain</h1>
+  <h3>Complete technology stack: hardware, AI and software</h3>
+  <div class="meta">
+    Problem Statement <b>SIH 26021</b>, Ministry of MSME (KVIC)<br>
+    Theme: Agriculture, FoodTech &amp; Rural Development<br>
+    Team: <b>Say My Name</b>
+  </div>
+  <div class="principle">AI assists. KVIC authorises. Blockchain records. QR verifies.</div>
+  <ol class="toc">
+    <li>Smart hive hardware (IoT)</li>
+    <li>Edge processing and the hive that listens</li>
+    <li>IoT gateway</li>
+    <li>AI / ML models and datasets</li>
+    <li>AI voice assistant: Madhu Mitra</li>
+    <li>Weather and alerts (software GSM)</li>
+    <li>Blockchain and traceability</li>
+    <li>Software platform</li>
+    <li>One-slide summary</li>
+  </ol>
+  <div class="legend">
+    <span class="b built">BUILT</span> working in the prototype
+    <span class="b part">PARTLY</span> part working, upgrade planned
+    <span class="b plan">PLANNED</span> next phase
+  </div>
+</div>
+
+<!-- Page 2: hardware, edge, gateway -->
+<div class="page">
+  <div class="top"><b>Honey Chain · Tech stack</b><span>Hardware and edge</span></div>
+
+  <h2><span class="n">1</span>Smart hive hardware (IoT)</h2>
+  <table>
+    <thead><tr><th>Component</th><th>Purpose</th><th class="st">Status</th></tr></thead>
+    <tbody>
+      <tr><td>ESP32 microcontroller</td><td>Reads all sensors, processes sound, sends data over Wi-Fi</td><td class="st"><span class="b built">BUILT</span></td></tr>
+      <tr><td>DHT11 ×2 → DS18B20 / SHT31</td><td>Brood-nest temperature and humidity (upgrade to ±0.5 °C probes)</td><td class="st"><span class="b part">PARTLY</span></td></tr>
+      <tr><td>MQ gas + CO₂ sensor → SCD40 / MH-Z19B</td><td>CO₂ in ppm and air quality inside the hive</td><td class="st"><span class="b part">PARTLY</span></td></tr>
+      <tr><td>Load cell + HX711</td><td>Hive weight: nectar flow, falling stores, swarm (sudden 1–3 kg drop)</td><td class="st"><span class="b built">FIRMWARE READY</span></td></tr>
+      <tr><td>BME280 (outside the hive)</td><td>Outside temperature, humidity and air pressure: inside-vs-outside comparison, storm warning</td><td class="st"><span class="b plan">PLANNED</span></td></tr>
+      <tr><td>INMP441 I²S MEMS microphone</td><td>Hive sound: queen status, swarm preparation</td><td class="st"><span class="b plan">PLANNED</span></td></tr>
+      <tr><td>Relay + 12 V fan</td><td>Cooling for heat only. High CO₂ raises an alert; the fan stays off</td><td class="st"><span class="b built">BUILT</span></td></tr>
+      <tr><td>Relay + heater bulb</td><td>Keeps the brood warm on cold nights</td><td class="st"><span class="b built">BUILT</span></td></tr>
+      <tr><td>SSD1306 OLED (0.96")</td><td>Live readings shown at the hive</td><td class="st"><span class="b built">BUILT</span></td></tr>
+      <tr><td>USB camera / ESP32-CAM</td><td>Entrance video: varroa mites, bee activity</td><td class="st"><span class="b part">PARTLY</span></td></tr>
+      <tr><td>Solar panel + Li-ion battery, LoRa</td><td>Rural sites with no mains power or Wi-Fi</td><td class="st"><span class="b plan">PLANNED</span></td></tr>
+    </tbody>
+  </table>
+
+  <h2><span class="n">2</span>Edge processing and the hive that listens</h2>
+  <p class="note">All noise cleaning is done in software on the ESP32, so the hardware stays cheap and small.</p>
+  <table>
+    <thead><tr><th>Technology</th><th>Purpose</th><th class="st">Status</th></tr></thead>
+    <tbody>
+      <tr><td>Arduino C++ firmware</td><td>Sensor loop, fan and heater control with hysteresis, local web dashboard</td><td class="st"><span class="b built">BUILT</span></td></tr>
+      <tr><td>I²S digital audio bus</td><td>24-bit digital sound from the mic chip, so the wires pick up no noise</td><td class="st"><span class="b plan">PLANNED</span></td></tr>
+      <tr><td>ESP-DSP: high-pass + low-pass filters</td><td>Removes wind and machinery below 100 Hz, birds and hiss above 600 Hz</td><td class="st"><span class="b plan">PLANNED</span></td></tr>
+      <tr><td>Rain gate</td><td>Skips moments when rain drums on the roof (broadband noise)</td><td class="st"><span class="b plan">PLANNED</span></td></tr>
+      <tr><td>ESP-DSP: FFT</td><td>Splits the 100–600 Hz buzz into its main frequencies (colony hum, queen piping)</td><td class="st"><span class="b plan">PLANNED</span></td></tr>
+      <tr><td>TensorFlow Lite Micro / Edge Impulse</td><td>Queen-status model running on the chip; only small feature packets are sent, never raw audio</td><td class="st"><span class="b plan">PLANNED</span></td></tr>
+    </tbody>
+  </table>
+  <div class="flow"><b>Sound pipeline:</b> INMP441 mic → I²S → high-pass 100 Hz → low-pass 600 Hz → rain gate → FFT peaks + MFCC → AI model → "Queenless" / "Swarm risk" alert</div>
+
+  <h2><span class="n">3</span>IoT gateway</h2>
+  <table>
+    <thead><tr><th>Technology</th><th>Purpose</th><th class="st">Status</th></tr></thead>
+    <tbody>
+      <tr><td>Python Flask</td><td>Receives hive data, runs the health check, serves live readings to the Keeper app</td><td class="st"><span class="b built">BUILT</span></td></tr>
+      <tr><td>OpenCV</td><td>Camera capture and streaming</td><td class="st"><span class="b built">BUILT</span></td></tr>
+      <tr><td>Alert worker</td><td>Checks hive health every 60 s and reports problems to the main server</td><td class="st"><span class="b built">BUILT</span></td></tr>
+    </tbody>
+  </table>
+  <div class="foot"><span>Honey Chain · SIH 2026 · PS 26021 · Team Say My Name</span><span>2</span></div>
+</div>
+
+<!-- Page 3: AI + voice -->
+<div class="page">
+  <div class="top"><b>Honey Chain · Tech stack</b><span>Artificial intelligence</span></div>
+
+  <h2><span class="n">4</span>AI / ML models and datasets</h2>
+  <p class="note">Key colony-health signal: a healthy colony holds its brood at 34–35 °C whatever the weather. When the inside temperature starts following the outside temperature, the colony is weak or queenless.</p>
+  <table>
+    <thead><tr><th>Model</th><th>Used for</th><th>Dataset</th><th class="st">Status</th></tr></thead>
+    <tbody>
+      <tr><td>Rule-based expert system</td><td>Hive health score and risks, with plain-language advice</td><td>Beekeeping guidelines</td><td class="st"><span class="b built">BUILT</span></td></tr>
+      <tr><td>AI lab-report check</td><td>Flags lab values outside FSSAI limits for the officer</td><td>FSSAI honey standards</td><td class="st"><span class="b built">BUILT</span></td></tr>
+      <tr><td>Linear trend forecast</td><td>Honey production forecast</td><td>Keeper's own harvest records</td><td class="st"><span class="b built">BUILT</span></td></tr>
+      <tr><td>Copied-QR detection</td><td>Impossible travel, too many places or phones, buyer reports</td><td>Live scan data</td><td class="st"><span class="b built">BUILT</span></td></tr>
+      <tr><td>Isolation Forest</td><td>Unusual hive behaviour</td><td>HOBOS (Univ. of Würzburg), MSPB 2024</td><td class="st"><span class="b plan">PLANNED</span></td></tr>
+      <tr><td>XGBoost</td><td>Healthy / Weak / Queenless / Swarm risk</td><td>MSPB (53 hives, inspection labels)</td><td class="st"><span class="b plan">PLANNED</span></td></tr>
+      <tr><td>MFCC + CNN</td><td>Queen status from hive sound</td><td>Kaggle "Smart Bee Colony Monitor"</td><td class="st"><span class="b plan">PLANNED</span></td></tr>
+      <tr><td>YOLOv8-nano</td><td>Varroa mite detection at the entrance</td><td>Roboflow Varroa, Bilik et al. 2021</td><td class="st"><span class="b plan">PLANNED</span></td></tr>
+      <tr><td>MobileNetV2</td><td>Bee-health check from a frame photo</td><td>Kaggle BeeImage (5,000+ images)</td><td class="st"><span class="b plan">PLANNED</span></td></tr>
+      <tr><td>Regression model</td><td>Predicts next hour's inside temperature, so heating or cooling starts early</td><td>HOBOS + Open-Meteo history</td><td class="st"><span class="b plan">PLANNED</span></td></tr>
+    </tbody>
+  </table>
+  <p class="note" style="margin-top:1.5mm">Tools: Python · scikit-learn · XGBoost · TensorFlow / Keras · Ultralytics YOLO · Jupyter</p>
+
+  <h2><span class="n">5</span>AI voice assistant: "Madhu Mitra"</h2>
+  <p class="note">The keeper asks any beekeeping doubt by voice, in their own language, and hears the answer.</p>
+  <table>
+    <thead><tr><th>Layer</th><th>Technology</th><th class="st">Status</th></tr></thead>
+    <tbody>
+      <tr><td>Speech → text</td><td>Bhashini ASR (MeitY) · OpenAI Whisper · AI4Bharat IndicConformer</td><td class="st"><span class="b plan">PLANNED</span></td></tr>
+      <tr><td>AI brain</td><td>LLM: Claude / Gemini API, or Llama 3 offline via Ollama</td><td class="st"><span class="b plan">PLANNED</span></td></tr>
+      <tr><td>Trusted knowledge (RAG)</td><td>pgvector + bge-m3 embeddings over NBB, KVIC, ICAR and FSSAI manuals</td><td class="st"><span class="b plan">PLANNED</span></td></tr>
+      <tr><td>Live hive answers</td><td>LLM function calling into the Honey Chain API (hive status, alerts, batches, weather)</td><td class="st"><span class="b plan">PLANNED</span></td></tr>
+      <tr><td>Text → speech</td><td>Bhashini TTS · AI4Bharat Indic-Parler-TTS</td><td class="st"><span class="b plan">PLANNED</span></td></tr>
+      <tr><td>In the app</td><td>Web Speech API (browser) · Flutter speech_to_text + flutter_tts (Android)</td><td class="st"><span class="b plan">PLANNED</span></td></tr>
+      <tr><td>Phone line for basic phones</td><td>Exotel / Twilio Voice IVR: missed call → the bot calls back</td><td class="st"><span class="b plan">PLANNED</span></td></tr>
+      <tr><td>Safety</td><td>Answers cite their source; no antibiotic doses; "Talk to officer" opens a help-desk ticket</td><td class="st"><span class="b plan">PLANNED</span></td></tr>
+    </tbody>
+  </table>
+  <div class="flow"><b>Flow:</b> Keeper speaks (Tamil / Hindi / …) → Bhashini speech-to-text → trusted manuals (RAG) + the keeper's live hive data → LLM answer → Bhashini text-to-speech → keeper hears the answer</div>
+  <div class="foot"><span>Honey Chain · SIH 2026 · PS 26021 · Team Say My Name</span><span>3</span></div>
+</div>
+
+<!-- Page 4: alerts + blockchain -->
+<div class="page">
+  <div class="top"><b>Honey Chain · Tech stack</b><span>Alerts and blockchain</span></div>
+
+  <h2><span class="n">6</span>Weather and alerts ("software GSM")</h2>
+  <p class="note">No GSM module or SIM card in the hive: the cloud AI decides, and the keeper is reached on their phone.</p>
+  <table>
+    <thead><tr><th>Technology</th><th>Purpose</th><th class="st">Status</th></tr></thead>
+    <tbody>
+      <tr><td>SMS gateway API (Fast2SMS / Twilio)</td><td>Critical hive alerts and OTPs by SMS, with TRAI DLT-registered templates</td><td class="st"><span class="b built">BUILT</span></td></tr>
+      <tr><td>In-app notifications</td><td>Every alert is also saved in the Keeper app (My Hives)</td><td class="st"><span class="b built">BUILT</span></td></tr>
+      <tr><td>Open-Meteo Forecast API</td><td>Storm, wind, rain and heatwave alerts for each apiary's location</td><td class="st"><span class="b plan">PLANNED</span></td></tr>
+      <tr><td>BME280 pressure-drop rule</td><td>A fall of 3 hPa or more in 3 hours means a storm is coming, even offline</td><td class="st"><span class="b plan">PLANNED</span></td></tr>
+      <tr><td>Firebase Cloud Messaging</td><td>Free push notifications on the phone</td><td class="st"><span class="b plan">PLANNED</span></td></tr>
+      <tr><td>Automatic voice call (Exotel / Twilio)</td><td>A critical alert not opened in 15 min triggers a phone call in the keeper's language</td><td class="st"><span class="b plan">PLANNED</span></td></tr>
+      <tr><td>WhatsApp Business Cloud API</td><td>Alert with a photo or chart</td><td class="st"><span class="b plan">PLANNED</span></td></tr>
+    </tbody>
+  </table>
+  <div class="flow"><b>Escalation:</b> Push notification → SMS → automatic voice call → regional KVIC officer notified if the problem continues or spreads across an area</div>
+  <p class="note" style="margin-top:1.5mm">SMS alerts run in demo mode until an SMS provider key is added. Critical (HIGH) problems are texted at once; the same problem is repeated at most every 6 hours.</p>
+
+  <h2><span class="n">7</span>Blockchain and traceability</h2>
+  <table>
+    <thead><tr><th>Technology</th><th>Purpose</th><th class="st">Status</th></tr></thead>
+    <tbody>
+      <tr><td>Solidity smart contract</td><td>Records harvest, lab certificate, officer approval, jars and sales</td><td class="st"><span class="b built">BUILT</span></td></tr>
+      <tr><td>Hardhat local chain · Polygon Amoy ready</td><td>Blockchain network (local for the demo, public testnet ready)</td><td class="st"><span class="b built">BUILT</span></td></tr>
+      <tr><td>ethers.js · EIP-712 signatures</td><td>The keeper and the officer each sign their own step</td><td class="st"><span class="b built">BUILT</span></td></tr>
+      <tr><td>Merkle tree</td><td>The number of jar QR codes is capped by the honey actually harvested</td><td class="st"><span class="b built">BUILT</span></td></tr>
+      <tr><td>IPFS CIDv1</td><td>Content IDs for batch and lab metadata</td><td class="st"><span class="b built">BUILT</span></td></tr>
+      <tr><td>Hash-chained ledger + database triggers</td><td>Records cannot be edited or deleted</td><td class="st"><span class="b built">BUILT</span></td></tr>
+      <tr><td>QR code per jar</td><td>Consumer verification with no app or login</td><td class="st"><span class="b built">BUILT</span></td></tr>
+      <tr><td>Keeper OTP confirmation</td><td>A wholesaler records honey received; the keeper confirms with an OTP; logged on the ledger</td><td class="st"><span class="b built">BUILT</span></td></tr>
+    </tbody>
+  </table>
+  <div class="foot"><span>Honey Chain · SIH 2026 · PS 26021 · Team Say My Name</span><span>4</span></div>
+</div>
+
+<!-- Page 5: platform + summary -->
+<div class="page">
+  <div class="top"><b>Honey Chain · Tech stack</b><span>Software platform and summary</span></div>
+
+  <h2><span class="n">8</span>Software platform</h2>
+  <table>
+    <thead><tr><th>Layer</th><th>Technology</th><th class="st">Status</th></tr></thead>
+    <tbody>
+      <tr><td>Keeper app · KVIC Admin portal · public website</td><td>React 19, Vite, Tailwind CSS, Recharts, Lucide icons</td><td class="st"><span class="b built">BUILT</span></td></tr>
+      <tr><td>Installable app</td><td>Progressive Web App (vite-plugin-pwa)</td><td class="st"><span class="b built">BUILT</span></td></tr>
+      <tr><td>Android apps</td><td>Flutter</td><td class="st"><span class="b built">BUILT</span></td></tr>
+      <tr><td>Backend API</td><td>Node.js + Express</td><td class="st"><span class="b built">BUILT</span></td></tr>
+      <tr><td>Database</td><td>PostgreSQL: private schema per organisation, row-level security</td><td class="st"><span class="b built">BUILT</span></td></tr>
+      <tr><td>Offline use</td><td>Harvests saved offline and synced when the internet returns</td><td class="st"><span class="b built">BUILT</span></td></tr>
+      <tr><td>Languages</td><td>Custom offline i18n engine, 12 Indian languages → Bhashini for live translation</td><td class="st"><span class="b part">PARTLY</span></td></tr>
+      <tr><td>Security</td><td>JWT, bcrypt, Helmet, rate limiting, hashed OTP (5 min), Aadhaar Verhoeff check (last 4 digits stored)</td><td class="st"><span class="b built">BUILT</span></td></tr>
+      <tr><td>Registration</td><td>NBB Madhukranti categories: Individual, Firm, Society, Company/FPO, Wholesaler, all approved by KVIC officers</td><td class="st"><span class="b built">BUILT</span></td></tr>
+      <tr><td>Digital twin</td><td>Unity 6 (playable in a browser via WebGL) + Blender 3D hive</td><td class="st"><span class="b built">BUILT</span></td></tr>
+    </tbody>
+  </table>
+
+  <h2><span class="n">9</span>One-slide summary</h2>
+  <div class="summary">
+    <div>Hardware</div><div>ESP32 · temperature, humidity, CO₂, weight and pressure sensors · INMP441 mic · fan and heater · solar</div>
+    <div>Edge</div><div>Arduino C++ · I²S · ESP-DSP (filters + FFT) · TensorFlow Lite Micro</div>
+    <div>AI</div><div>Expert system · Isolation Forest · XGBoost · audio CNN · YOLOv8 · MobileNetV2 · LLM + RAG voice assistant</div>
+    <div>Voice &amp; language</div><div>Bhashini (speech, translation) · 12 Indian languages</div>
+    <div>Alerts</div><div>SMS gateway API (no GSM module) · Firebase push · voice call · Open-Meteo weather</div>
+    <div>Blockchain</div><div>Solidity · Hardhat / Polygon · EIP-712 · Merkle tree · IPFS</div>
+    <div>Apps</div><div>React · Vite · Tailwind · PWA · Flutter</div>
+    <div>Backend</div><div>Node.js · Express · PostgreSQL · Python Flask</div>
+    <div>Simulation</div><div>Unity 6 · Blender</div>
+  </div>
+
+  <div class="idea"><b>If the jury asks "what works today?":</b> everything marked <span class="b built">BUILT</span> is in the live demo. Items marked <span class="b plan">PLANNED</span> are the next phase, backed by the public research datasets named above.</div>
+  <div class="foot"><span>Honey Chain · SIH 2026 · PS 26021 · Team Say My Name</span><span>5</span></div>
+</div>
+
+</body>
+</html>

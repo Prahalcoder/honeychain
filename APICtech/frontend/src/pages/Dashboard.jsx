@@ -6,7 +6,14 @@ import {
   IndianRupee,
   AlertTriangle,
   ArrowUpRight,
+  BellRing,
   CalendarClock,
+  ChevronRight,
+  CircleCheck,
+  FlaskConical,
+  Hexagon,
+  PackagePlus,
+  Wallet,
 } from 'lucide-react'
 import {
   Area,
@@ -21,6 +28,7 @@ import {
 import MainLayout from '../layouts/MainLayout'
 import NoticeBoard from '../components/NoticeBoard'
 import { formatDate, money, useApi, useSummary } from '../lib/store'
+import { assess, demoHistory } from '../lib/colonyDemo'
 
 function readUser() {
   try {
@@ -40,6 +48,12 @@ export default function Dashboard() {
   const harvestData = useApi('/company/harvests')
   const financeData = useApi('/company/finance')
   const notificationData = useApi('/company/notifications')
+  const alertData = useApi('/company/hive-alerts')
+  const connectedHive = (() => { try { return localStorage.getItem('apictech_connected_hive') } catch { return null } })()
+  const dayAgo = Date.now() - 86400000
+  const criticalAlerts = (alertData.data?.alerts || []).filter((alert) => alert.level === 'HIGH' && alert.smsStatus !== 'COOLDOWN' && new Date(alert.createdAt).getTime() > dayAgo).slice(0, 3)
+  const hour = new Date().getHours()
+  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
 
   const hives = hiveData.data || []
   const harvests = harvestData.data || []
@@ -85,7 +99,7 @@ export default function Dashboard() {
 
       <div className="mb-8">
         <h1 className="text-2xl font-black">
-          {`Good morning, ${(user.name || 'there').split(' ')[0]}`}
+          {`${greeting}, ${(user.name || 'there').split(' ')[0]}`}
         </h1>
 
         <p className="mt-1 text-sm text-gray-500">
@@ -109,11 +123,11 @@ export default function Dashboard() {
       )}
 
       <div className="mb-6 grid gap-6 xl:grid-cols-3">
-        <section className="relative min-h-72 overflow-hidden rounded-3xl bg-[#182d34] shadow-[0_24px_60px_rgba(18,42,47,0.28)] xl:col-span-2">
+        <section className="relative min-h-64 overflow-hidden rounded-3xl bg-[#182d34] shadow-[0_24px_60px_rgba(18,42,47,0.28)] xl:col-span-2">
           <img src="/img/bee-1.jpg" alt="A honey bee flying near the hive" className="absolute inset-0 h-full w-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-r from-[#102625]/90 via-[#102625]/55 to-transparent" />
           <div className="hex-pattern absolute inset-0 opacity-25" />
-          <div className="relative flex min-h-72 max-w-xl flex-col justify-center p-7 text-white sm:p-10">
+          <div className="relative flex min-h-64 max-w-xl flex-col justify-center p-7 text-white sm:p-10">
             <span className="mb-3 w-fit rounded-full bg-[#f86751] px-3 py-1 text-xs font-black uppercase tracking-[0.16em] text-[#10262a]">
               Apiary today
             </span>
@@ -126,7 +140,7 @@ export default function Dashboard() {
           </div>
         </section>
 
-        <NoticeBoard className="min-h-72" />
+        <NoticeBoard className="min-h-64" />
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -136,7 +150,7 @@ export default function Dashboard() {
           return (
             <div
               key={stat.title}
-              className="stat-card rounded-2xl border border-[#c0dedc] bg-white p-5 shadow-[0_10px_28px_rgba(30,71,80,0.1)] transition hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(30,71,80,0.18)]"
+              className="stat-card rounded-2xl border border-[#c0dedc] bg-white p-5 shadow-[0_10px_28px_rgba(30,71,80,0.08)]"
             >
               <div className="flex items-center justify-between">
                 <div className={`rounded-2xl bg-gradient-to-br p-3 text-white shadow-lg ${stat.tone}`}>
@@ -202,19 +216,19 @@ export default function Dashboard() {
             <div>
               <h2 className="font-bold">Apiary Overview</h2>
               <p className="text-xs text-gray-500">
-                Your registered hives
+                Colony health of every hive. Tap a hive to open it.
               </p>
             </div>
 
             <span className="rounded-full bg-teal-50 px-3 py-1 text-xs font-semibold text-teal-600">
-              {hives.length} Hives
+              {hives.length === 1 ? '1 hive' : `${hives.length} hives`}
             </span>
           </div>
 
           <div className="mt-5 space-y-3">
             {hives.length === 0 && <p className="text-sm text-gray-500">No hives yet. Add your first hive from My Hives.</p>}
             {hives.map((hive) => (
-              <HiveRow key={hive.hive_code} id={hive.hive_code} name={hive.name} location={hive.location} health="Device not connected" />
+              <HiveRow key={hive.hive_code} id={hive.hive_code} name={hive.name} location={hive.location} connected={connectedHive === hive.hive_code} onOpen={() => navigate(`/iot-monitoring/${hive.hive_code}?tab=colony`)} />
             ))}
           </div>
         </div>
@@ -223,10 +237,10 @@ export default function Dashboard() {
           <h2 className="font-bold">Quick Actions</h2>
 
           <div className="mt-5 space-y-3">
-            <QuickAction text="Record Harvest" onClick={() => navigate('/harvest')} />
-            <QuickAction text="Share Lab Result" onClick={() => navigate('/laboratory')} />
-            <QuickAction text="Create Bottle QR Codes" onClick={() => navigate('/qr-management')} />
-            <QuickAction text="Add Transaction" onClick={() => navigate('/finance')} />
+            <QuickAction icon={PackagePlus} text="Record Harvest" onClick={() => navigate('/harvest')} />
+            <QuickAction icon={FlaskConical} text="Share Lab Result" onClick={() => navigate('/laboratory')} />
+            <QuickAction icon={QrCode} text="Create Bottle QR Codes" onClick={() => navigate('/qr-management')} />
+            <QuickAction icon={Wallet} text="Add Transaction" onClick={() => navigate('/finance')} />
           </div>
         </div>
 
@@ -278,21 +292,35 @@ export default function Dashboard() {
             </div>
           )}
 
-          <div className="mt-4 rounded-xl bg-orange-50 p-4">
-            <div className="flex gap-3">
-              <AlertTriangle className="text-orange-600" size={20} />
+          {criticalAlerts.map((alert) => (
+            <Link key={alert.id} to={`/iot-monitoring/${alert.hiveCode}?tab=history`} className="mt-4 block rounded-xl border border-red-100 bg-red-50 p-4 hover:bg-red-100/70">
+              <div className="flex gap-3">
+                <BellRing className="shrink-0 text-red-600" size={20} />
+                <div>
+                  <p className="font-semibold text-red-800">Critical: hive {alert.hiveCode} · {alert.riskName}</p>
+                  <p className="mt-1 text-xs text-gray-600">{formatDate(alert.createdAt)} · you were alerted automatically by SMS and app notification.</p>
+                </div>
+              </div>
+            </Link>
+          ))}
 
-              <div>
-                <p className="font-semibold">
-                  IoT devices not connected
-                </p>
-
-                <p className="mt-1 text-xs text-gray-600">
-                  Connect an ESP32 to a hive to begin real-time monitoring.
-                </p>
+          {!connectedHive && (
+            <div className="mt-4 rounded-xl bg-orange-50 p-4">
+              <div className="flex gap-3">
+                <AlertTriangle className="shrink-0 text-orange-600" size={20} />
+                <div>
+                  <p className="font-semibold">No hive monitor connected</p>
+                  <p className="mt-1 text-xs text-gray-600">Connect an ESP32 from a hive page to start live monitoring and automatic alerts.</p>
+                </div>
               </div>
             </div>
-          </div>
+          )}
+
+          {connectedHive && criticalAlerts.length === 0 && (summary?.pendingLabReviews || 0) === 0 && summary?.organization?.status === 'APPROVED' && (
+            <div className="mt-5 flex items-center gap-3 rounded-xl bg-teal-50 p-4 text-sm font-semibold text-teal-800">
+              <CircleCheck size={20} /> Nothing needs your attention right now.
+            </div>
+          )}
         </div>
 
       </div>
@@ -301,37 +329,32 @@ export default function Dashboard() {
   )
 }
 
-function HiveRow({ id, name, location, health }) {
+function HiveRow({ id, name, location, connected, onOpen }) {
+  const { score, status } = assess(demoHistory(id).slice(-1)[0])
+  const tone = status === 'CRITICAL' ? 'bg-red-50 text-red-700' : status === 'WATCH' ? 'bg-orange-50 text-orange-700' : 'bg-teal-50 text-teal-700'
   return (
-    <div className="flex items-center justify-between rounded-xl border border-gray-100 p-4">
-      <div className="flex items-center gap-3">
-        <div className="h-10 w-10 rounded-xl bg-[#dbedeb] p-2.5">
-          🐝
-        </div>
-
-        <div>
-          <p className="font-semibold">{id} <span className="font-normal text-gray-400">· {name}</span></p>
-          <p className="text-xs text-gray-500">{location}</p>
+    <button onClick={onOpen} className="flex w-full items-center justify-between gap-3 rounded-xl border border-gray-100 p-4 text-left transition hover:border-[#c0dfdd] hover:bg-[#f7fbfb]">
+      <div className="flex min-w-0 items-center gap-3">
+        <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#dbedeb] text-[#0F766E]"><Hexagon size={19} /></div>
+        <div className="min-w-0">
+          <p className="truncate font-semibold">{id} <span className="font-normal text-gray-400">· {name}</span></p>
+          <p className="truncate text-xs text-gray-500">{location} · {connected ? 'monitor connected' : 'no monitor connected'}</p>
         </div>
       </div>
-
-      <div className="text-right">
-        <span className="rounded-full bg-teal-50 px-2.5 py-1 text-xs font-semibold text-teal-600">
-          Active
-        </span>
-
-        <p className="mt-1 text-[11px] text-gray-400">
-          {health}
-        </p>
+      <div className="flex shrink-0 items-center gap-2">
+        <span className={`rounded-full px-2.5 py-1 text-xs font-bold ${tone}`}>Colony {score}</span>
+        <ChevronRight size={16} className="text-gray-300" />
       </div>
-    </div>
+    </button>
   )
 }
 
-function QuickAction({ text, onClick }) {
+function QuickAction({ icon: Icon, text, onClick }) {
   return (
-    <button onClick={onClick} className="w-full rounded-xl border border-gray-100 p-3 text-left text-sm font-medium hover:bg-[#f4fbfb]">
-      {text}
+    <button onClick={onClick} className="flex w-full items-center gap-3 rounded-xl border border-gray-100 p-3 text-left text-sm font-semibold transition hover:border-[#c0dfdd] hover:bg-[#f4fbfb]">
+      <span className="grid h-8 w-8 place-items-center rounded-lg bg-[#eef7f6] text-[#0F766E]"><Icon size={16} /></span>
+      <span className="flex-1">{text}</span>
+      <ChevronRight size={15} className="text-gray-300" />
     </button>
   )
 }

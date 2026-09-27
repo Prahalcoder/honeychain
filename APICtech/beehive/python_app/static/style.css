@@ -732,11 +732,11 @@ body.light-theme {
 .text-slate { color: var(--text-secondary); }
 
 /* ------------------------------ */
-/* ------- Middle Section: Gauges & Python OpenCV Camera ----------- */
+/* ------- Middle Section: Gauges ----------- */
 /* ------------------------------ */
-.climate-camera-composite-layout {
+.climate-composite-layout {
     display: grid;
-    grid-template-columns: 1.15fr 1fr;
+    grid-template-columns: 1fr;
     gap: 18px;
     width: 100%;
     min-width: 0;
@@ -744,7 +744,7 @@ body.light-theme {
 }
 
 @media (max-width: 1120px) {
-    .climate-camera-composite-layout {
+    .climate-composite-layout {
         grid-template-columns: 1fr;
     }
 }
@@ -791,186 +791,6 @@ body.light-theme {
     flex: 1;
 }
 
-.camera-right-column {
-    display: flex;
-    min-width: 0;
-    width: 100%;
-}
-
-.camera-right-column .camera-feed-card {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    padding: 18px 20px;
-}
-
-.camera-card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-bottom: 12px;
-}
-
-.camera-select-area {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex: 1 1 200px;
-    min-width: 0;
-}
-
-.camera-select-area label {
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: var(--text-secondary);
-    white-space: nowrap;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-
-.camera-select-with-refresh {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    flex: 1;
-    min-width: 0;
-}
-
-.camera-select-with-refresh select {
-    flex: 1;
-    min-width: 0;
-    padding: 7px 10px;
-    font-size: 0.82rem;
-}
-
-.camera-controls-area {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    flex-wrap: wrap;
-}
-
-.camera-viewport-box {
-    position: relative;
-    width: 100%;
-    flex: 1;
-    min-height: 280px;
-    background: #0f172a;
-    border-radius: var(--radius-md);
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.4);
-    transition: aspect-ratio 0.3s ease;
-}
-
-#cameraStreamImg, #cameraVideoElement, .camera-stream-feed {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    background: #0f172a;
-    display: none;
-}
-
-#cameraStreamImg.active, #cameraVideoElement.active {
-    display: block;
-}
-
-.camera-standby-placeholder {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 24px 16px;
-    color: #94a3b8;
-}
-
-.cam-standby-icon {
-    width: 52px;
-    height: 52px;
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.35rem;
-    color: #cbd5e1;
-    margin-bottom: 10px;
-}
-
-.camera-standby-placeholder h4 {
-    font-family: var(--font-heading);
-    font-size: 0.98rem;
-    color: #f8fafc;
-    margin-bottom: 4px;
-}
-
-.camera-standby-placeholder p {
-    font-size: 0.78rem;
-    color: #94a3b8;
-    max-width: 380px;
-}
-
-.camera-hud-badge {
-    position: absolute;
-    top: 12px;
-    left: 12px;
-    background: rgba(15, 23, 42, 0.75);
-    backdrop-filter: blur(6px);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    color: #ffffff;
-    font-family: var(--font-mono);
-    font-size: 0.72rem;
-    font-weight: 600;
-    padding: 4px 10px;
-    border-radius: var(--radius-pill);
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    z-index: 10;
-}
-
-.hud-rec-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: #e11d48;
-    animation: statusPulse 1.4s infinite;
-}
-
-.hud-separator {
-    color: rgba(255, 255, 255, 0.3);
-}
-
-/* ------------------------------ */
-/* ------- Snapshot Preview Drawer ----------- */
-/* ------------------------------ */
-.snapshot-preview-drawer {
-    margin-top: 12px;
-    padding: 10px 14px;
-    background: var(--bg-card-subtle);
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-md);
-    animation: fadeIn 0.3s ease;
-}
-
-.snapshot-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 8px;
-    font-size: 0.82rem;
-    font-weight: 600;
-    color: var(--text-secondary);
-}
-
 .btn-close-snap {
     background: transparent;
     border: none;
@@ -981,21 +801,6 @@ body.light-theme {
 
 .btn-close-snap:hover {
     color: var(--accent-rose);
-}
-
-.snapshot-body {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    flex-wrap: wrap;
-}
-
-#snapshotImgPreview {
-    max-height: 110px;
-    max-width: 180px;
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--border-subtle);
-    object-fit: cover;
 }
 
 /* ------------------------------ */
@@ -1871,20 +1676,11 @@ input[type="date"]:focus, select:focus, input[type="text"]:focus, input[type="nu
         grid-template-columns: 1fr;
     }
 
-    .climate-camera-composite-layout {
+    .climate-composite-layout {
         grid-template-columns: 1fr;
     }
 
     .gauges-subgrid {
         grid-template-columns: 1fr;
-    }
-
-    .camera-select-area {
-        flex: 1 1 100%;
-    }
-
-    .camera-controls-area {
-        width: 100%;
-        justify-content: flex-start;
     }
 }
